@@ -28,15 +28,15 @@ jobs:
 
   # nix flake checks
   nix-tests:
-   strategy:
-    matrix:
-      os:
-        # intel mac
-        - "macos-13"
-        # aarch mac
-        - "macos-15"
-        # intel linux
-        - "ubuntu-24.04"
+    strategy:
+      matrix:
+        os:
+          # intel mac
+          - "macos-13"
+          # aarch mac
+          - "macos-15"
+          # intel linux
+          - "ubuntu-24.04"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     permissions:
