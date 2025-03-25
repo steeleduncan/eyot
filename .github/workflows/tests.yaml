@@ -13,6 +13,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - run: sudo apt install gcc ocl-icd-opencl-dev intel-opencl-icd golang -y
+        if: contains(matrix.os, 'ubuntu')
       - name: Unit tests
         run: source contrib/env.sh && eyot_test
 
