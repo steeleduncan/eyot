@@ -4,18 +4,28 @@ on:
   push:
 
 jobs:
-  tests:
+  # basic unit tests
+  unit-tests:
+    strategy:
+      matrix:
+        os: [ "macos-13", "ubuntu-24.04" ]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit tests
+        run: source contrib/env.sh && eyot_test
+
+  # nix flake checks
+  linux-nix-tests:
     runs-on: ubuntu-24.04
-    timeout-minutes: 6
+    timeout-minutes: 10
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
-
-      # NB this ends up using space out of the allowance that is hard to clear
-#      - uses: DeterminateSystems/magic-nix-cache-action@main
 
       # unit tests
       - run: nix flake check -L
