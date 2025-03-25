@@ -12,6 +12,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /*
   This is pretty ancient now
