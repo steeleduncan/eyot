@@ -4,11 +4,17 @@ on:
   push:
 
 jobs:
-  # basic unit tests
-  unit-tests:
+  # unit tests running on "raw" machine
+  host-tests:
     strategy:
       matrix:
-        os: [ "macos-13", "ubuntu-24.04" ]
+        os:
+          # intel mac
+          - "macos-13"
+          # aarch mac
+          - "macos-15"
+          # intel linux
+          - "ubuntu-24.04"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -21,8 +27,17 @@ jobs:
         run: source contrib/env.sh && eyot_test
 
   # nix flake checks
-  linux-nix-tests:
-    runs-on: ubuntu-24.04
+  nix-tests:
+   strategy:
+    matrix:
+      os:
+        # intel mac
+        - "macos-13"
+        # aarch mac
+        - "macos-15"
+        # intel linux
+        - "ubuntu-24.04"
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     permissions:
       contents: read
@@ -39,13 +54,16 @@ jobs:
       - run: echo "cpu fn main() { print_ln(true) }" > test.ey
         name: Create an example program
 
-      # install and run the deb package
+      # install and run the deb package (on linux)
       - run: nix build .#deb
         name: Build the debian package
+        if: contains(matrix.os, 'ubuntu')
       - run: sudo apt install --reinstall --yes ./result/eyot.deb
         name: Install debian package
+        if: contains(matrix.os, 'ubuntu')
       - run: eyot run test.ey
         name: Run eyot via the debian package
+        if: contains(matrix.os, 'ubuntu')
 
       # check running via nix ok
       - run: nix run . -- run test.ey
