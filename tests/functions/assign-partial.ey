@@ -1,0 +1,17 @@
+// check we can reassign a closure (generated from a partial expression in this case)
+
+fn multiply(lhs, rhs i64) i64 {
+   return lhs * rhs 
+}
+
+fn arithmetic(a, b, c i64) i64 {
+   return a + b * c 
+}
+
+cpu fn main() {
+    let f1 = partial arithmetic(1, _, 3) 
+    print_ln(f1(1))
+
+    f1 = partial multiply(4, _) 
+    print_ln(f1(4))
+}

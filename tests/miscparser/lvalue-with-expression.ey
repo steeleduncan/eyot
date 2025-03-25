@@ -1,0 +1,6 @@
+// this caught a problem with unbalanced reject/accept in parser on line 4
+cpu fn main() {
+    let s = "xyz"
+    s[s.length() - 1] = 'c'
+    print_ln(s)
+}

@@ -1,0 +1,18 @@
+import std::runtime
+
+//  This tests creating a GPU worker from a function that lives in a module namespace
+
+import testmod::mod
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    let c = gpu mod::double
+    send(c, [i64]{ 1, 2, 3, 4 })
+	foreach v: drain(c) {
+		print_ln("- ", v)
+	}
+}

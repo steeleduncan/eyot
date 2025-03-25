@@ -1,0 +1,10 @@
+// check the right file is reported in errors
+	
+import testlib::lib
+
+fn add(i, j i64) i64 {
+}
+
+cpu fn main() {
+
+}

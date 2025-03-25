@@ -1,0 +1,38 @@
+// check for the worker type, that it can be passed around, and that they are fungible
+import std::runtime
+
+fn double(val i64) i64 {
+    return val * 2
+}
+
+cpu fn create_double_worker(on_gpu bool) worker(i64)i64 {
+    if on_gpu {
+        return gpu double
+    } else {
+        return cpu double
+    }
+}
+
+cpu fn do_calc(on_gpu bool) {
+    if on_gpu {
+        print_ln("On gpu")
+    } else {
+        print_ln("On cpu")
+    }
+
+    let c = create_double_worker(on_gpu)
+    send(c, [i64]{ 1, 2, 3, 4 })
+	foreach v: drain(c) {
+		print_ln("- ", v)
+	}
+}
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    do_calc(false)
+    do_calc(true)
+}

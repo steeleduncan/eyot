@@ -1,0 +1,21 @@
+{
+    "functions": [
+        {
+            "name": "ey_runtime_check_cl",
+            "return": "EyBoolean",
+            "arguments": [ ]
+        },
+        {
+            "name": "ey_runtime_allocated_bytes",
+            "return": "EyInteger"
+        },
+        {
+            "name": "ey_runtime_collect",
+            "arguments": [ ]
+        },
+        {
+            "name": "ffi_panic",
+            "arguments": [ ]
+        }
+    ]
+}

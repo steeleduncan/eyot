@@ -1,0 +1,3 @@
+fn square(val i64) i64 {
+    return val * val
+}

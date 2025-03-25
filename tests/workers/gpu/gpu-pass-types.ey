@@ -1,0 +1,29 @@
+import std::runtime
+
+fn check_f32(v f32) f32 {
+   print_ln(v)
+   return 2.0f * v
+}
+
+fn check_i64(v i64) i64 {
+   print_ln(v)
+   return 2 * v
+}
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    let f = gpu check_f32
+    send(f, [f32] { 1.0f, 2.0 })
+    print_ln("f: ", receive(f))
+    print_ln("f: ", receive(f))
+    drain(f)
+
+    let i = gpu check_i64
+    send(i, [i64] { 1 })
+    print_ln("i: ", receive(i))
+    drain(i)
+}

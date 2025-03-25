@@ -1,0 +1,20 @@
+/*
+    The synthesized generic callers would not initially compile with this example
+*/
+
+struct Multiplier {
+	lhs, rhs f64
+
+	cpu fn do_calc() f64 {
+		return self.lhs * self.rhs 
+	}
+}
+
+cpu fn call_mult(m Multiplier) f64 {
+	return m.do_calc()
+}
+
+cpu fn main() {
+	let m = Multiplier { lhs: 3, rhs: 2 }
+    print_ln(call_mult(m))
+}

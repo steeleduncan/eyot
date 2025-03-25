@@ -1,0 +1,11 @@
+import lib
+
+cpu fn t(val i64) {
+    lib::put(val)
+    print_ln(val, " = ", lib::get())
+}
+
+cpu fn main() {
+    t(10)
+    t(45)
+}

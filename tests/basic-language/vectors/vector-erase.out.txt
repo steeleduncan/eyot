@@ -1,0 +1,27 @@
+Print vector of 8 elements
+- 0
+- 1
+- 2
+- 3
+- 4
+- 5
+- 6
+- 7
+Print vector of 6 elements
+- 0
+- 1
+- 2
+- 3
+- 6
+- 7
+Print vector of 3 elements
+- 0
+- 1
+- 2
+Print vector of 3 elements
+- 0
+- 1
+- 2
+Print vector of 2 elements
+- 1
+- 2

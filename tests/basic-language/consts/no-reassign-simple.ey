@@ -1,0 +1,5 @@
+cpu fn main() {
+    const x = 12
+    x = 14
+    print_ln(x)
+}

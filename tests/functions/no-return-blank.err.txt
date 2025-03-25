@@ -1,0 +1,1 @@
+A non-void function must end with a return

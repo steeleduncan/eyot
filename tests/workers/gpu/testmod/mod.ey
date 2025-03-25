@@ -1,0 +1,8 @@
+fn double(val i64) i64 {
+    return val * 2
+}
+
+fn do_mult(lhs, rhs i64) i64 {
+    return lhs * rhs
+}
+

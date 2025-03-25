@@ -1,0 +1,7 @@
+cpu fn bg(val i64) {
+}
+
+cpu fn main() {
+    let c = cpu bg
+    send(bg, [i64] { 1, 2, 3 })
+}

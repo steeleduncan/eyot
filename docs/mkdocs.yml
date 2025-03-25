@@ -1,0 +1,15 @@
+site_name: Eyot Documentation
+
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - Installing: installing.md
+  - Basics: basics.md
+  - Control Flow: control-flow.md
+  - Functions: functions.md
+  - Memory: memory.md
+  - Workers: workers.md
+  - Structs: structs.md
+  - Modules: modules.md

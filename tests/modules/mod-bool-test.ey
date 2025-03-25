@@ -1,0 +1,15 @@
+import testlib::lib
+
+cpu fn main() {
+	if lib::is_positive(12) {
+		print_ln("pos 1")
+	} else {
+		print_ln("neg 1")
+	}
+
+	if lib::is_positive(-3) {
+		print_ln("pos 2")
+	} else {
+		print_ln("neg 2")
+	}
+}

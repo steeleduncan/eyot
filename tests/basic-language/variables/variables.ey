@@ -1,0 +1,10 @@
+cpu fn main() {
+	let a = "hello"
+	let b = false
+	print_ln(a, " ", b)
+	b = true
+	print_ln(a, " ", b)
+
+	a, b = "there", false
+	print_ln(a, " ", b)
+}

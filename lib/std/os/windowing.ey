@@ -1,0 +1,15 @@
+struct SdlInstance {
+  cpu fn destroy() {
+     sdleyot_teardown()
+  }
+
+  cpu fn clear(r, g, b i64) {
+     sdleyot_clear(r, g, b)
+  }
+}
+
+cpu fn new_instance(w, h i64) *SdlInstance {
+   let i = new SdlInstance {}
+   sdleyot_init(w, h) 
+   return i
+}

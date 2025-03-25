@@ -1,0 +1,17 @@
+import std::runtime
+
+/*
+    There was an issue where we needed gpu code around for this runtime fn to be linked in
+ */
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+	if runtime::can_use_gpu() {
+		print_ln("Y")
+	} else {
+		print_ln("N")
+	}
+}

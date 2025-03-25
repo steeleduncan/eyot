@@ -1,0 +1,24 @@
+struct Parser {
+    src string
+}
+
+cpu fn main() {
+    let s = "x"
+
+    // always worked
+    let p1 = Parser { src: s }
+
+    // failed initially
+    let p2 = Parser {
+        src: s
+    }
+
+    // failed initially
+    let p3 = Parser {
+        src: s,
+    }
+
+    print_ln(p1.src)
+    print_ln(p2.src)
+    print_ln(p3.src)
+}

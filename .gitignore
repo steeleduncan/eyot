@@ -1,0 +1,14 @@
+# emacs
+*~
+
+# avoid build products getting checked in
+*.exe
+
+# helpful to have a test.ey around
+test.ey
+
+# mac
+.DS_Store
+
+# nix
+result

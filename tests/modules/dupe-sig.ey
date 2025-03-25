@@ -1,0 +1,8 @@
+// there was a bug where if two modules had functions with the same signature, one or the other would be inaccessible
+import testlib::dupesiga
+import testlib::dupesigb
+
+cpu fn main() {
+    print_ln("6 = ", dupesiga::double(3))
+    print_ln("9 = ", dupesigb::square(3))
+}

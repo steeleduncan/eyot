@@ -1,0 +1,19 @@
+import std::runtime
+
+// this tests running on gpu with 0 strings (ie that the string pool works)
+fn pr(rval i64) {
+    print_ln(rval)
+}
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    let c = gpu pr
+
+    send(c, [i64]{ 1, 2, 3, 4 })
+    drain(c)
+}
+

@@ -1,0 +1,9 @@
+// ensure we always return values from non-void
+
+fn get() i64 {
+    return
+}
+
+cpu fn main() {
+}
+

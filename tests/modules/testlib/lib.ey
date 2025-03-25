@@ -1,0 +1,15 @@
+fn square(val i64) i64 {
+   return val * val
+}
+
+struct Squarer {
+   val i64
+
+   fn calc() i64 {
+      return self.val * self.val
+   }
+}
+
+fn is_positive(val i64) bool {
+	return val > 0
+}

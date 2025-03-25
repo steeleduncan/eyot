@@ -1,0 +1,7 @@
+// parsing this crashed
+struct Parser {
+    src string
+
+    fn 
+}
+

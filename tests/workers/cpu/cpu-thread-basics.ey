@@ -1,0 +1,52 @@
+// Basic CPU threads/workers tests
+
+// A void cpu worker that returns data to us
+cpu fn do_log(val i64) {
+	print_ln("log: ", val)
+}
+
+cpu fn test_cpu_no_return() {
+    let c = cpu do_log
+
+    // send some data to do_log()
+    send(c, [i64]{ 1, 5, 3, 4 })
+    send(c, [i64]{ 5, 6, 7, 8 })
+    send(c, [i64]{ })
+
+    // void drain is essentially a join
+    drain(c)
+}
+
+// A non-void CPU worker that returns data to us
+fn double(val i64) i64 {
+    return val * 2
+}
+
+// This is a factory for a cpu worker, also checks the worker type in a return
+cpu fn create_double_worker() worker(i64)i64 {
+   return cpu double
+}
+
+cpu fn cpu_return() {
+    let c = create_double_worker()
+
+    send(c, [i64]{ 1, 2, 3, 4 })
+
+    print_ln("- ", receive(c))
+    print_ln("- ", receive(c))
+    print_ln("- ", receive(c))
+    print_ln("- ", receive(c))
+
+    print_ln("drain")
+
+    send(c, [i64]{ 5, 6, 7, 8 })
+	foreach v: drain(c) {
+		print_ln("- ", v)
+	}
+}
+
+cpu fn main() {
+    test_cpu_no_return()
+    print_ln("---")
+    cpu_return()
+}

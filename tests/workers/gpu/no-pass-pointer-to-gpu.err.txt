@@ -1,0 +1,1 @@
+Worker creation uses type that cannot be passed to GPU

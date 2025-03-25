@@ -1,0 +1,16 @@
+/*
+  This test checks that when a string is expanded, it is padded with spaces
+ */
+cpu fn main() {
+    let a = "he"
+    print_ln("(", a, "), ", a.length())
+    a.resize(2)
+    print_ln("(", a, "), ", a.length())
+    a.resize(5)
+    print_ln("(", a, "), ", a.length())
+    a[3] = 'x'
+    print_ln("(", a, "), ", a.length())
+    a.resize(1)
+    print_ln("(", a, "), ", a.length())
+}
+

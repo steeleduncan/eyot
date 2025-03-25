@@ -1,0 +1,11 @@
+Root
+Called A
+Called B
+Root again
+four = 4
+squaring 4
+four squared = 16
+squaring 4
+four squared again = 16
+mult(2*3) 2 with 3
+two times three = 6

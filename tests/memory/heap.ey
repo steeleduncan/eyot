@@ -1,0 +1,38 @@
+struct Junk {
+	cpu fn print() {
+		print_ln("printing ", self.x)
+	}
+
+    x i64
+}
+
+cpu fn call_print(j *Junk) {
+    j.print()
+}
+
+cpu fn main() {
+	let r = new Junk { x: 0 }
+    r.print()
+    call_print(r)
+
+    call_print(new Junk { x: 2 })
+
+    let s = r
+    s.x = 10
+    r.print()
+
+    let t = *r
+    r.x = 15
+    t.print()
+
+    let iv = new 12
+    print_ln("iv = ", *iv)
+    *iv = 13
+    print_ln("iv = ", *iv)
+
+    let jv = iv
+    *jv = 14
+    print_ln("iv = ", *iv)
+
+    (new Junk { x: 1 }).print()
+}

@@ -1,0 +1,48 @@
+import std::runtime
+
+fn square(val i64) i64 {
+    return val * val
+}
+
+cpu fn minimal_test() {
+    let c = gpu square
+    send(c, [i64]{ 1, 2, 3, 4 })
+
+    let vs = drain(c)
+    foreach v: vs {
+        print_ln("- ", v)
+    }
+}
+
+struct Multiplier {
+	lhs, rhs f32
+
+	fn do_calc() f32 {
+		return self.lhs * self.rhs 
+	}
+}
+
+fn call_mult(m Multiplier) f32 {
+	return m.do_calc()
+}
+
+cpu fn struct_test() {
+    let c = gpu call_mult
+	let m = Multiplier { lhs: 3, rhs: 2 }
+	let ms = [Multiplier] { m } 
+    send(c, ms)
+
+	print_ln("+ ", receive(c))
+}
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    minimal_test()
+    print_ln("---")
+    struct_test()
+}
+

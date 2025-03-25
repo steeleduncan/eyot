@@ -1,0 +1,66 @@
+fn big(val i64) bool {
+	return val > 10
+}
+
+cpu fn if_segment() {
+	print_ln("big a ", big(20))
+	print_ln("big b ", big(1))
+
+	if true {
+		print_ln("pass 1")
+	} else {
+		print_ln("fail 1")
+	}
+
+	if false {
+		print_ln("fail 2")
+	} else {
+		print_ln("pass 2")
+	}
+
+	if false {
+		print_ln("fail 3")
+	} elseif false {
+		print_ln("fail 3")
+	} elseif true {
+		print_ln("pass 3")
+	}
+
+	if big(12) {
+		print_ln("pass 4")
+	}
+
+	if big(6) {
+		print_ln("fail 5")
+	}
+
+	let val = true
+	if val {
+		print_ln("pass 6")
+	}
+}
+
+cpu fn while_segment() {
+	let i = 0
+	while i < 4 {
+		print_ln("- ", i)
+		i = i + 1
+	}
+}
+
+cpu fn early_return() {
+    if true {
+		print_ln("bail")
+        return 
+    }
+
+    print_ln("shouldn't be here")
+}
+
+cpu fn main() {
+	if_segment()
+	print_ln("---")
+	while_segment()
+	print_ln("---")
+	early_return()
+}

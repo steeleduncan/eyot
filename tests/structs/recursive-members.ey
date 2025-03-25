@@ -1,0 +1,9 @@
+struct X {
+    left, right *X
+}
+
+cpu fn main() {
+    let a = new X { left: new X {}, right: new X {} }
+    print_ln("ok!")
+}
+

@@ -1,0 +1,42 @@
+name: Eyot Tests
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      # NB this ends up using space out of the allowance that is hard to clear
+#      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      # unit tests
+      - run: nix flake check -L
+        name: Run all builds and tests
+
+      # minimal hello world
+      - run: echo "cpu fn main() { print_ln(true) }" > test.ey
+        name: Create an example program
+
+      # install and run the deb package
+      - run: nix build .#deb
+        name: Build the debian package
+      - run: sudo apt install --reinstall --yes ./result/eyot.deb
+        name: Install debian package
+      - run: eyot run test.ey
+        name: Run eyot via the debian package
+
+      # check running via nix ok
+      - run: nix run . -- run test.ey
+        name: Run eyot from the flake
+
+      # run a command within the nix shell to ensure that is ok
+      - run: nix develop -i -c "eyot" "run" "tests/helloworld.ey"
+        name: Check the nix shell

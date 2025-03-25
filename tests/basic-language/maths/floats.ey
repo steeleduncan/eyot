@@ -1,0 +1,12 @@
+fn double_f32(val f32) f32 {
+   return val * 2.0
+}
+
+fn double_f64(val f64) f64 {
+   return val * 2.0
+}
+
+cpu fn main() {
+    print_ln(double_f32(1.0f))
+    print_ln(double_f64(2.0))
+}

@@ -1,0 +1,7 @@
+cpu fn put(val i64) {
+    ffi_set_var(val)
+}
+
+cpu fn get() i64 {
+    return ffi_get_var()
+}

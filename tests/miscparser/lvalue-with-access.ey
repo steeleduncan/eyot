@@ -1,0 +1,15 @@
+struct StringBuilder {
+    s string
+
+    cpu fn change_character() {
+        // this used to fail due to an issue with the lvalue parsing
+        self.s[0] = 'c'
+    }
+}
+
+cpu fn main() {
+    let sb = StringBuilder { s: "hello" }
+    sb.change_character()
+    print_ln(sb.s)
+}
+

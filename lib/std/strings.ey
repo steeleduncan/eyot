@@ -1,0 +1,66 @@
+fn is_newline(c char) bool {
+	if c == '\n' {
+		return true	
+	}	
+
+	if c == '\r' {
+		return true	
+	}	
+
+	return false
+}
+
+fn is_whitespace(c char) bool {
+	if c == ' ' {
+		return true	
+	}	
+
+	if is_newline(c) {
+		return true	
+	}	
+
+	return false
+}
+
+cpu fn substring(s string, start, length i64) string {
+	// far from efficient, but will do for now
+	let ret = ""
+	ret.resize(length)
+
+	foreach i: range(start, start + length) {
+		ret[i - start] = s[i]
+	}
+
+	return ret
+}
+
+/*
+cpu fn trim_whitespace_left(s string) string {
+	while s.length() > 0 and is_whitespace(s[0]) {
+		s = substring(s, 1, s.length() - 1)
+	}
+
+	return s
+}
+
+cpu fn trim_whitespace_right(s string) string {
+	while s.length() > 0 and is_whitespace(s[s.length() - 1]) {
+		s = substring(s, 0, s.length() - 1)
+	}
+
+	return s
+}
+*/
+
+cpu fn trim_whitespace(s string) string {
+	while s.length() > 0 and is_whitespace(s[0]) {
+		s = substring(s, 1, s.length() - 1)
+	}
+
+	while s.length() > 0 and is_whitespace(s[s.length() - 1]) {
+		s = substring(s, 0, s.length() - 1)
+	}
+
+	return s
+}
+

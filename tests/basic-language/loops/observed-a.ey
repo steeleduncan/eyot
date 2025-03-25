@@ -1,0 +1,8 @@
+cpu fn main() {
+    let a = [i64] { 4, 6, 8, 2 }
+    
+    foreach i: range(0, a.length()) {
+        print_ln("a[", i, "] = ", a[i])
+    }
+}
+

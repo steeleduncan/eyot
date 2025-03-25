@@ -1,0 +1,7 @@
+cpu fn main() {
+    // ensure that a float initted off the wrong width is still ok
+    let v = [f32] { 1.0f, 2.0 }
+
+    print_ln("back: ", v[0])
+    print_ln("back: ", v[1])
+}

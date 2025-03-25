@@ -1,0 +1,7 @@
+a true
+b false
+c 2
+d there
+e 2.000000
+f 2.000000
+g g 123.456000

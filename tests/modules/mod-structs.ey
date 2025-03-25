@@ -1,0 +1,17 @@
+import testlib::lib
+
+struct Squarer {
+   val i64
+
+   fn calc() i64 {
+      return self.val * self.val * self.val
+   }
+}
+
+cpu fn main() {
+    let s = lib::Squarer { val: 4 }
+    print_ln(s.calc())
+
+    let t = Squarer { val: 3 }
+    print_ln(t.calc())
+}

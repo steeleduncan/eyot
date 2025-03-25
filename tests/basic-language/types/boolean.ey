@@ -1,0 +1,42 @@
+// basic boolean behaviours
+cpu fn main() {
+	print_ln("true false")
+	print_ln(true)
+	print_ln(false)
+
+	print_ln("true false false")
+	print_ln(1 < 2)
+	print_ln(2 < 1)
+	print_ln(2 < 2)
+
+	print_ln("false true false")
+	print_ln(1 > 2)
+	print_ln(2 > 1)
+	print_ln(2 > 2)
+
+	print_ln("true false true")
+	print_ln(1 <= 2)
+	print_ln(2 <= 1)
+	print_ln(2 <= 2)
+
+	print_ln("false true true")
+	print_ln(1 >= 2)
+	print_ln(2 >= 1)
+	print_ln(2 >= 2)
+
+	print_ln("true false false true")
+	print_ln(1 == 1)
+	print_ln(1 != 1)
+	print_ln(2 == 1)
+	print_ln(2 != 1)
+
+	print_ln("true false false true")
+	print_ln(true and true)
+	print_ln(true and false)
+	print_ln(false or false)
+	print_ln(true or false)
+
+	print_ln("true false")
+	print_ln(not false)
+	print_ln(not true)
+}

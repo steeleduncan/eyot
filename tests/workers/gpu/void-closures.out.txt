@@ -1,0 +1,4 @@
+(gpu 0) val = 5
+(gpu 1) val = 10
+(gpu 2) val = 15
+(gpu 3) val = 20

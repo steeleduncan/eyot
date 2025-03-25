@@ -1,0 +1,11 @@
+// test generating closures from functions in module namespace
+
+import testmod::mod
+
+cpu fn main() {
+    let pl = partial mod::do_mult(3, _) 
+    print_ln(pl(1))
+    print_ln(pl(2))
+    print_ln(pl(3))
+}
+

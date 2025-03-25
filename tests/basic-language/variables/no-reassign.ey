@@ -1,0 +1,10 @@
+struct A {
+}
+
+struct B {
+}
+
+cpu fn main() {
+    let x = A {};
+    let x = B {};
+}

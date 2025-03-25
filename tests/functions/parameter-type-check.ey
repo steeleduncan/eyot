@@ -1,0 +1,9 @@
+// check right type for passed params
+
+fn timestwo(val i64) i64 {
+	return val * 2
+}
+
+cpu fn main() {
+	print_ln("x ", timestwo(true))
+}

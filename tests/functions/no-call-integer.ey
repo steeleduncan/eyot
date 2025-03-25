@@ -1,0 +1,6 @@
+// don't call int types
+
+cpu fn main() {
+    let a = 12
+    a()
+}

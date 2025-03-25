@@ -1,0 +1,4 @@
+// All programming starts ...
+cpu fn main() {
+	print_ln("Hello World!")
+}

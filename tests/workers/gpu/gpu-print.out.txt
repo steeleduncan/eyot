@@ -1,0 +1,10 @@
+Send vals
+(gpu 0) on gpu
+(gpu 0)  val = 1
+(gpu 1) on gpu
+(gpu 1)  val = 2
+(gpu 2) on gpu
+(gpu 2)  val = 3
+(gpu 3) on gpu
+(gpu 3)  val = 4
+Receive vals

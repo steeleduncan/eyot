@@ -1,0 +1,10 @@
+cpu fn main() {
+	let a = "hello"
+    print_ln(a)
+
+    a.resize(2)
+    print_ln(a)
+
+    print_ln("hello")
+}
+

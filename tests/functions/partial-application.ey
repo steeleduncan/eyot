@@ -1,0 +1,52 @@
+// basic partial application tests
+
+fn multiply(lhs, rhs i64) i64 {
+   return lhs * rhs 
+}
+
+fn arithmetic(a, b, c i64) i64 {
+   return a + b * c 
+}
+
+struct Point {
+	x, y f64
+}
+
+cpu fn distance(lhs, rhs Point) f64 {
+   let dx = lhs.x - rhs.x
+   let dy = lhs.y - rhs.y
+   return dx * dx + dy * dy
+}
+
+cpu fn main() {
+    let m3 = partial multiply(3, _) 
+    print_ln(m3(4))
+    print_ln(m3(5))
+    print_ln(m3(6))
+
+    print_ln("---")
+
+    let m4 = partial multiply(4, _) 
+    print_ln(m4(4))
+    print_ln(m4(5))
+    print_ln(m4(6))
+
+    print_ln("---")
+
+    let pm4 = partial multiply(_, 4) 
+    print_ln(pm4(4))
+    print_ln(pm4(5))
+    print_ln(pm4(6))
+
+    print_ln("---")
+
+    let pd1 = partial distance(Point { x: 1, y: 1 }, _)
+    print_ln(pd1(Point { x: 1, y: 2 }))
+
+    print_ln("---")
+
+    let f1 = partial arithmetic(1, _, 3) 
+    print_ln(f1(1))
+    print_ln(f1(2))
+    print_ln(f1(3))
+}

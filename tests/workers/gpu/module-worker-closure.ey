@@ -1,0 +1,20 @@
+import std::runtime
+
+//  This tests creating a GPU worker from partial application of a function that lives in a module namespace
+
+import testmod::mod
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    let p = partial mod::do_mult(_, 3)
+    let c = gpu p
+
+    send(c, [i64]{ 1, 2, 3, 4 })
+	foreach v: drain(c) {
+		print_ln("- ", v)
+	}
+}

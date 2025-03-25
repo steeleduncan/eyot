@@ -1,0 +1,12 @@
+// dupe in the
+
+import testlib::lib
+
+fn square(val i64) i64 {
+   return val * val + 1
+}
+
+cpu fn main() {
+    print_ln("their square = ", lib::square(2))
+    print_ln("our square = ", square(2))
+}

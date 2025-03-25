@@ -1,0 +1,3 @@
+fn square(v i64) i64 {
+	return v * v
+}

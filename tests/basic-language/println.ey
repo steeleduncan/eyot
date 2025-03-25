@@ -1,0 +1,11 @@
+// check print_ln behaviour
+cpu fn main() {
+	print_ln("a ", true)
+	print_ln("b ", false)
+	print_ln("c ", 2)
+	print_ln("d ", "there")
+	print_ln("e ", 2.0)
+	print_ln("f ", 2f)
+	print("g ")
+	print_ln("g ", 123.456)
+}

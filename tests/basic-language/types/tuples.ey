@@ -1,0 +1,15 @@
+fn foo(val i64) (i64, i64) {
+	if val < 10 {
+		return 1, 0
+	} else {
+		return 0, 1
+	}
+}
+	
+cpu fn main() {
+	let lhs, rhs = foo(12)	
+	print_ln("lhs = ", lhs, ", rhs = ", rhs)
+
+	let lhs2, rhs2 = foo(9)	
+	print_ln("lhs = ", lhs2, ", rhs = ", rhs2)
+}

@@ -1,0 +1,28 @@
+struct Value {
+    ival i64
+}
+
+cpu fn log_null(x *Value) {
+	if x == null {
+		print_ln("null 1")
+	}
+	if null == x {
+		print_ln("null 2")
+	}
+
+	if x != null {
+		print_ln("not null 1")
+	}
+	if null != x {
+		print_ln("not null 2")
+	}
+}
+
+
+cpu fn main() {
+	let x = new Value { ival: 12 }
+	log_null(x)
+	x = null
+	log_null(x)
+}
+

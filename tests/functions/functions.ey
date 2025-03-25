@@ -1,0 +1,34 @@
+// simple example of calling our own functions
+
+cpu fn f_b() {
+	print_ln("Called B")
+}
+
+cpu fn f_a() {
+	print_ln("Called A")
+	f_b()
+}
+
+fn four() i64 {
+	return 4
+}
+
+cpu fn square(val i64) i64 {
+	print_ln("squaring ", val)
+	return val * val 
+}
+
+cpu fn multiply_and_log(lhs, rhs i64, message string) i64 {
+	print_ln("mult(", message, ") ", lhs, " with ", rhs)
+	return lhs * rhs
+}
+
+cpu fn main() {
+	print_ln("Root")
+	f_a()
+	print_ln("Root again")
+	print_ln("four = ", four())
+	print_ln("four squared = ", square(4))
+	print_ln("four squared again = ", square(four()))
+	print_ln("two times three = ", multiply_and_log(2, 3, "2*3"))
+}

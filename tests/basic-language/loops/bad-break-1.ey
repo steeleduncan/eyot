@@ -1,0 +1,5 @@
+cpu fn main() {
+    break
+    while true {
+    }
+}

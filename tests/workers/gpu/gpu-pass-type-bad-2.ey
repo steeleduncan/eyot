@@ -1,0 +1,16 @@
+struct TS {
+    val f64
+}
+
+fn check(v TS) i64 {
+   print_ln(v.val)
+   return 0
+}
+
+cpu fn main() {
+    let v = TS { val: 0.0 }
+    let f = gpu check
+    send(f, [TS] { v })
+    print_ln("f: ", receive(f))
+    drain(f)
+}

@@ -1,0 +1,20 @@
+// runtime interface for Eyot
+
+// trigger a collection
+cpu fn collect() {
+    ey_runtime_collect()
+}
+
+cpu fn allocated_bytes() i64 {
+    return ey_runtime_allocated_bytes()
+}
+
+// return true if this can use a GPU
+cpu fn can_use_gpu() bool {
+	return ey_runtime_check_cl()
+}
+
+cpu fn panic(msg string) {
+    print_ln(msg)
+    ffi_panic()
+}

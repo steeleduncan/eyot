@@ -1,0 +1,5 @@
+cpu fn main() {
+    let v = [i64] { }
+    v.append("hello")
+    print_ln(v[0])
+}

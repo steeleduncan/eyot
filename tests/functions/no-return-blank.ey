@@ -1,0 +1,7 @@
+fn mult(x, y i64) i64 {
+	// specific case for empty block
+}
+	
+cpu fn main() {
+	print_ln("m = ", mult(2, 4))
+}

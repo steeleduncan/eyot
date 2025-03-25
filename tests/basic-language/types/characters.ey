@@ -1,0 +1,5 @@
+cpu fn main() {
+   print_ln("c = ", 'c')
+   print_ln("é = ", 'é')
+   print_ln("體 = ", '體')
+}

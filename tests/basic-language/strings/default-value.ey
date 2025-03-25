@@ -1,0 +1,25 @@
+struct StringBuilderSub {
+    s string
+}
+
+struct StringBuilder2 {
+    sub StringBuilderSub
+}
+
+struct StringBuilder1 {
+    s string
+}
+
+cpu fn main() {
+    let a = StringBuilder1 {  }
+    print_ln("val1 = '", a.s, "'")
+    if a.s == "" {
+       print_ln("ok1")
+    }
+
+    let b = StringBuilder2 {  }
+    print_ln("val2 = '", b.sub.s, "'")
+    if b.sub.s == "" {
+       print_ln("ok2")
+    }
+}

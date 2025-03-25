@@ -1,0 +1,33 @@
+import std::runtime
+
+/*
+    Check that the buffers get cleared
+    NB this requires the -a to max out the input
+*/
+fn pr(x i64) {
+    print_ln(x, "a: abcdefghijklmnopqrstuvwxyz")
+    print_ln(x, "b: abcdefghijklmnopqrstuvwxyz")
+    print_ln(x, "c: abcdefghijklmnopqrstuvwxyz")
+    print_ln(x, "d: abcdefghijklmnopqrstuvwxyz")
+    print_ln(x, "e: abcdefghijklmnopqrstuvwxyz")
+    print_ln(x, "f: abcdefghijklmnopqrstuvwxyz")
+    print_ln(x, "g: abcdefghijklmnopqrstuvwxyz")
+    print_ln(x, "h: abcdefghijklmnopqrstuvwxyz")
+    print_ln(x, "i: abcdefghijklmnopqrstuvwxyz")
+    print_ln(x, "j: abcdefghijklmnopqrstuvwxyz")
+}
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    let c = gpu pr
+
+    foreach i: range(4) {
+        send(c, [i64]{ i })
+        drain(c)
+    }
+}
+

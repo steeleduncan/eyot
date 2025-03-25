@@ -1,0 +1,15 @@
+import std::os
+
+cpu fn bg(val i64) {
+    os::usleep(1000) 
+    print_ln("waited ", val)
+}
+
+cpu fn main() {
+    print_ln("hello")
+
+    let c = cpu bg
+    send(c, [i64] { 1 })
+    drain(c)
+    print_ln("done")
+}

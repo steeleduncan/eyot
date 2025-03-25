@@ -1,0 +1,24 @@
+cpu fn pvec(vec [i64]) {
+    print_ln("Print vector of ", vec.length(), " elements");
+    foreach val: vec {
+        print_ln("- ", val)
+    }
+}
+
+cpu fn main() {
+    let v = range(8)
+    pvec(v)
+
+    v.erase(4, 2)
+    pvec(v)
+
+    v.erase(3, 3)
+    pvec(v)
+
+    v.erase(3, 0)
+    pvec(v)
+
+    v.erase(0, 1)
+    pvec(v)
+}
+

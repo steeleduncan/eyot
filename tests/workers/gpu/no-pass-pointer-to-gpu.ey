@@ -1,0 +1,15 @@
+import std::runtime
+
+struct S {
+    ptr *i64
+}
+
+fn dbl(v S) i64 {
+	return (*v.ptr) * 2
+}
+
+cpu fn main() {
+    // won't compile
+    gpu dbl
+}
+

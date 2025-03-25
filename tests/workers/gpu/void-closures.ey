@@ -1,0 +1,19 @@
+import std::runtime
+
+// this tests  void gpu closures
+fn pr(lval, rval i64) {
+    print_ln("val = ", lval * rval)
+}
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    let c = gpu (partial pr(5, _))
+
+    send(c, [i64]{ 1, 2, 3, 4 })
+    drain(c)
+}
+

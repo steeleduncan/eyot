@@ -1,0 +1,19 @@
+fn add_one(val i64) i64 {
+    print_ln("add_one ", val)
+    return val + 1
+}
+
+fn double(val i64) i64 {
+    print_ln("double ", val)
+    return val * 2
+}
+
+cpu fn main() {
+    let c1 = cpu add_one
+    let c2 = cpu double
+    let c = pipeline c1 c2
+    send(c, [i64]{ 1, 2, 3 })
+	foreach v: drain(c) {
+		print_ln("- ", v)
+	}
+}

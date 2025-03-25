@@ -1,0 +1,5 @@
+import testlib::bada
+
+cpu fn main() {
+    print_ln("val2 = ", lib::square(2))
+}

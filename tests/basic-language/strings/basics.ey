@@ -1,0 +1,32 @@
+cpu fn main() {
+	let a = "hello"
+    print_ln(a)
+
+    print_ln("len = ", a.length())
+
+    let b = "he"
+    let c = "llo"
+    print_ln(b)
+    print_ln(c)
+    let d = b + c
+    print_ln(d)
+    
+    print_ln("len = ", d.length())
+    
+    if a == b {
+       print_ln("fail a")
+    }
+
+    if a == d {
+       print_ln("pass b")
+    }
+
+    if b != c {
+       print_ln("pass c")
+    }
+
+    let al = a.length()
+    foreach i: range(al) {
+        print_ln("hello[", i, "] = ", a[i])
+    }
+}

@@ -1,0 +1,9 @@
+cpu fn main() {
+    let x = "hello there"
+
+    // ok
+    print_ln("length = ", x.length())
+
+    // not ok
+    print_ln("size = ", x.size())
+}

@@ -1,0 +1,14 @@
+{
+    "functions": [
+        {
+            "name": "ey_stdlib_readline",
+            "return": "EyString",
+            "arguments": [ ]
+        },
+        {
+            "name": "ey_stdlib_read_text_file",
+            "return": "EyString",
+            "arguments": [ "EyString" ]
+        }
+    ]
+}

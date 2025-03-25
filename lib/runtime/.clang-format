@@ -1,0 +1,20 @@
+﻿---
+BasedOnStyle: Google
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: 'true'
+AlignConsecutiveAssignments: 'false'
+AlignConsecutiveDeclarations: 'false'
+AlignEscapedNewlines: DontAlign
+AlignOperands: 'true'
+AlignTrailingComments: 'false'
+AllowAllArgumentsOnNextLine: 'false'
+AllowAllParametersOfDeclarationOnNextLine: 'false'
+ColumnLimit: 100
+UseTab: Never
+IndentWidth: 4
+TabWidth: 4
+IndentCaseLabels: false
+AllowShortFunctionsOnASingleLine: None
+SortIncludes: false
+NamespaceIndentation: All
+...

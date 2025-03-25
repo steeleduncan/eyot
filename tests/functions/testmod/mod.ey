@@ -1,0 +1,4 @@
+fn do_mult(lhs, rhs i64) i64 {
+    return lhs * rhs
+}
+

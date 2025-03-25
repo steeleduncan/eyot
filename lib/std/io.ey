@@ -1,0 +1,8 @@
+// read a line from stdin
+cpu fn get_line() string {
+    return ey_stdlib_readline()
+}
+
+cpu fn read_file(path string) string {
+    return ey_stdlib_read_text_file(path)
+}

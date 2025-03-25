@@ -1,0 +1,3 @@
+fn double(val i64) i64 {
+    return val * 2
+}

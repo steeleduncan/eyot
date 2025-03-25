@@ -1,0 +1,8 @@
+cpu fn main() {
+	print_ln("before")
+	let cond = false
+	while cond {
+		print_ln("during")
+	}
+	print_ln("after")
+}

@@ -1,0 +1,16 @@
+// straightforward 
+
+cpu fn main() {
+	print_ln("12 = ", 12)
+	print_ln("14 = ", 2 + 3 * 4)
+	print_ln("10 = ", 2 * 3 + 4)
+	print_ln("9 = ", 2 + 3 + 4)
+	print_ln("16 = ", 2 * (3 + 5))
+	print_ln("-12 = ", -12)
+	print_ln("-6 = ", 2 * -3)
+
+	print_ln("-2/3 = ", 2.0 / -3.0)
+	print_ln("0.007 = ", 0.007)
+
+	print_ln("2 = ", 5 % 3)
+}

@@ -1,0 +1,80 @@
+// basic struct examples
+
+struct Point {
+	x, y f64
+}
+
+struct Rect {
+	x, y, w, h f64
+
+	// simple example of self
+	cpu fn area() f64 {
+		return self.w * self.h 
+	}
+
+	cpu fn print() {
+		print_ln("w = ", self.w, ", h = ", self.h, ", x = ", self.x, ", y = ", self.y)
+	}
+
+	cpu fn origin() Point {
+		return Point { x: self.x, y: self.y }
+	}
+
+	cpu fn max() (f64, f64) {
+		return self.x + self.w, self.y + self.h
+	}
+
+	cpu fn contains(pt Point) bool {
+		let mx, my = self.max()
+		return pt.x > self.x and pt.y > self.y and pt.x < mx and pt.y < my
+	}
+
+	cpu fn move_to_zero() {
+ 		self.x = 0
+		self.y = 0
+	}
+}
+
+cpu fn get_rect_area(r Rect) f64 {
+	return r.w * r.h
+}
+
+cpu fn main() {
+	let p = Point { x: 1, y: 123 }
+	print_ln("p.y = ", p.y)
+
+	let a = Rect { x: 1, y: 1, w: 3, h: 3 } 	
+	print_ln("area of a = ", get_rect_area(a))
+
+	a.w = 6
+	print_ln("area of a = ", get_rect_area(a))
+
+	let b = Rect { x: 2, y: 2, w: 5, h: 4 } 	
+	print_ln("area of b = ", get_rect_area(b))
+
+	let i = 0
+
+	b, i = a, 1 + 2
+	print_ln("area of a again = ", get_rect_area(b))
+	print_ln("i = ", i)
+
+	print_ln("area from bound = ", b.area())
+    b.print()
+
+    let pt = b.origin()
+	print_ln("pt.x = ", pt.x, ", ", pt.y)
+    b.move_to_zero()
+    pt = b.origin()
+	print_ln("pt.x = ", pt.x, ", ", pt.y)
+	print_ln("boxx = ", b.origin().x, ", boxy = ", b.origin().y)
+
+    let xx, yy = b.max()
+	print_ln("maxx = ", xx)
+
+    if b.contains(p) {
+       print_ln("fail")    
+    }
+    if not b.contains(Point { x: 2, y: 2 }) {
+       print_ln("fail")    
+    }
+}

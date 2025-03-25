@@ -1,0 +1,5 @@
+import testlib::lib
+
+cpu fn main() {
+    print_ln("val2 = ", lib::square(2))
+}

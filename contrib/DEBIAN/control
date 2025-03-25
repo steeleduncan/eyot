@@ -1,0 +1,8 @@
+Package: eyot
+Version: 0.0.0
+Architecture: amd64
+Maintainer: steeleduncan@hotmail.com
+Description: Eyot programming language
+Depends: gcc, ocl-icd-opencl-dev
+
+

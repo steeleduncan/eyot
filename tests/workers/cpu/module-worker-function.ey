@@ -1,0 +1,11 @@
+//  This tests creating a worker from a function that lives in a module namespace
+
+import testmod::mod
+
+cpu fn main() {
+    let c = cpu mod::double
+    send(c, [i64]{ 1, 2, 3, 4 })
+	foreach v: drain(c) {
+		print_ln("- ", v)
+	}
+}

@@ -1,0 +1,15 @@
+/*
+ This checked a compile error
+ It requires types to be included as parts of structs
+ */
+struct Point {
+	x, y f64
+}
+
+cpu fn distance(pt Point) f64 {
+   return pt.x * pt.x + pt.y * pt.y
+}
+
+cpu fn main() {
+    print_ln("ok")    
+}

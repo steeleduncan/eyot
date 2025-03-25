@@ -1,0 +1,26 @@
+cpu fn gen_vec() [i64] {
+   return [i64] { 1, 4, 2 }
+}
+
+cpu fn log(v [i64]) {
+   print_ln("[0] = ", v[0])
+   print_ln("[1] = ", v[1])
+   print_ln("[2] = ", v[2])
+}
+
+cpu fn main() {
+   let v = gen_vec()
+   log(v)
+   v[1] = 5
+   log(v)
+
+   foreach i: v {
+        print_ln("- ", i)
+   }
+
+   print_ln("len = ", v.length())
+   v.append(3)
+   print_ln("len = ", v.length())
+   v.resize(0)
+   print_ln("len = ", v.length())
+}

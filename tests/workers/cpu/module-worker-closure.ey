@@ -1,0 +1,13 @@
+//  This tests creating a worker from partial application of a function that lives in a module namespace
+
+import testmod::mod
+
+cpu fn main() {
+    let p = partial mod::do_mult(_, 3)
+    let c = cpu p
+
+    send(c, [i64]{ 1, 2, 3, 4 })
+	foreach v: drain(c) {
+		print_ln("- ", v)
+	}
+}

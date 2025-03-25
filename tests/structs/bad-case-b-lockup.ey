@@ -1,0 +1,8 @@
+struct StringBuilder {
+    s string
+}
+
+cpu fn main() {
+    // this is invalid syntax, which originally caused a lockup in the parser
+    let b = StringBuilder { s = "hi" }
+}

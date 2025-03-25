@@ -1,0 +1,11 @@
+fn check_f64(v f64) f64 {
+   print_ln(v)
+   return 2.0 * v
+}
+
+cpu fn main() {
+    let f = gpu check_f64
+    send(f, [f64] { 1.0 })
+    print_ln("f: ", receive(f))
+    drain(f)
+}

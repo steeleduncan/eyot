@@ -1,0 +1,4 @@
+cpu fn main() {
+    print_ln("first line
+    second line")
+}

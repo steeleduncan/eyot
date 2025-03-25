@@ -1,0 +1,9 @@
+cpu fn log(s string) {
+    print_ln(s, ":", s.length())
+}
+
+cpu fn main() {
+    log("he")
+    log("également")
+    log("簡體版")
+}

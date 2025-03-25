@@ -1,0 +1,10 @@
+// ensure we return the right type
+
+fn get() i64 {
+    return true
+}
+
+cpu fn main() {
+    return
+}
+

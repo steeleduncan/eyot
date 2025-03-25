@@ -1,0 +1,5 @@
+import testlib::emptymod
+
+cpu fn main() {
+    print_ln("x")
+}

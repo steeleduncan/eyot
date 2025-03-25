@@ -1,0 +1,29 @@
+import std::runtime
+
+/*
+    Check that range within foreach is ok on GPU
+ */
+fn factorial(val i64) i64 {
+    let r = 1
+    foreach i: range(1, val + 1) {
+        r = r * i
+    }
+    return r
+}
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    let c = gpu factorial
+    send(c, [i64]{ 1, 2, 3, 4 })
+
+    let vs = drain(c)
+    foreach v: vs {
+        print_ln("- ", v)
+    }
+}
+
+

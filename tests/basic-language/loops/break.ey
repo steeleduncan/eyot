@@ -1,0 +1,15 @@
+cpu fn main() {
+    print_ln("a");
+    while true {
+        print_ln("b");
+        break
+        print_ln("c");
+    }
+    print_ln("d");
+    foreach val: [i64] { 2, 4, 6 } {
+        print_ln(val);
+        break
+        print_ln("e");
+    }
+	print_ln("f");
+}

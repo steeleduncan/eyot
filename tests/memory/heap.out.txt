@@ -1,0 +1,9 @@
+printing 0
+printing 0
+printing 2
+printing 10
+printing 10
+iv = 12
+iv = 13
+iv = 14
+printing 1

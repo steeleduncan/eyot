@@ -1,0 +1,19 @@
+cpu fn main() {
+    let a = "hello"
+
+    print_ln("before: ", a)
+	let echar = a[1]
+    print_ln("e = ", echar)
+
+	let cs = [char] { 'a', 'b', 'c', 'd', 'e' }
+	foreach echar: cs {
+		a[1] = echar
+		print_ln("after: ", a)
+	}
+
+	print('x')
+	print('\n')
+	print('y')
+	print_ln()
+}
+

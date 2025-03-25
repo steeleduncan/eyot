@@ -1,0 +1,16 @@
+{
+    "functions": [
+        {
+            "name": "ey_runtime_get_args",
+            "return": "[EyString]"
+        },
+        {
+            "name": "ffi_os_usleep",
+            "arguments": [ "EyInteger" ]
+        },
+        {
+            "name": "ffi_os_exit",
+            "arguments": [ "EyInteger" ]
+        }
+    ]
+}

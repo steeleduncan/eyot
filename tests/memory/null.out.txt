@@ -1,0 +1,4 @@
+not null 1
+not null 2
+null 1
+null 2

@@ -1,0 +1,5 @@
+import testlib::missinglib
+
+cpu fn main() {
+    print_ln("Hello world")
+}

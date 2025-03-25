@@ -1,0 +1,11 @@
+fn y() i64 {
+   return 2
+}
+
+cpu fn x() f64 {
+   return y()
+}
+
+cpu fn main() {
+    print_ln("x = ", x())
+}

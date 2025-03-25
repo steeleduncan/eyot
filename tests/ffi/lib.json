@@ -1,0 +1,13 @@
+{
+    "functions": [
+        {
+            "name": "ffi_set_var",
+            "arguments": [ "EyInteger" ]
+        },
+        {
+            "name": "ffi_get_var",
+            "return": "EyInteger",
+            "arguments": [  ]
+        }
+    ]
+}

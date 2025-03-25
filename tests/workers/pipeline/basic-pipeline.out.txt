@@ -1,0 +1,9 @@
+add_one 1
+add_one 2
+add_one 3
+double 2
+double 3
+double 4
+- 4
+- 6
+- 8

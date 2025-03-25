@@ -1,0 +1,5 @@
+const k_val = 12
+
+cpu fn main() {
+	print_ln("kval = ", k_val)
+}

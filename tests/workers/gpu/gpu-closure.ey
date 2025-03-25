@@ -1,0 +1,23 @@
+import std::runtime
+
+// minimal GPU closure test
+
+fn mult(lhs, rhs i64) i64 {
+	return lhs * rhs
+}
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+	let dbl = partial mult(2, _)	
+
+    let c = gpu dbl
+    send(c, [i64]{ 1, 5, 3, 4 })
+	foreach i: drain(c) {
+		print_ln("- ", i)
+	}
+}
+

@@ -1,0 +1,7 @@
+cpu fn max() (f64, f64) {
+    return 2, 3
+}
+
+cpu fn main() {
+    print_ln("Hello World")
+}

@@ -1,0 +1,14 @@
+cpu fn main() {
+    let i = 0
+    print_ln(i)
+    i += 1
+    print_ln(i)
+    i *= 2
+    print_ln(i)
+    i += 10
+    print_ln(i)
+    i /= 2
+    print_ln(i)
+    i -= 2
+    print_ln(i)
+}

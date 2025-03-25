@@ -1,0 +1,14 @@
+big a true
+big b false
+pass 1
+pass 2
+pass 3
+pass 4
+pass 6
+---
+- 0
+- 1
+- 2
+- 3
+---
+bail

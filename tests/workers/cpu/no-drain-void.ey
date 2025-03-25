@@ -1,0 +1,11 @@
+// A void cpu worker that returns data to us throws an error
+
+cpu fn do_log(val i64) {
+	print_ln("log: ", val)
+}
+
+cpu fn main() {
+    let c = cpu do_log
+    let x = drain(c)
+}
+

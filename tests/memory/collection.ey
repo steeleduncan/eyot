@@ -1,0 +1,41 @@
+import std::runtime
+
+struct Wrap {
+    value i64
+}
+
+// This test is a bit fragile
+// NB string literals cause allocations
+cpu fn main() {
+    let x = 12
+    runtime::collect()
+	let r = new Wrap { value: 3 }
+
+    let ok = true
+
+    let before = runtime::allocated_bytes()
+
+    if true {
+        let s = new Wrap { value: 4 }
+        if before >= runtime::allocated_bytes() {
+            print_ln("fail 1")
+            ok = false
+        }
+        r = s;
+    }
+
+    if false {
+        return
+    }
+
+    runtime::collect()
+
+    if before != runtime::allocated_bytes() {
+        print_ln("fail 2")
+        ok = false
+    }
+
+    if ok {
+        print_ln("ok")
+    }
+}

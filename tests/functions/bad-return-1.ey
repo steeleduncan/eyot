@@ -1,0 +1,6 @@
+// no returning values from a void
+
+cpu fn main() {
+    return 1
+}
+

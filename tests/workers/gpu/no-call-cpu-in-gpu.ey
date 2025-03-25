@@ -1,0 +1,22 @@
+import std::runtime
+
+cpu fn do_log() {
+    print_ln("log")
+}
+
+fn square(val i64) i64 {
+    do_log()
+    return val * val
+}
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    let c = gpu square
+    send(c, [i64]{ 1, 2, 3, 4 })
+    drain(c)
+}
+

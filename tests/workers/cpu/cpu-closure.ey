@@ -1,0 +1,16 @@
+//  This tests creating a worker from partial application of a function
+
+fn mult(lhs, rhs i64) i64 {
+	return lhs * rhs
+}
+
+cpu fn main() {
+	let dbl = partial mult(2, _)	
+
+    let c = cpu dbl
+    send(c, [i64]{ 1, 5, 3, 4 })
+	foreach i: drain(c) {
+		print_ln("- ", i)
+	}
+}
+
