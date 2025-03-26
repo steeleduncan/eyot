@@ -73,14 +73,14 @@ jobs:
       - run: nix develop -i -c "eyot" "run" "tests/helloworld.ey"
         name: Check the nix shell
 
-  # Update github pages (NB this also updates the .deb, so only do it on success)
+  # Update github pages
   build-site:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs:
     - nix-tests
     - host-tests
-    if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
+    if: always() # NB this also updates the .deb, so only do it on success
     steps:
     - uses: actions/checkout@v4
     - uses: DeterminateSystems/nix-installer-action@main
