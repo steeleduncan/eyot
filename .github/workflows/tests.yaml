@@ -72,3 +72,32 @@ jobs:
       # run a command within the nix shell to ensure that is ok
       - run: nix develop -i -c "eyot" "run" "tests/helloworld.ey"
         name: Check the nix shell
+
+    # Update github pages (NB this also updates the .deb, so only do it on success)
+    build-site:
+      runs-on: ubuntu-latest
+      timeout-minutes: 10
+      needs:
+      - nix-tests
+      - host-tests
+      if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
+      steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Generate docs
+        run: nix build .#docs
+      - name: Upload docs
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: result/
+
+  deploy-site:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-site
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
