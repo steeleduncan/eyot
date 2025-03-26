@@ -1,4 +1,4 @@
-name: Eyot Tests
+name: CI
 on:
   workflow_dispatch:
   push:
@@ -97,6 +97,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build-site
+    permissions:
+      pages: write
+      id-token: write
     steps:
     - name: Deploy to GitHub Pages
       id: deployment
