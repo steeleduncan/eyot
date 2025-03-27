@@ -75,7 +75,18 @@
           pkgs.stdenv.mkDerivation {
             name = "eyot";
             src = ./.;
-            buildInputs = inputs ++ [ lib_folder ];
+            propagatedBuildInputs = [
+              pkgs.gcc
+            ];
+            buildInputs = [
+              pkgs.opencl-headers
+              pkgs.ocl-icd
+            ];
+            nativeBuildInputs = [
+              pkgs.go
+              lib_folder
+            ];
+
             doCheck = true;
             
             buildPhase = ''
@@ -116,6 +127,24 @@
             '';
           };
 
+        check_example = name: pkgs.stdenvNoCC.mkDerivation {
+            name = "eyot-example-" + name;
+            src = ./examples + "/${name}";
+            buildInputs = [
+              eyot_package
+            ];
+            
+            buildPhase = ''
+              echo "About to build"
+              eyot build main.ey || exit 1
+              echo "About to run"
+              ./out.exe
+            '';
+
+            installPhase = "touch $out";
+
+        };
+
       in rec {
         packages = {
           default = eyot_package;
@@ -130,6 +159,8 @@
           build-eyot = eyot_package;
           build-deb = deb;
           build-docs = docs;
+
+          example-hello = check_example "hello-world";
 
           # Check the reformat script is working
           # NB this needs to mutate the source folder so it can't use the default immutable folder
