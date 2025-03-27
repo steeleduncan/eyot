@@ -1,5 +1,7 @@
 # Eyot documentation
 
+⚠ NB this documentation is out of date and I am currently updating it ⚠ 
+
 This document is a rough guide to the Eyot programming language.
 It is designed as a tutorial, but given the experimental nature of Eyot I've tried to explain why I've made certain choices rather than just document what i've done.
 
