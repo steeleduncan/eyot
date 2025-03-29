@@ -2,11 +2,11 @@
 
 # Eyot - A language where the GPU is just another thread
 
-## :warning: Eyot is a work in progress. I'm develping it in the open, and it is useable for those who enjoy experimenting with new stuff, but it is probably quite unstable still :warning:
+## :warning: Eyot is a work in progress. I'm develping it in the open, and it is useable for those who enjoy experimenting with new stuff, but it is unstable :warning:
 
 Eyot is an experiment to write a language in which it is no harder to dispatch a task to the GPU than it is to run a task on a background thread. All aspects of the Eyot's design are directed towards this goal. It can be thought of as an entire language built around a CUDA model of GPU concurrency.
 
-For a simple example the following code will square a vector of numbers on the GPU
+The full documentation can be found [here](https://steeleduncan.github.io/eyot/), but to take a simple example, the following code will square a vector of numbers on the GPU
 
 ```
 fn square(value i64) i64 {

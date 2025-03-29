@@ -10,7 +10,7 @@ if x > 1 {
 }
 ```
 
-It must be given a boolean value as there are no type coercions. E.g. You must write
+It requires a boolean value, as there are no type coercions to bool. E.g. You must write
 
 ```
 if x.length() != 0 {
@@ -28,7 +28,7 @@ if x.length() {
 
 ## While
 
-While is just like an if statement, but rather than execute once *if* the condition is true, it will execute continuously *while* the condition is true
+While is similar to an if statement, but rather than execute once *if* the condition is true, it will execute continuously *while* the condition is true
 
 ```
 while queue.has_message() {

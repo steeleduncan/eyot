@@ -24,7 +24,11 @@ The only integer type so far is `i64`, which denotes a 64 bit signed integer.
 
 ## Float
 
-The only floating point type so far is `f64`, which denotes a 64 bit floating point number.
+Currently there are 32 and 64 bit floating point types `f32` and `f64` respectively.
+Due to limitations in the standard profile of OpenCL, only 32 bit floats are allowed in GPU code.
+I hope to lift this restriction by moving to a different back end on day.
+
+`1.0` is an `f64` literal, and `1.0f` is an `f32` literal.
 
 ## Boolean
 
@@ -38,7 +42,7 @@ Eyot has the usual numerical comparison operators (`==`, `!=`, `<`, `>`, `<=`, `
 
 A vector (flexible array) of values is denoted by square brackets around the type it contains.
 E.g. `[i64]`.
-Literals can be assigned with braces after the vector
+Literals are denoted by braces after the type
 
 ```
 let x = [i64] { 1, 2, 3, 4 }
@@ -56,7 +60,7 @@ Additionally vectors support the following builtin functions
 - `x.resize(20)` resizes the vector to have space for `20` slots
 - `x.append(1)` would add a new value to the vector
 
-## String
+## Strings and Characters
 
 String literals are created with quotes
 
@@ -74,4 +78,6 @@ print_ln(concatenated)
 And similar to vectors they support `.length()` and the access operator (`[]`).
 Please note that these operators work in terms of Unicode Scalar Values.
 For now the details of how they may be stored are opaque to users of Eyot, and the runtime is free to chose.
+
+The access operator, `[]`, takes the code point index as a value, and returns a `char` type, which is a type sufficient to represent all Unicode code points
 
