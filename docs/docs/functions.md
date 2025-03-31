@@ -31,17 +31,17 @@ fn square(val i64) i64 {
 }
 ```
 
-However printing to the log (for now at least) requires the CPU and so any function containing this must be tagged with `cpu` .
+However some operations, like allocating a vector, require the CPU. Any function containing this must be tagged with `cpu`.
 
 ```
 cpu fn log_square(val i64) {
-    print_ln(val * val
+    let values = [i64] { 0, 1, 2, 3, 4 }
+    ...
 }
 ```
 
-Calling `cpu` code from location independent code is a compile time error.
+Calling `cpu` code from code not marked `cpu` is a compile time error.
 As Eyot develops the intention is to loosen these restrictions as far as possible, but it is likely that some form of this system will always be required.
-`print_ln` is a good example where with some work it is likely possible to log from GPU, but it is not obvious that it will be possible to always log to the console from a DSP or FPGA should Eyot be extended to those.
 
 The `cpu` requirement goes as far as being part of the type signature because it is important to never assign to a variable of function type capable of running anywhere, a function that is only capable of running on the CPU, or the runtime would have to panic.
 It is analogous to how you can assign a non const pointer to a const pointer in C, but not the other way around.

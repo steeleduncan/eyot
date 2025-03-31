@@ -16,6 +16,7 @@ The `.deb` at that link is built along with this documentation after each succes
 
 ## Nix
 
-Running `nix build github:steeleduncan/eyot` will leave an Eyot installation in the `result` folder.
+Run `nix build github:steeleduncan/eyot` to leave an Eyot installation in the `result` folder.
 
 You can also add the flake as an input to your own, and use Eyot in that manner.
+There is an example of consuming eyot from a flake in [examples/hello-world](https://github.com/steeleduncan/eyot/tree/main/examples/hello-world).
