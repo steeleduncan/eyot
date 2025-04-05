@@ -6,10 +6,10 @@ TODO this uses `sqrt`, which would presumably be stdlib when that is a thing
 
 ```
 struct Vector {
-    x, y f64 
+    x, y f32 
     
     // a GPU capable function
-    fn length() f4 {
+    fn length() f32 {
         return sqrt(self.x * self.x + self.y * self.y)
     }
 

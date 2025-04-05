@@ -27,7 +27,7 @@ fn square(val i64) i64 {
 	return val * val
 }
 
-fn main() {
+cpu fn main() {
 	let w = cpu square
     
     send(w, [i64] { 1, 2, 3 })
@@ -45,7 +45,7 @@ fn square(val i64) i64 {
 	return val * val
 }
 
-fn main() {
+cpu fn main() {
 	let w = cpu square
     
     send(w, [i64] { 1, 2, 3 })
@@ -64,11 +64,11 @@ fn square(val i64) i64 {
 	return val * val
 }
 
-fn main() {
+cpu fn main() {
 	let w = cpu square
     
     send(w, [i64] { 1, 2, 3 })
-    for ret: drain(w) {
+    foreach ret: drain(w) {
         print_ln(" ", ret)
     }
 }
@@ -84,11 +84,11 @@ fn square(val i64) i64 {
 	return val * val
 }
 
-fn main() {
+cpu fn main() {
 	let w = gpu square
     
     send(w, [i64] { 1, 2, 3 })
-    for ret: drain(w) {
+    foreach ret: drain(w) {
         print_ln(" ", ret)
     }
 }
@@ -108,43 +108,16 @@ fn multiply(lhs, rhs i64) i64 {
 	return lhs * rhs
 }
 
-fn main() {
+cpu fn main() {
     let triple = partial multiply(_, 3)
 	let w = gpu triple
     
     send(w, [i64] { 1, 2, 3 })
-    for ret: drain(w) {
+    foreach ret: drain(w) {
         print_ln(" ", ret)
     }
 }
 ```
 
 This is a lot more convenient than passing a struct in for the purpose of providing context to a function. 
-
-It is for this reason that the `.` operator for acessing struct functions returns a partially applied function.
-For example given the following struct
-
-```
-struct Multiplier {
-    factor i64
-    
-    fn mult(val i64) i64 {
-
-    }
-}
-
-```
-
-`mult` can be applied to a vector of values as follows
-
-```
-let doubler = Multiplier { factor: 2 }
-let double_worker = gpu doubler.mult
-send(double_worker, [i64] { 0, 1, 2, 3})
-for i: drain(double_worker) {
-    print("v = ", v)
-}
-```
-
-This pattern provides is probably the easiest way to pass state into workers in Eyot
 
