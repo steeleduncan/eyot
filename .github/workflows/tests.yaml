@@ -36,8 +36,8 @@ jobs:
           - "macos-13"
           # aarch mac
           - "macos-15"
-          # intel linux, no point doing more than one intel linux as it is under nix
-          - "ubuntu-24.04"
+          # intel linux, no point on more than version as it is under nix
+          - "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     permissions:
