@@ -26,7 +26,7 @@ cpu fn main() {
     }
 
     let al = a.length()
-    foreach i: range(al) {
+    for i: range(al) {
         print_ln("hello[", i, "] = ", a[i])
     }
 }

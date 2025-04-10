@@ -22,7 +22,7 @@ cpu fn do_calc(on_gpu bool) {
 
     let c = create_double_worker(on_gpu)
     send(c, [i64]{ 1, 2, 3, 4 })
-	foreach v: drain(c) {
+	for v: drain(c) {
 		print_ln("- ", v)
 	}
 }

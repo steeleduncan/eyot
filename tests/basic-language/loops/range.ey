@@ -1,47 +1,47 @@
 cpu fn main() {
     // check all cases inside and out (optimised and not optimised)
 
-    foreach i: range(5) {
+    for i: range(5) {
         print_ln(") a", i)
     }
-    foreach i: range(3, 5) {
+    for i: range(3, 5) {
         print_ln(") b", i)
     }
-    foreach i: range(3, 5, 2) {
+    for i: range(3, 5, 2) {
         print_ln(") c", i)
     }
-    foreach i: range(3, 3) {
+    for i: range(3, 3) {
         print_ln(") d", i)
     }
-    foreach i: range(6, 3, -1) {
+    for i: range(6, 3, -1) {
         print_ln(") e", i)
     }
-    foreach i: range(3, 5, 0) {
+    for i: range(3, 5, 0) {
         print_ln(") f", i)
     }
 
     let is = range(5)
-    foreach i: is {
+    for i: is {
         print_ln("> a", i)
     }
     is = range(3, 5)
-    foreach i: is {
+    for i: is {
         print_ln("> b", i)
     }
     is = range(3, 5, 2)
-    foreach i: is {
+    for i: is {
         print_ln("> c", i)
     }
     is = range(3, 3)
-    foreach i: is {
+    for i: is {
         print_ln("> d", i)
     }
     is = range(6, 3, -1)
-    foreach i: is {
+    for i: is {
         print_ln("> e", i)
     }
     is = range(3, 5, 0)
-    foreach i: is {
+    for i: is {
         print_ln(") f", i)
     }
 }

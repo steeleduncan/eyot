@@ -9,7 +9,7 @@ cpu fn main() {
 
     let c = cpu dbl
     send(c, [i64]{ 1, 5, 3, 4 })
-	foreach i: drain(c) {
+	for i: drain(c) {
 		print_ln("- ", i)
 	}
 }

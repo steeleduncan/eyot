@@ -13,7 +13,7 @@ cpu fn main() {
     let c2 = cpu double
     let c = pipeline c1 c2
     send(c, [i64]{ 1, 2, 3 })
-	foreach v: drain(c) {
+	for v: drain(c) {
 		print_ln("- ", v)
 	}
 }

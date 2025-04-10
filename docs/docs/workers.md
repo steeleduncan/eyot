@@ -68,7 +68,7 @@ cpu fn main() {
 	let w = cpu square
     
     send(w, [i64] { 1, 2, 3 })
-    foreach ret: drain(w) {
+    for ret: drain(w) {
         print_ln(" ", ret)
     }
 }
@@ -88,7 +88,7 @@ cpu fn main() {
 	let w = gpu square
     
     send(w, [i64] { 1, 2, 3 })
-    foreach ret: drain(w) {
+    for ret: drain(w) {
         print_ln(" ", ret)
     }
 }
@@ -113,7 +113,7 @@ cpu fn main() {
 	let w = gpu triple
     
     send(w, [i64] { 1, 2, 3 })
-    foreach ret: drain(w) {
+    for ret: drain(w) {
         print_ln(" ", ret)
     }
 }

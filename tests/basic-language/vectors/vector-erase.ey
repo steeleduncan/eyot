@@ -1,6 +1,6 @@
 cpu fn pvec(vec [i64]) {
     print_ln("Print vector of ", vec.length(), " elements");
-    foreach val: vec {
+    for val: vec {
         print_ln("- ", val)
     }
 }

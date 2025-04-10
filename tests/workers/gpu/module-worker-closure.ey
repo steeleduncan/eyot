@@ -14,7 +14,7 @@ cpu fn main() {
     let c = gpu p
 
     send(c, [i64]{ 1, 2, 3, 4 })
-	foreach v: drain(c) {
+	for v: drain(c) {
 		print_ln("- ", v)
 	}
 }

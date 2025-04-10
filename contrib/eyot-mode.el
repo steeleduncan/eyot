@@ -15,7 +15,7 @@
     '(
         "fn" "partial" "_"
         "struct" "self" "true" "false"  "return" "if" "else" "elseif" "and" "not" "or" "placeholder" "new" "range"
-        "foreach" "while" "break"
+        "for" "while" "break"
         "let" "const"
         "bool" "string" "i64" "f32" "f64" "char"
 		"null"

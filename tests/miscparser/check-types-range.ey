@@ -1,6 +1,6 @@
 cpu fn main() {
     let inp = "hello"
 
-	foreach i: range(0, inp.length) {
+	for i: range(0, inp.length) {
     }
 }

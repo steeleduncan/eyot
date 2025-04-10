@@ -1,12 +1,12 @@
 import std::runtime
 
 /*
-    Check that range outside foreach is not ok on GPU
+    Check that range outside for is not ok on GPU
  */
 fn factorial(val i64) i64 {
     let is = range(1, val + 1)
     let r = 1
-    foreach i: is {
+    for i: is {
         r = r * i
     }
     return r
@@ -22,7 +22,7 @@ cpu fn main() {
     send(c, [i64]{ 1, 2, 3, 4 })
 
     let vs = drain(c)
-    foreach v: vs {
+    for v: vs {
         print_ln("- ", v)
     }
 }

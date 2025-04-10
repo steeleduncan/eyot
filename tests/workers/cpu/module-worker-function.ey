@@ -5,7 +5,7 @@ import testmod::mod
 cpu fn main() {
     let c = cpu mod::double
     send(c, [i64]{ 1, 2, 3, 4 })
-	foreach v: drain(c) {
+	for v: drain(c) {
 		print_ln("- ", v)
 	}
 }

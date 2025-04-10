@@ -1430,13 +1430,13 @@ func (p *Parser) ForeachStatement() (ast.Statement, bool) {
 
 	identifierToken, fnd := p.Token(token.Identifier)
 	if !fnd {
-		p.LogError("Expecting identifier after 'foreach'")
+		p.LogError("Expecting identifier after 'for'")
 		return nil, false
 	}
 
 	_, fnd = p.Token(token.Colon)
 	if !fnd {
-		p.LogError("Expecting ':' after identifier in 'foreach'")
+		p.LogError("Expecting ':' after identifier in 'for'")
 		return nil, false
 	}
 
@@ -1444,14 +1444,14 @@ func (p *Parser) ForeachStatement() (ast.Statement, bool) {
 	iterableExpression, fnd := p.Expression()
 	p.structLiteralOk += 2
 	if !fnd {
-		p.LogError("Expecting expression after ':' in 'foreach'")
+		p.LogError("Expecting expression after ':' in 'for'")
 		return nil, false
 	}
 
 	p.breakOk += 1
 	block, fnd := p.StatementBlock()
 	if !fnd {
-		p.LogError("Statement block expected after foreach statement")
+		p.LogError("Statement block expected after for statement")
 		return nil, false
 	}
 	p.breakOk -= 1
@@ -1599,7 +1599,7 @@ func (p *Parser) BreakStatement() (ast.Statement, bool) {
 	}
 
 	if p.breakOk == 0 {
-		p.LogError("Cannot break outside of a breakable block (e.g. foreach or while)")
+		p.LogError("Cannot break outside of a breakable block (e.g. for or while)")
 		return nil, false
 	}
 

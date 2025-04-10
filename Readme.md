@@ -16,7 +16,7 @@ fn square(value i64) i64 {
 cpu fn main() {
     let w = gpu square
     send(w, [i64]{ 1, 2, 3, 4 })
-    foreach v: drain(w) {
+    for v: drain(w) {
         print_ln("- ", v)
     }
 }
@@ -43,7 +43,7 @@ cpu fn main() {
 }
 ```
 
-The `square` function does not need the `cpu` keyword as it will use no CPU dependent code. To iterate over a vector of numbers and print them, we use a vector literal and a `foreach` loop
+The `square` function does not need the `cpu` keyword as it will use no CPU dependent code. To iterate over a vector of numbers and print them, we use a vector literal and a `for` loop
 
 ```
 fn square(value i64) i64 {
@@ -53,7 +53,7 @@ fn square(value i64) i64 {
 
 cpu fn main() {
     let values = [i64]{ 1, 2, 3, 4 }
-    foreach x: values {
+    for x: values {
         let y = square(x)
         print_ln("- ", y)
     }
@@ -71,7 +71,7 @@ fn square(value i64) i64 {
 cpu fn main() {
     let w = cpu square
     send(w, [i64]{ 1, 2, 3, 4 })
-    foreach v: drain(w) {
+    for v: drain(w) {
         print_ln("- ", v)
     }
 }

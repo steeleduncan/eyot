@@ -28,7 +28,7 @@ cpu fn main() {
 
     let c = gpu pr
 
-    foreach i: range(4) {
+    for i: range(4) {
         send(c, [i64]{ i })
     }
     drain(c)

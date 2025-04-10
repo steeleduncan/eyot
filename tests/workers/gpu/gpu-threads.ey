@@ -9,7 +9,7 @@ cpu fn minimal_test() {
     send(c, [i64]{ 1, 2, 3, 4 })
 
     let vs = drain(c)
-    foreach v: vs {
+    for v: vs {
         print_ln("- ", v)
     }
 }

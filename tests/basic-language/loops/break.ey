@@ -6,7 +6,7 @@ cpu fn main() {
         print_ln("c");
     }
     print_ln("d");
-    foreach val: [i64] { 2, 4, 6 } {
+    for val: [i64] { 2, 4, 6 } {
         print_ln(val);
         break
         print_ln("e");

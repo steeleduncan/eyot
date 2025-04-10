@@ -14,7 +14,7 @@ cpu fn main() {
    v[1] = 5
    log(v)
 
-   foreach i: v {
+   for i: v {
         print_ln("- ", i)
    }
 

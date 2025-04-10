@@ -27,7 +27,7 @@ cpu fn substring(s string, start, length i64) string {
 	let ret = ""
 	ret.resize(length)
 
-	foreach i: range(start, start + length) {
+	for i: range(start, start + length) {
 		ret[i - start] = s[i]
 	}
 

@@ -6,7 +6,7 @@ cpu fn main() {
     print_ln("e = ", echar)
 
 	let cs = [char] { 'a', 'b', 'c', 'd', 'e' }
-	foreach echar: cs {
+	for echar: cs {
 		a[1] = echar
 		print_ln("after: ", a)
 	}
