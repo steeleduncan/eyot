@@ -29,7 +29,7 @@
     '(
         ("[0-9]+" . 'font-lock-variable-name-face)
         ("^fn\\s-+\\([A-Za-z0-9_]+\\)" (1 font-lock-function-name-face))
-        ("^\\s-*cpu\\s-+fn\\s-+\\([A-Za-z0-9_]+\\)" (1 font-lock-function-name-face))
+        ("^\\s-*(cpu|gpu)\\s-+fn\\s-+\\([A-Za-z0-9_]+\\)" (2 font-lock-function-name-face))
         ("^\\s-*struct\\s-+\\([A-Za-z0-9_]+\\)" (1 font-lock-type-face))
     )
 

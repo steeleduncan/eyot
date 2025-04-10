@@ -1902,7 +1902,13 @@ func (p *Parser) ParameterList() ([]ast.FunctionParameter, bool) {
 func (p *Parser) FunctionDefinition() (*ast.FunctionDefinition, bool) {
 	p.Save()
 
-	_, needsCpuRequirement := p.Token(token.Cpu)
+	loc := ast.KLocationAnywhere
+
+	if _, cpuKeyword := p.Token(token.Cpu); cpuKeyword {
+		loc = ast.KLocationCpu
+	} else if _, gpuKeyword := p.Token(token.Gpu); gpuKeyword {
+		loc = ast.KLocationGpu
+	}
 
 	_, fnd := p.Token(token.Function)
 	if !fnd {
@@ -1955,11 +1961,6 @@ func (p *Parser) FunctionDefinition() (*ast.FunctionDefinition, bool) {
 		p.LogError("FunctionDefinition(): No statement block found following definition")
 	}
 
-	fr := ast.KRequirementNone
-	if needsCpuRequirement {
-		fr = ast.KRequirementCpu
-	}
-
 	return &ast.FunctionDefinition{
 		Id: ast.FunctionId{
 			Name:   ident.Tval,
@@ -1971,7 +1972,7 @@ func (p *Parser) FunctionDefinition() (*ast.FunctionDefinition, bool) {
 		Scope:           ourScope,
 		Block:           statements,
 		Parameters:      parameters,
-		Requirement:     fr,
+		Location:     loc,
 	}, true
 }
 

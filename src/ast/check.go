@@ -62,7 +62,7 @@ type CheckContext struct {
 	Functions map[string]*FunctionSet
 
 	// when positive we are in a cpu method
-	inCpuMethodCount int
+	inCpuMethodCount, inGpuMethodCount int
 
 	// When true the GPU was required for at least something in the code
 	gpuRequired bool
@@ -145,6 +145,7 @@ func NewCheckContext(es *errors.Errors, sp map[string]int) *CheckContext {
 		insertElements:        []TopLevelElement{},
 		shouldRemoveStatement: false,
 		inCpuMethodCount:      0,
+		inGpuMethodCount:      0,
 		maximumClosureSize:    0,
 		tempCount:             0,
 		Strings:               sp,
@@ -170,16 +171,35 @@ func (cc *CheckContext) GetTemporaryName() string {
 	return fmt.Sprintf("ey_temp_%v", cc.GetUniqueId())
 }
 
+func (cc *CheckContext) validateCpuGpuCount() {
+	if cc.inCpuMethodCount < 0 {
+		panic("CheckContext: negative cpu method count")
+	}
+	if cc.inGpuMethodCount < 0 {
+		panic("CheckContext: negative gpu method count")
+	}
+
+	if cc.inCpuMethodCount > 0 && cc.inGpuMethodCount > 0 {
+		panic("CheckContext: both cpu and gpu counts positive")
+	}
+}
+
+func (cc *CheckContext) EnterGpuBlock() {
+	cc.inGpuMethodCount += 1
+}
+
+func (cc *CheckContext) LeaveGpuBlock() {
+	cc.inGpuMethodCount -= 1
+	cc.validateCpuGpuCount()
+}
+
 func (cc *CheckContext) EnterCpuBlock() {
 	cc.inCpuMethodCount += 1
 }
 
 func (cc *CheckContext) LeaveCpuBlock() {
 	cc.inCpuMethodCount -= 1
-
-	if cc.inCpuMethodCount < 0 {
-		panic("CheckContext.LeaveCpuFunction() negative cpu method count")
-	}
+	cc.validateCpuGpuCount()
 }
 
 /*
@@ -191,6 +211,18 @@ This can be called in any pass
 func (cc *CheckContext) NoteCpuRequired(msg string) {
 	if cc.inCpuMethodCount == 0 {
 		cc.Errors.Errorf("CPU is required for this statement: %v", msg)
+	}
+}
+
+/*
+Call this in any pass where Gpu is required
+
+It will add an error if gpu is not available
+This can be called in any pass
+*/
+func (cc *CheckContext) NoteGpuRequired(msg string) {
+	if cc.inGpuMethodCount == 0 {
+		cc.Errors.Errorf("GPU is required for this statement: %v", msg)
 	}
 }
 

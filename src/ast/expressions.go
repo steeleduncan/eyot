@@ -349,10 +349,10 @@ func (ae *AccessExpression) Check(ctx *CheckContext, scope *Scope) {
 		case KTypeString:
 			switch ae.Identifier {
 			case "resize":
-				ae.cachedType = Type{Selector: KTypeFunction, Return: &Type{Selector: KTypeVoid}, Requirement: KRequirementCpu}
+				ae.cachedType = Type{Selector: KTypeFunction, Return: &Type{Selector: KTypeVoid}, Location: KLocationCpu}
 
 			case "length":
-				ae.cachedType = Type{Selector: KTypeFunction, Return: &Type{Selector: KTypeInteger}, Requirement: KRequirementNone}
+				ae.cachedType = Type{Selector: KTypeFunction, Return: &Type{Selector: KTypeInteger}, Location: KLocationAnywhere}
 
 			default:
 				logNotFound()
@@ -362,10 +362,10 @@ func (ae *AccessExpression) Check(ctx *CheckContext, scope *Scope) {
 		case KTypeVector:
 			switch ae.Identifier {
 			case "append", "resize", "erase":
-				ae.cachedType = Type{Selector: KTypeFunction, Return: &Type{Selector: KTypeVoid}, Requirement: KRequirementCpu}
+				ae.cachedType = Type{Selector: KTypeFunction, Return: &Type{Selector: KTypeVoid}, Location: KLocationCpu}
 
 			case "length":
-				ae.cachedType = Type{Selector: KTypeFunction, Return: &Type{Selector: KTypeInteger}, Requirement: KRequirementCpu}
+				ae.cachedType = Type{Selector: KTypeFunction, Return: &Type{Selector: KTypeInteger}, Location: KLocationCpu}
 
 			default:
 				logNotFound()
@@ -694,7 +694,7 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 			it, _ := ce.CalledExpression.(*IdentifierTerminal)
 			// this is a bit redundant
 			it.CachedType = voidFunction()
-			it.CachedType.Requirement = KRequirementNone
+			it.CachedType.Location = KLocationAnywhere
 			ctx.RequireType(it.CachedType, scope)
 		} else {
 			ce.CalledExpression.Check(ctx, scope)
@@ -1115,7 +1115,7 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 			return
 		}
 
-		if ty.Requirement == KRequirementCpu {
+		if ty.Location == KLocationCpu {
 			ctx.NoteCpuRequired("function call")
 		}
 		ce.cachedType = *ty.Return

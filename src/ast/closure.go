@@ -6,7 +6,7 @@ import (
 )
 
 type FunctionSignature struct {
-	Requirement FunctionRequirement
+	Location FunctionLocation
 	Return      Type
 	Types       []Type
 }
@@ -14,11 +14,14 @@ type FunctionSignature struct {
 func (fs FunctionSignature) MapKey() string {
 	buf := bytes.NewBuffer([]byte{})
 	fmt.Fprintf(buf, fs.Return.RawIdentifier())
-	switch fs.Requirement {
-	case KRequirementCpu:
+	switch fs.Location {
+	case KLocationCpu:
 		fmt.Fprintf(buf, "__cpu")
 
-	case KRequirementNone:
+	case KLocationGpu:
+		fmt.Fprintf(buf, "__gpu")
+
+	case KLocationAnywhere:
 
 	default:
 		panic("missing case")

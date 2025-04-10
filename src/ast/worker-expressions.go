@@ -292,7 +292,7 @@ func (cce *CreateWorkerExpression) Check(ctx *CheckContext, scope *Scope) {
 
 				Return:      Type{Selector: KTypeVoid},
 				Scope:       nil,
-				Requirement: KRequirementCpu,
+				Location: KLocationCpu,
 
 				// don't typecheck stuff we've generated
 				AvoidCheckPhase: true,

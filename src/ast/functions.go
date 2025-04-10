@@ -9,7 +9,7 @@ type FunctionParameter struct {
 	Type Type
 }
 
-type FunctionRequirement int
+type FunctionLocation int
 
 const (
 	/*
@@ -18,19 +18,24 @@ const (
 	   Eventually this should probably be split into actual requirements
 	   Likely some cpu functions are available on gpu, and some will become so eventually
 	*/
-	KRequirementCpu FunctionRequirement = iota
+	KLocationCpu FunctionLocation = iota
 
 	/*
 	   Pure code that can run anywhere
 	*/
-	KRequirementNone
+	KLocationAnywhere
+
+	/*
+	   This needs to run on the GPU
+	*/
+	KLocationGpu
 )
 
 type FunctionDefinition struct {
 	Id              FunctionId
 	Return          Type
 	AvoidCheckPhase bool
-	Requirement     FunctionRequirement
+	Location     FunctionLocation
 
 	// scope including function parameters
 	Scope *Scope
@@ -57,7 +62,7 @@ func (fd *FunctionDefinition) Signature() FunctionSignature {
 	return FunctionSignature{
 		Return:      fd.Return,
 		Types:       types,
-		Requirement: fd.Requirement,
+		Location: fd.Location,
 	}
 }
 
@@ -67,7 +72,7 @@ func (fd *FunctionDefinition) OurType() Type {
 		Return:      &fd.Return,
 		Selector:    KTypeFunction,
 		Types:       []Type{},
-		Requirement: fd.Requirement,
+		Location: fd.Location,
 	}
 
 	for _, arg := range fd.Parameters {
@@ -106,8 +111,12 @@ func (fd *FunctionDefinition) Check(ctx *CheckContext, externalScope *Scope) {
 		panic("blank definition " + fd.Id.Name)
 	}
 
-	switch fd.Requirement {
-	case KRequirementCpu:
+	switch fd.Location {
+	case KLocationGpu:
+		ctx.EnterGpuBlock()
+		defer ctx.LeaveGpuBlock()
+
+	case KLocationCpu:
 		ctx.EnterCpuBlock()
 		defer ctx.LeaveCpuBlock()
 	}

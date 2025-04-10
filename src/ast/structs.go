@@ -43,7 +43,7 @@ func (sd *StructDefinition) GetField(name string) (StructField, bool) {
 					Selector:        KTypeFunction,
 					BoundStructName: name,
 					Return:          &fn.Return,
-					Requirement:     fn.Requirement,
+					Location:     fn.Location,
 					Types:           args,
 				},
 			}, true

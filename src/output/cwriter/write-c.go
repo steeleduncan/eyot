@@ -186,10 +186,16 @@ func convertedUnaryOperator(op ast.UnaryOperator) string {
 	return ""
 }
 
-func (cw *CWriter) CanWriteRequirement(req ast.FunctionRequirement) bool {
-	if cw.WritingGpu() && req == ast.KRequirementCpu {
+func (cw *CWriter) CanWriteRequirement(req ast.FunctionLocation) bool {
+	if cw.WritingGpu() && req == ast.KLocationCpu {
 		return false
 	}
+
+	/*
+	if cw.WritingCpu() && req == ast.KLocationGpu {
+		return false
+	}
+	*/
 
 	return true
 }
@@ -1176,7 +1182,7 @@ func (cw *CWriter) WriteFunctionPrototype(sig ast.FunctionSignature, fid ast.Fun
 }
 
 func (cw *CWriter) WriteFunction(fd *ast.FunctionDefinition) {
-	if !cw.CanWriteRequirement(fd.Requirement) {
+	if !cw.CanWriteRequirement(fd.Location) {
 		return
 	}
 
@@ -1546,7 +1552,7 @@ func (cw *CWriter) WriteFunctionArgSize(p *program.Program) {
 			cw.w().EndLine()
 			cw.w().Indent()
 
-			if cw.CanWriteRequirement(fns.Signature.Requirement) {
+			if cw.CanWriteRequirement(fns.Signature.Location) {
 				cw.w().AddComponents(
 					"switch",
 					"(",
@@ -1657,7 +1663,7 @@ func (cw *CWriter) WriteFunctionCaller(p *program.Program) {
 			cw.w().EndLine()
 			cw.w().Indent()
 
-			if cw.CanWriteRequirement(fns.Signature.Requirement) {
+			if cw.CanWriteRequirement(fns.Signature.Location) {
 				cw.w().AddComponents(
 					namespaceFunctionCallerId(fid),
 					"(",
@@ -1803,7 +1809,7 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 	cw.w().AddComponent("// Forward decls for all functions")
 	cw.w().EndLine()
 	for _, fns := range p.Functions {
-		if !cw.CanWriteRequirement(fns.Signature.Requirement) {
+		if !cw.CanWriteRequirement(fns.Signature.Location) {
 			continue
 		}
 
@@ -1823,7 +1829,7 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 
 		for _, cfn := range m.Ffid.Functions {
 			sig := ast.FunctionSignature{
-				Requirement: ast.KRequirementCpu,
+				Location: ast.KLocationCpu,
 				Return:      cfn.ReturnType,
 				Types:       cfn.ArgumentTypes,
 			}

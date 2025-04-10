@@ -63,7 +63,7 @@ type Type struct {
 
 	// Callables only
 	// This is the function requirements for the function
-	Requirement FunctionRequirement
+	Location FunctionLocation
 
 	// Floats only. Generally 32 or 64
 	Width int
@@ -78,7 +78,7 @@ func (ty Type) Signature() FunctionSignature {
 	}
 
 	return FunctionSignature{
-		Requirement: ty.Requirement,
+		Location: ty.Location,
 		Return:      *ty.Return,
 		Types:       ty.Types,
 	}
