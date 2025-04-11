@@ -59,39 +59,6 @@ func (lhs ModuleId) IsEqual(rhs ModuleId) bool {
 }
 
 // A fully resolved function identifier
-type FunctionId struct {
-	// the module that owns this
-	Module ModuleId
-
-	// The struct/etc within the module that owns this
-	// This is blank if it is unbound to a struct
-	Struct StructId
-
-	// the user facing name
-	Name string
-}
-
-func (fi FunctionId) String() string {
-	return fmt.Sprintf("FunctionId(%v, %v, %v)", fi.Module.Key(), fi.Struct, fi.Name)
-}
-
-func (lhs FunctionId) IsEqual(rhs FunctionId) bool {
-	if lhs.Name != rhs.Name {
-		return false
-	}
-
-	if !lhs.Struct.IsEqual(rhs.Struct) {
-		return false
-	}
-
-	if !lhs.Module.IsEqual(rhs.Module) {
-		return false
-	}
-
-	return true
-}
-
-// A fully resolved function identifier
 type StructId struct {
 	// the module that owns this
 	Module ModuleId
