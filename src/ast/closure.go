@@ -5,37 +5,6 @@ import (
 	"fmt"
 )
 
-type FunctionSignature struct {
-	Location FunctionLocation
-	Return   Type
-	Types    []Type
-}
-
-func (fs FunctionSignature) MapKey() string {
-	buf := bytes.NewBuffer([]byte{})
-	fmt.Fprintf(buf, fs.Return.RawIdentifier())
-	switch fs.Location {
-	case KLocationCpu:
-		fmt.Fprintf(buf, "__cpu")
-
-	case KLocationGpu:
-		fmt.Fprintf(buf, "__gpu")
-
-	case KLocationAnywhere:
-
-	default:
-		panic("missing case")
-	}
-	fmt.Fprintf(buf, "__")
-	for tyi, ty := range fs.Types {
-		if tyi > 0 {
-			fmt.Fprintf(buf, "_")
-		}
-		fmt.Fprintf(buf, ty.RawIdentifier())
-	}
-	return buf.String()
-}
-
 // Represent the creation of a closure
 type ClosureExpression struct {
 	// The root function this builds upon
