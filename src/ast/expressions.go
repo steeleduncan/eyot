@@ -225,7 +225,7 @@ func (sle *StructLiteralExpression) Check(ctx *CheckContext, scope *Scope) {
 	}
 
 	if ctx.CurrentPass() == KPassMutate {
-		existingKeys := map[string]bool {}
+		existingKeys := map[string]bool{}
 		for _, pr := range sle.Pairs {
 			existingKeys[pr.FieldName] = true
 		}
@@ -240,10 +240,10 @@ func (sle *StructLiteralExpression) Check(ctx *CheckContext, scope *Scope) {
 						return
 					}
 
-					sle.Pairs = append(sle.Pairs, StructLiteralPair {
+					sle.Pairs = append(sle.Pairs, StructLiteralPair{
 						FieldName: field.Name,
-						Value: dv,
-					});
+						Value:     dv,
+					})
 				}
 			}
 		}
@@ -620,7 +620,7 @@ func (it *IntegerTerminal) Check(ctx *CheckContext, scope *Scope) {
 
 type FloatTerminal struct {
 	LValue, Zeros, RValue int64
-	Width int
+	Width                 int
 }
 
 var _ Expression = &FloatTerminal{}
@@ -838,7 +838,7 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 					}
 
 					if !at.Types[0].CanAssignTo(ce.Arguments[0].Type()) {
-						ctx.Errors.Errorf("Bad type in vector append. Have %v, expecting %v", ce.Arguments[0].Type(), at.Types[0]);
+						ctx.Errors.Errorf("Bad type in vector append. Have %v, expecting %v", ce.Arguments[0].Type(), at.Types[0])
 						return
 					}
 
@@ -1350,8 +1350,8 @@ func (vl *VectorLiteralExpression) Check(ctx *CheckContext, scope *Scope) {
 				PinPointers: false,
 				Rhs:         e,
 				// NB we may need C to coerce the type across for us
-				NewType:     vl.ElementType,
-				Type:        KAssignLet,
+				NewType: vl.ElementType,
+				Type:    KAssignLet,
 			})
 
 			// append that initialiser

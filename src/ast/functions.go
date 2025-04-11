@@ -35,7 +35,7 @@ type FunctionDefinition struct {
 	Id              FunctionId
 	Return          Type
 	AvoidCheckPhase bool
-	Location     FunctionLocation
+	Location        FunctionLocation
 
 	// scope including function parameters
 	Scope *Scope
@@ -60,8 +60,8 @@ func (fd *FunctionDefinition) Signature() FunctionSignature {
 	}
 
 	return FunctionSignature{
-		Return:      fd.Return,
-		Types:       types,
+		Return:   fd.Return,
+		Types:    types,
 		Location: fd.Location,
 	}
 }
@@ -69,9 +69,9 @@ func (fd *FunctionDefinition) Signature() FunctionSignature {
 // the type of this function when viewed as a variable
 func (fd *FunctionDefinition) OurType() Type {
 	ftype := Type{
-		Return:      &fd.Return,
-		Selector:    KTypeFunction,
-		Types:       []Type{},
+		Return:   &fd.Return,
+		Selector: KTypeFunction,
+		Types:    []Type{},
 		Location: fd.Location,
 	}
 

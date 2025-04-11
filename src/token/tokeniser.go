@@ -434,7 +434,7 @@ func Tokenise(text string) ([]Token, error) {
 			"worker":   Worker,
 			"drain":    Drain,
 			"import":   Import,
-			"for":  Foreach,
+			"for":      Foreach,
 		},
 		multicharMap: map[string]TokenType{
 			"==": Equality,

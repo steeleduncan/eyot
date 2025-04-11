@@ -24,4 +24,3 @@ EyClosure ey_closure_create(int fid, void **args) {
 
     return c;
 }
-

@@ -24,7 +24,7 @@ static EyString ey_runtime_string_create_blank(EyExecutionContext *ctx) {
     EyStringS *s =
         ey_runtime_gc_alloc(ey_runtime_gc(ctx), sizeof(EyStringS), finalise_allocated_string);
 
-    *s = (EyStringS) {
+    *s = (EyStringS){
         .length = 0,
         .ptr = 0,
         .static_lifetime = k_false,
@@ -134,8 +134,8 @@ EyCharacter ey_runtime_string_get_character(EyExecutionContext *ctx __attribute_
     return (EyCharacter)((uint32_t *)s->ptr)[position];
 }
 
-void ey_runtime_string_set_character(EyExecutionContext *ctx __attribute__((unused)),
-                                     EyString s, int position, EyCharacter c) {
+void ey_runtime_string_set_character(EyExecutionContext *ctx __attribute__((unused)), EyString s,
+                                     int position, EyCharacter c) {
     void *ptr = &(((uint32_t *)s->ptr)[position]);
     *(EyCharacter *)ptr = c;
 }

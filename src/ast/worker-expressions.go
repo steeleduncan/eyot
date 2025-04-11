@@ -290,8 +290,8 @@ func (cce *CreateWorkerExpression) Check(ctx *CheckContext, scope *Scope) {
 			fd := &FunctionDefinition{
 				Id: cce.WrapperId,
 
-				Return:      Type{Selector: KTypeVoid},
-				Scope:       nil,
+				Return:   Type{Selector: KTypeVoid},
+				Scope:    nil,
 				Location: KLocationCpu,
 
 				// don't typecheck stuff we've generated

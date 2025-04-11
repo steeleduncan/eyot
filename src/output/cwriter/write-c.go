@@ -192,17 +192,17 @@ func (cw *CWriter) CanWriteRequirement(req ast.FunctionLocation) bool {
 	}
 
 	/*
-	if cw.WritingCpu() && req == ast.KLocationGpu {
-		return false
-	}
+		if cw.WritingCpu() && req == ast.KLocationGpu {
+			return false
+		}
 	*/
 
 	return true
 }
 
 /*
-	Write an expression that appears on the rhs of a x=
-	This is an override point for copying literals to the heap if need be
+Write an expression that appears on the rhs of a x=
+This is an override point for copying literals to the heap if need be
 */
 func (cw *CWriter) WriteAssignedExpression(e ast.Expression) {
 	if e.Type().Selector == ast.KTypeString {
@@ -1830,8 +1830,8 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 		for _, cfn := range m.Ffid.Functions {
 			sig := ast.FunctionSignature{
 				Location: ast.KLocationCpu,
-				Return:      cfn.ReturnType,
-				Types:       cfn.ArgumentTypes,
+				Return:   cfn.ReturnType,
+				Types:    cfn.ArgumentTypes,
 			}
 
 			cw.WriteFunctionPrototypeRawName(sig, cfn.Name)

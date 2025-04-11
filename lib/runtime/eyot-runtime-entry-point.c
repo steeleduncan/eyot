@@ -70,4 +70,3 @@ int main(int argc, const char **argv) {
     ey_runtime_gc_free(global_gc);
     return 0;
 }
-

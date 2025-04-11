@@ -223,4 +223,3 @@ func TestLValue(t *testing.T) {
 		t.Fatal("Top level was not accessor")
 	}
 }
-

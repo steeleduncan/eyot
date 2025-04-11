@@ -1142,8 +1142,8 @@ func (p *Parser) SimpleLValue() (ast.LValue, bool) {
 }
 
 /*
-   a.b
- */
+	a.b
+*/
 func (p *Parser) AccessLValue() (ast.LValue, bool) {
 	lv, fnd := p.SimpleLValue()
 	if !fnd {
@@ -1972,7 +1972,7 @@ func (p *Parser) FunctionDefinition() (*ast.FunctionDefinition, bool) {
 		Scope:           ourScope,
 		Block:           statements,
 		Parameters:      parameters,
-		Location:     loc,
+		Location:        loc,
 	}, true
 }
 

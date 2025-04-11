@@ -79,8 +79,8 @@ func (ty Type) Signature() FunctionSignature {
 
 	return FunctionSignature{
 		Location: ty.Location,
-		Return:      *ty.Return,
-		Types:       ty.Types,
+		Return:   *ty.Return,
+		Types:    ty.Types,
 	}
 }
 
@@ -91,7 +91,6 @@ func (ty Type) Unwrapped() Type {
 	}
 	return r
 }
-
 
 func MakePointer(ty Type) Type {
 	return Type{
@@ -553,30 +552,30 @@ func (ty Type) String() string {
 func (ty Type) DefaultValueExpression(scope *Scope) (Expression, bool) {
 	switch ty.Selector {
 	case KTypeInteger:
-		return &IntegerTerminal{ Value: 0 }, true
+		return &IntegerTerminal{Value: 0}, true
 
 	case KTypeString:
-		return &StringTerminal{ Value: "" }, true
+		return &StringTerminal{Value: ""}, true
 
 	case KTypeBoolean:
-		return &BooleanTerminal{ Value: false }, true
+		return &BooleanTerminal{Value: false}, true
 
 	case KTypeCharacter:
-		return &CharacterTerminal{ CodePoint: 0 }, true
+		return &CharacterTerminal{CodePoint: 0}, true
 
 	case KTypeFloat:
-		return &FloatTerminal{ LValue: 0, Zeros: 1, RValue: 0 }, true
+		return &FloatTerminal{LValue: 0, Zeros: 1, RValue: 0}, true
 
 	// this admits null pointers, but to remove them we need a solution to recursive structs
 	case KTypePointer, KTypeNull:
-		return &NullLiteral {}, true
-		
+		return &NullLiteral{}, true
+
 	case KTypeStruct:
 		sd, fnd := scope.LookupStructDefinition(ty.StructId)
 		if fnd {
-			sle := &StructLiteralExpression {
-				Id: ty.StructId,
-				Pairs: []StructLiteralPair {},
+			sle := &StructLiteralExpression{
+				Id:    ty.StructId,
+				Pairs: []StructLiteralPair{},
 			}
 
 			for _, field := range sd.Fields {
@@ -584,9 +583,9 @@ func (ty Type) DefaultValueExpression(scope *Scope) (Expression, bool) {
 				if !ok {
 					return nil, false
 				}
-				sle.Pairs = append(sle.Pairs, StructLiteralPair {
+				sle.Pairs = append(sle.Pairs, StructLiteralPair{
 					FieldName: field.Name,
-					Value: dve,
+					Value:     dve,
 				})
 			}
 

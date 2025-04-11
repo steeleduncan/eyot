@@ -66,13 +66,13 @@ func NewScope(parent *Scope) *Scope {
 }
 
 /*
-   Is this type ok to use on the GPU
-   
-   For now nothing with heap allocs, e.g.
-   - vectors
-   - pointers
+Is this type ok to use on the GPU
 
-   This returns true/false along with the type that can't be passed
+For now nothing with heap allocs, e.g.
+- vectors
+- pointers
+
+This returns true/false along with the type that can't be passed
 */
 func (s *Scope) CanPassToGpu(ty Type) (bool, Type) {
 	switch ty.Selector {
@@ -105,7 +105,7 @@ func (s *Scope) CanPassToGpu(ty Type) (bool, Type) {
 
 	// easy answers
 	case KTypeInteger, KTypeString, KTypeBoolean, KTypeVoid:
-		return true, Type {}
+		return true, Type{}
 
 	case KTypeClosure, KTypeFunction, KTypePointer, KTypeVector, KTypeWorker:
 		return false, ty

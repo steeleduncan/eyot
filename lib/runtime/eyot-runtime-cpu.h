@@ -332,7 +332,8 @@ EyCharacter ey_runtime_string_get_character(EyExecutionContext *ctx, EyString s,
 /*
   Set a unicode USV
  */
-void ey_runtime_string_set_character(EyExecutionContext *ctx, EyString s, int position, EyCharacter c);
+void ey_runtime_string_set_character(EyExecutionContext *ctx, EyString s, int position,
+                                     EyCharacter c);
 
 /*
   Create a literal runtime string from a utf 8 string

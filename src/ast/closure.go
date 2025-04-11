@@ -7,8 +7,8 @@ import (
 
 type FunctionSignature struct {
 	Location FunctionLocation
-	Return      Type
-	Types       []Type
+	Return   Type
+	Types    []Type
 }
 
 func (fs FunctionSignature) MapKey() string {
