@@ -132,6 +132,10 @@ func (cr *CRunnerUnix) getCompileCommand(withOpenCl bool, defs map[string]string
 		args = append(args, "-DEYOT_OPENCL_INCLUDED")
 	}
 
+	if cr.showLog {
+		args = append(args, "-DEYOT_SHOW_LOG")
+	}
+
 	for key, value := range defs {
 		args = append(args, "-D"+key+"="+value)
 	}

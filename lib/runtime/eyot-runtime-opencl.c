@@ -159,7 +159,16 @@ static ClDriver *cldriver_create(const char *src) {
         ey_print(src);
     }
     err = clBuildProgram(driver->program, 0, NULL, NULL, NULL, NULL);
-    if (err != CL_SUCCESS) {
+
+    static const int always_show_log =
+    #ifdef EYOT_SHOW_LOG
+        1
+    #else
+        0
+    #endif
+        ;
+
+    if (err != CL_SUCCESS || always_show_log) {
         size_t len;
 
         print_with_line_numbers(src);
