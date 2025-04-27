@@ -14,6 +14,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static const int k_always_show_log =
+#ifdef EYOT_SHOW_LOG
+    1
+#else
+    0
+#endif
+    ;
+
 /*
   This is pretty ancient now
   It is the mandatory baseline for OpenCL 3.0
@@ -160,15 +168,8 @@ static ClDriver *cldriver_create(const char *src) {
     }
     err = clBuildProgram(driver->program, 0, NULL, NULL, NULL, NULL);
 
-    static const int always_show_log =
-    #ifdef EYOT_SHOW_LOG
-        1
-    #else
-        0
-    #endif
-        ;
-
-    if (err != CL_SUCCESS || always_show_log) {
+    const int compile_failed = err != CL_SUCCESS;
+    if (compile_failed || k_always_show_log) {
         size_t len;
 
         print_with_line_numbers(src);
@@ -188,7 +189,10 @@ static ClDriver *cldriver_create(const char *src) {
                              "failed to compile program and got error when reading build log");
         }
         ey_print("%s\n", build_log);
-        ey_runtime_panic("cldriver_create", "failed to compile program");
+
+        if (compile_failed) {
+            ey_runtime_panic("cldriver_create", "failed to compile program");
+        }
         ey_runtime_manual_free(build_log);
     }
 
