@@ -7,7 +7,9 @@
 
   These are used on both the CPU and GPU code
  */
+#ifndef EYOT_RUNTIME_GPU
 #pragma once
+#endif
 
 typedef int EyBoolean;
 typedef int EyInteger;
