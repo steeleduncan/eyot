@@ -1,0 +1,22 @@
+cpu fn mult(val i64) i64 {
+   return val * 2
+}
+
+gpu fn mult(val i64) i64 {
+   return val * 3
+}
+
+cpu fn main() {
+    let c = gpu mult
+    send(c, [i64]{ 2, 3, 4 })
+    for v: drain(c) {
+        print_ln("- ", v)
+    }
+
+    let d = gpu mult
+    send(d, [i64]{ 2, 3, 4 })
+    for v: drain(d) {
+        print_ln("+ ", v)
+    }
+}
+

@@ -1,0 +1,26 @@
+cpu fn mult(val i64) i64 {
+   return val * 2
+}
+
+gpu fn mult(val i64) i64 {
+   return val * 3
+}
+
+fn domult(val i64) i64 {
+   return mult(val)
+}
+
+cpu fn main() {
+    let c = gpu domult
+    send(c, [i64]{ 2, 3, 4 })
+    for v: drain(c) {
+        print_ln("- ", v)
+    }
+
+    let d = gpu domult
+    send(d, [i64]{ 2, 3, 4 })
+    for v: drain(d) {
+        print_ln("+ ", v)
+    }
+}
+
