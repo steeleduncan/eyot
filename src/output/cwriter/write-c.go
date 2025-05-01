@@ -2,7 +2,6 @@ package cwriter
 
 import (
 	"bytes"
-	_ "embed"
 	"eyot/output/textwriter"
 	"fmt"
 	"os"
@@ -191,11 +190,9 @@ func (cw *CWriter) CanWriteRequirement(req ast.FunctionLocation) bool {
 		return false
 	}
 
-	/*
-		if cw.WritingCpu() && req == ast.KLocationGpu {
-			return false
-		}
-	*/
+	if !cw.WritingGpu() && req == ast.KLocationGpu {
+		return false
+	}
 
 	return true
 }
