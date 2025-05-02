@@ -1,8 +1,8 @@
 package ast
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 )
 
 // A fully resolved function identifier

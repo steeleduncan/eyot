@@ -1142,7 +1142,7 @@ func (p *Parser) SimpleLValue() (ast.LValue, bool) {
 }
 
 /*
-	a.b
+a.b
 */
 func (p *Parser) AccessLValue() (ast.LValue, bool) {
 	lv, fnd := p.SimpleLValue()
