@@ -27,15 +27,6 @@ jobs:
       - name: Unit tests
         run: source contrib/env.sh && eyot_test
 
-  # experiment with oclgrind
-  ocl-grind-expt:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt install ocl-icd-opencl-dev intel-opencl-icd clinfo oclgrind -y
-      - name: Unit tests
-        run: oclgrind clinfo
 
   # nix flake checks
   nix-tests:
@@ -69,6 +60,12 @@ jobs:
       - run: nix build .#deb
         name: Build the debian package
         if: contains(matrix.os, 'ubuntu')
+
+      - name: Upload .deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb
+          path: ./result/eyot.deb
       - run: sudo apt install --reinstall --yes ./result/eyot.deb
         name: Install debian package
         if: contains(matrix.os, 'ubuntu')
@@ -94,6 +91,31 @@ jobs:
       # run a command within the nix shell to ensure that is ok
       - run: nix develop -i -c "eyot" "run" "tests/helloworld.ey"
         name: Check the nix shell
+
+  # experiment with oclgrind
+  ocl-grind-expt:
+    runs-on: ubuntu-22.04
+    needs:
+    - nix-tests
+    if:always()
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt install gcc ocl-icd-opencl-dev intel-opencl-icd clinfo oclgrind -y
+      - name: Download .deb
+        uses: actions/download-artifact@v4
+        with:
+          name: deb
+          path: eyot.deb
+      - run: sudo apt install --reinstall --yes eyot.deb
+        name: Install debian package
+        if: contains(matrix.os, 'ubuntu')
+      - name: Build binary
+        run: eyot build tests/workers/gpu/gpu-threads.ey
+      - name: Run without oclgrind
+        run: ./out.exe
+      - name: Run with oclgrind
+        run: oclgrind ./out.exe
 
   deploy-site:
     environment:
