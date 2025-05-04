@@ -27,6 +27,16 @@ jobs:
       - name: Unit tests
         run: source contrib/env.sh && eyot_test
 
+  # experiment with oclgrind
+  ocl-grind-expt:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt install ocl-icd-opencl-dev intel-opencl-icd clinfo oclgrind -y
+      - name: Unit tests
+        run: oclgrind clinfo
+
   # nix flake checks
   nix-tests:
     strategy:
