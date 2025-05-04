@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs:
     - nix-tests
-    if:always()
+    if: always()
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
