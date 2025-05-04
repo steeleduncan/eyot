@@ -8,16 +8,21 @@ jobs:
   host-tests:
     strategy:
       matrix:
+        vgpu:
+        - "oclgrind"
+        - "none"
         os:
-          # intel mac
-          - "macos-13"
-          # aarch mac
-          - "macos-15"
-          # intel linuxes
-          - "ubuntu-22.04" # this should be glibc older than debian 12
-          - "ubuntu-24.04"
+        # intel mac
+        - "macos-13"
+        # aarch mac
+        - "macos-15"
+        # intel linuxes
+        - "ubuntu-22.04" # this should be glibc older than debian 12
+        - "ubuntu-24.04"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
+    environment:
+      EyTestOclGrind: "${{ matrix.vgpu == 'oclgrind' && 'y' || 'n' }}"
     steps:
       - uses: actions/checkout@v4
       - run: brew install go

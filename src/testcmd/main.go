@@ -29,6 +29,8 @@ func errMain() error {
 	binaryPath := os.Args[1]
 	rootFolder := os.Args[2]
 
+	useOclGrind := os.Getenv("EyTestOclGrind") == "y"
+
 	failures := []string{}
 
 	err := filepath.Walk(rootFolder, func(outputPath string, info os.FileInfo, err error) error {
@@ -52,7 +54,12 @@ func errMain() error {
 			referenceOutput := sortLineEndings(string(testOutputBlob))
 
 			buf := bytes.NewBuffer([]byte{})
-			cmd := exec.Command(binaryPath, "run", sourcePath)
+			var cmd *exec.Cmd
+			if useOclGrind {
+				cmd = exec.Command("oclgrind", binaryPath, "run", sourcePath)
+			} else {
+				cmd = exec.Command(binaryPath, "run", sourcePath)
+			}
 			cmd.Stdout = buf
 			cmd.Stderr = buf
 			cmd.Env = os.Environ()
