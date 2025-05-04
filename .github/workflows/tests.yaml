@@ -103,7 +103,7 @@ jobs:
 
       # build and install deb via nix
       - uses: DeterminateSystems/nix-installer-action@main
-      - run: Build deb
+      - run: nix build .#deb
         name: Build the debian package
       - run: sudo apt install --reinstall --yes ./result/eyot.deb
         name: Install debian package
