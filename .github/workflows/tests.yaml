@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: brew install go
         if: contains(matrix.os, 'macos')
-      - run: sudo apt install gcc ocl-icd-opencl-dev intel-opencl-icd golang -y
+      - run: sudo apt install oclgrind gcc ocl-icd-opencl-dev intel-opencl-icd golang -y
         if: contains(matrix.os, 'ubuntu')
       - name: Unit tests (no vgpu)
         run: source contrib/env.sh && eyot_test
