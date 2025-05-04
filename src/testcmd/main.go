@@ -29,7 +29,7 @@ func errMain() error {
 	binaryPath := os.Args[1]
 	rootFolder := os.Args[2]
 
-	useOclGrind := os.Getenv("EyTestOclGrind") == "y"
+	useOclGrind := os.Getenv("EyotTestOclGrind") == "y"
 
 	failures := []string{}
 
