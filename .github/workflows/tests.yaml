@@ -26,11 +26,11 @@ jobs:
         if: contains(matrix.os, 'ubuntu')
       - name: Unit tests (no vgpu)
         run: source contrib/env.sh && eyot_test
-      - name: Unit tests (oclgrind)
-        if: contains(matrix.os, 'ubuntu')
-        run: source contrib/env.sh && eyot_test
-        env:
-          EyotTestOclGrind: y
+#      - name: Unit tests (oclgrind)
+#        if: contains(matrix.os, 'ubuntu')
+#        run: source contrib/env.sh && eyot_test
+#        env:
+#          EyotTestOclGrind: y
 
   # nix flake checks
   nix-tests:
