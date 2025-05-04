@@ -8,9 +8,6 @@ jobs:
   host-tests:
     strategy:
       matrix:
-        vgpu:
-        - "oclgrind"
-        - "none"
         os:
         # intel mac
         - "macos-13"
@@ -21,17 +18,19 @@ jobs:
         - "ubuntu-24.04"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
-    environment:
-      EyTestOclGrind: "${{ matrix.vgpu == 'oclgrind' && 'y' || 'n' }}"
     steps:
       - uses: actions/checkout@v4
       - run: brew install go
         if: contains(matrix.os, 'macos')
       - run: sudo apt install gcc ocl-icd-opencl-dev intel-opencl-icd golang -y
         if: contains(matrix.os, 'ubuntu')
-      - name: Unit tests
+      - name: Unit tests (no vgpu)
         run: source contrib/env.sh && eyot_test
-
+      - name: Unit tests (oclgrind)
+        if: contains(matrix.os, 'ubuntu')
+        run: source contrib/env.sh && eyot_test
+        environment:
+          EyotTestOclGrind: y
 
   # nix flake checks
   nix-tests:
