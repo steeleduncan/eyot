@@ -1,6 +1,6 @@
 // currently part of eyot-runtime
 #include <stdlib.h>
-#include "eyot-runtime-common.h"
+#include "eyot-runtime-cpu.h"
 
 void ffi_panic(EyExecutionContext *ctx) {
     ey_runtime_panic("runtime", "panic");

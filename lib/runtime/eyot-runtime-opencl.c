@@ -173,7 +173,9 @@ static ClDriver *cldriver_create(const char *src) {
         size_t len;
 
         print_with_line_numbers(src);
-        ey_print("cldriver_create: Failed to build program executable!\n");
+        if (compile_failed) {
+            ey_print("cldriver_create: Failed to build program executable!\n");
+        }
 
         err = clGetProgramBuildInfo(driver->program, driver->device_id, CL_PROGRAM_BUILD_LOG, 0, 0,
                                     &len);
