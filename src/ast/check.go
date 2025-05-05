@@ -32,21 +32,6 @@ const (
 	KPassCheckTypes
 )
 
-type FunctionSet struct {
-	Signature FunctionSignature
-	Ids       []FunctionId
-}
-
-func (fs *FunctionSet) MergeIn(ofs *FunctionSet) {
-	if fs.Signature.MapKey() != ofs.Signature.MapKey() {
-		panic(fmt.Sprintf("FunctionSet.MergeIn: Map keys do not match %v != %v", fs.Signature.MapKey(), ofs.Signature.MapKey()))
-	}
-
-	for _, id := range ofs.Ids {
-		fs.Ids = append(fs.Ids, id)
-	}
-}
-
 type CheckContext struct {
 	Pass                  CheckPass
 	Errors                *errors.Errors
@@ -59,7 +44,7 @@ type CheckContext struct {
 	maximumClosureSize    int
 
 	// map from function key to a function (only gpu functions are required here, so only gpu functions are kept)
-	Functions map[string]*FunctionSet
+	Functions *FunctionGroup
 
 	// when positive we are in a cpu method
 	inCpuMethodCount, inGpuMethodCount int
@@ -104,38 +89,6 @@ func (ctx *CheckContext) CurrentModule() *Module {
 	return ctx.currentModule
 }
 
-/*
-This is where we add each raw "function"
-These are raw chunks of code, as opposed to any closures constructed from them
-*/
-func (ctx *CheckContext) AddFunction(id FunctionId, fs FunctionSignature) {
-	key := fs.MapKey()
-
-	fsv, ok := ctx.Functions[key]
-	if !ok {
-		fsv = &FunctionSet{
-			Signature: fs,
-			Ids:       []FunctionId{},
-		}
-	}
-
-	/*
-	   Struct functions seem to end up in twice, this deduplicates them
-	*/
-	exists := false
-	for _, fid := range fsv.Ids {
-		if fid.IsEqual(id) {
-			exists = true
-			break
-		}
-	}
-	if !exists {
-		fsv.Ids = append(fsv.Ids, id)
-	}
-
-	ctx.Functions[key] = fsv
-}
-
 func NewCheckContext(es *errors.Errors, sp map[string]int) *CheckContext {
 	return &CheckContext{
 		Errors:                es,
@@ -150,7 +103,7 @@ func NewCheckContext(es *errors.Errors, sp map[string]int) *CheckContext {
 		tempCount:             0,
 		Strings:               sp,
 		gpuRequired:           false,
-		Functions:             map[string]*FunctionSet{},
+		Functions:             NewFunctionGroup(),
 	}
 }
 

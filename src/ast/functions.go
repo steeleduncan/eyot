@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
+	"sort"
 )
 
 // A fully resolved function identifier
@@ -60,27 +61,26 @@ const (
 	KLocationGpu
 )
 
+func FunctionLocations() []FunctionLocation {
+	return []FunctionLocation {
+		KLocationCpu,
+		KLocationGpu,
+		KLocationAnywhere,
+	}
+}
+
 type FunctionSignature struct {
 	Location FunctionLocation
 	Return   Type
 	Types    []Type
 }
 
+/*
+   An id of type and location
+ */
 func (fs FunctionSignature) MapKey() string {
 	buf := bytes.NewBuffer([]byte{})
 	fmt.Fprintf(buf, fs.Return.RawIdentifier())
-	switch fs.Location {
-	case KLocationCpu:
-		fmt.Fprintf(buf, "__cpu")
-
-	case KLocationGpu:
-		fmt.Fprintf(buf, "__gpu")
-
-	case KLocationAnywhere:
-
-	default:
-		panic("missing case")
-	}
 	fmt.Fprintf(buf, "__")
 	for tyi, ty := range fs.Types {
 		if tyi > 0 {
@@ -89,6 +89,165 @@ func (fs FunctionSignature) MapKey() string {
 		fmt.Fprintf(buf, ty.RawIdentifier())
 	}
 	return buf.String()
+}
+
+/*
+   complete grouping of functions of a specific signature, along with type
+ */
+type FunctionSet struct {
+	// Common signature for all in the set
+	Signature FunctionSignature
+
+	// A set of function ids
+	AllIds map[FunctionLocation][]FunctionId
+}
+
+func NewFunctionSet(sig FunctionSignature) *FunctionSet {
+	fs := &FunctionSet{
+		Signature: sig,
+		AllIds:    map[FunctionLocation][]FunctionId{},
+	}
+
+	for _, loc := range FunctionLocations() {
+		fs.AllIds[loc] = []FunctionId {}
+	}
+
+	return fs
+}
+
+func (fs *FunctionSet) UniqueIds() []FunctionId {
+	fmt.Println("UniqueIds")
+	mp := map[string]FunctionId {}
+
+	for _, ids := range fs.AllIds {
+		for _, id := range ids {
+			mp[id.String()] = id
+			fmt.Println("id = ", id)
+		}
+	}
+
+	ret := []FunctionId {}
+	for _, id := range mp {
+		ret = append(ret, id)
+		fmt.Println("out = ", id)
+	}
+	return ret
+}
+
+func (fs *FunctionSet) MergeIn(ofs *FunctionSet) {
+	if fs.Signature.MapKey() != ofs.Signature.MapKey() {
+		panic(fmt.Sprintf("FunctionSet.MergeIn: Map keys do not match %v != %v", fs.Signature.MapKey(), ofs.Signature.MapKey()))
+	}
+
+	for loc, ids := range ofs.AllIds {
+		for _, id := range ids {
+			fs.AllIds[loc] = append(fs.AllIds[loc], id)
+		}
+	}
+}
+
+type FunctionGroup struct {
+	// functions indexed by FunctionSignature.MapKey()
+	Functions map[string]*FunctionSet
+}
+
+type FunctionEntry struct {
+	// A global integer id, same on c/gpu
+	// This must be consistent or bugs arise in the closures
+	Id int
+
+	// The function id 
+	Fid FunctionId
+
+	// Where this function entry is located
+	Location FunctionLocation
+}
+
+func (fg *FunctionGroup) FunctionEntries() []FunctionEntry {
+	tlKeys := []string { }
+	for k, _ := range fg.Functions {
+		tlKeys = append(tlKeys, k)
+	}
+	sort.Strings(tlKeys)
+
+	runningId := 0
+	fes := []FunctionEntry {}
+
+	for _, k := range tlKeys {
+		fs := fg.Functions[k]
+
+		for _, loc := range FunctionLocations() {
+			ids := fs.AllIds[loc]
+			for _, fid := range ids {
+				fes = append(fes, FunctionEntry {
+					Id: runningId,
+					Location: loc,
+					Fid: fid,
+				})
+				runningId += 1
+			}
+		}
+	}
+
+	return fes
+}
+
+/*
+The most args passed by any
+*/
+func (fg *FunctionGroup) MaxArgCount() int {
+	maxArgCount := 0
+
+	for _, fs := range fg.Functions {
+		argCount := len(fs.Signature.Types)
+		if argCount > maxArgCount {
+			maxArgCount = argCount
+		}
+	}
+		
+	return maxArgCount
+}
+
+func NewFunctionGroup() *FunctionGroup {
+	return &FunctionGroup {
+		Functions: map[string]*FunctionSet {},
+	}
+}
+
+func (fg *FunctionGroup) MergeIn(mfg *FunctionGroup) {
+	for k, v := range mfg.Functions {
+		fs, fsExists := fg.Functions[k]
+		if !fsExists {
+			fg.Functions[k] = v
+		} else {
+			fs.MergeIn(v)
+		}
+	}
+}
+
+func (fg *FunctionGroup) Add(id FunctionId, fs FunctionSignature, loc FunctionLocation) {
+	key := fs.MapKey()
+
+	fsv, ok := fg.Functions[key]
+	if !ok {
+		fsv = NewFunctionSet(fs)
+	}
+
+	/*
+	   Struct functions seem to end up in twice, this deduplicates them
+	*/
+	exists := false
+	for _, fid := range fsv.AllIds[loc] {
+		if fid.IsEqual(id) {
+			exists = true
+			break
+		}
+	}
+	if !exists {
+		fsv.AllIds[loc] = append(fsv.AllIds[loc], id)
+	}
+
+	fg.Functions[key] = fsv
 }
 
 type FunctionParameter struct {
@@ -208,7 +367,7 @@ func (fd *FunctionDefinition) Check(ctx *CheckContext, externalScope *Scope) {
 		if !ctx.Errors.Clean() {
 			return
 		}
-		ctx.AddFunction(fd.Id, fd.Signature())
+		ctx.Functions.Add(fd.Id, fd.Signature(), fd.Location)
 
 	case KPassCheckTypes:
 		if fd.AvoidCheckPhase {
@@ -250,3 +409,4 @@ func (fd FunctionDefinition) EffectiveParameters(executionContextParameter Funct
 
 	return prms
 }
+

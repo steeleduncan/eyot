@@ -18,7 +18,7 @@ type Program struct {
 	MaximumClosureSize int
 
 	// map from function type to a vector of functions
-	Functions map[string]*ast.FunctionSet
+	Functions *ast.FunctionGroup
 
 	Env *Environment
 
@@ -39,7 +39,7 @@ func NewProgram(e *Environment, es *errors.Errors) *Program {
 		GpuRequired:        false,
 		Env:                e,
 		es:                 es,
-		Functions:          map[string]*ast.FunctionSet{},
+		Functions:          ast.NewFunctionGroup(),
 		MaximumClosureSize: 0,
 		Strings:            map[string]int{},
 	}
@@ -179,14 +179,7 @@ func (p *Program) CheckModule(m *ast.Module) {
 	if !p.GpuRequired {
 		p.GpuRequired = ctx.GpuRequired()
 	}
-	for k, v := range ctx.Functions {
-		fs, fsExists := p.Functions[k]
-		if !fsExists {
-			p.Functions[k] = v
-		} else {
-			fs.MergeIn(v)
-		}
-	}
+	p.Functions.MergeIn(ctx.Functions)
 	if ctx.MaximumClosureSize() > p.MaximumClosureSize {
 		p.MaximumClosureSize = ctx.MaximumClosureSize()
 	}
@@ -202,18 +195,3 @@ func (p *Program) GetStringPool() []string {
 	return pool
 }
 
-/*
-The most args passed by any
-*/
-func (p *Program) MaxArgCount() int {
-	maxArgCount := 0
-
-	for _, fns := range p.Functions {
-		argCount := len(fns.Signature.Types)
-		if argCount > maxArgCount {
-			maxArgCount = argCount
-		}
-	}
-
-	return maxArgCount
-}

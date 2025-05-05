@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"eyot/ast"
@@ -1382,24 +1381,29 @@ func (cw *CWriter) WriteArgCountFunction(p *program.Program) {
 	)
 	cw.w().EndLine()
 
-	for _, fns := range p.Functions {
-		for _, fid := range fns.Ids {
-			cw.w().AddComponents(
-				"case",
-				namespaceFunctionEnumId(fid),
-				":",
-			)
-			cw.w().EndLine()
-			cw.w().Indent()
-
-			cw.w().AddComponents(
-				"return",
-				fmt.Sprintf("%v", len(fns.Signature.Types)),
-				";",
-			)
-			cw.w().EndLine()
-
-			cw.w().Unindent()
+	for _, fs := range p.Functions.Functions {
+		for loc, ids := range fs.AllIds {
+			if !cw.CanWriteRequirement(loc) {
+				continue
+			}
+			for _, fid := range ids {
+				cw.w().AddComponents(
+					"case",
+					namespaceFunctionEnumId(fid),
+					":",
+				)
+				cw.w().EndLine()
+				cw.w().Indent()
+				
+				cw.w().AddComponents(
+					"return",
+					fmt.Sprintf("%v", len(fs.Signature.Types)),
+					";",
+				)
+				cw.w().EndLine()
+				
+				cw.w().Unindent()
+			}
 		}
 	}
 
@@ -1484,26 +1488,22 @@ func (cw *CWriter) WriteNewFunctionEnum(p *program.Program) {
 	cw.w().EndLine()
 	cw.w().Indent()
 
-	evals := []string{}
-
-	for _, fns := range p.Functions {
-		for _, fid := range fns.Ids {
-			evals = append(evals, namespaceFunctionEnumId(fid))
+	for _, fe := range p.Functions.FunctionEntries() {
+		if cw.CanWriteRequirement(fe.Location) {
+			cw.w().AddComponents(
+				namespaceFunctionEnumId(fe.Fid),
+				"=", fmt.Sprintf("%v", fe.Id),
+				",",
+			)
+			cw.w().EndLine()
 		}
-	}
-
-	sort.Strings(evals)
-	for _, eval := range evals {
-		cw.w().AddComponents(
-			eval, ",",
-		)
-		cw.w().EndLine()
 	}
 
 	cw.w().Unindent()
 	cw.w().AddComponents(
 		"}",
 		namespaceEnumFunctionListNew(),
+		"/* should be unuique */",
 		";",
 	)
 	cw.w().EndLine()
@@ -1535,64 +1535,68 @@ func (cw *CWriter) WriteFunctionArgSize(p *program.Program) {
 	cw.w().Indent()
 
 	// cases
-	for _, fns := range p.Functions {
-		for _, fid := range fns.Ids {
-			if len(fns.Signature.Types) == 0 {
+	for _, fs := range p.Functions.Functions {
+		if len(fs.Signature.Types) == 0 {
+			continue
+		}
+
+		for loc, ids := range fs.AllIds {
+			if !cw.CanWriteRequirement(loc) {
 				continue
 			}
-
-			cw.w().AddComponents(
-				"case",
-				namespaceFunctionEnumId(fid),
-				":",
-			)
-			cw.w().EndLine()
-			cw.w().Indent()
-
-			if cw.CanWriteRequirement(fns.Signature.Location) {
+			for _, fid := range ids {
 				cw.w().AddComponents(
-					"switch",
-					"(",
-					"(", namespaceEnumFunctionListNew(), ")",
-					"arg",
-					")",
-					"{",
+					"case",
+					namespaceFunctionEnumId(fid),
+					":",
 				)
 				cw.w().EndLine()
 				cw.w().Indent()
 
-				for tyi, ty := range fns.Signature.Types {
+				if cw.CanWriteRequirement(fs.Signature.Location) {
 					cw.w().AddComponents(
-						"case",
-						fmt.Sprintf("%v", tyi),
-						":",
+						"switch",
+						"(",
+						"arg",
+						")",
+						"{",
 					)
 					cw.w().EndLine()
 					cw.w().Indent()
 
+					for tyi, ty := range fs.Signature.Types {
+						cw.w().AddComponents(
+							"case",
+							fmt.Sprintf("%v", tyi),
+							":",
+						)
+						cw.w().EndLine()
+						cw.w().Indent()
+
+						cw.w().AddComponents(
+							"return", "sizeof", "(",
+						)
+						cw.WriteType(ty)
+						cw.w().AddComponents(
+							")", ";",
+						)
+						cw.w().EndLine()
+						cw.w().Unindent()
+					}
+
+					cw.w().Unindent()
 					cw.w().AddComponents(
-						"return", "sizeof", "(",
-					)
-					cw.WriteType(ty)
-					cw.w().AddComponents(
-						")", ";",
+						"}",
 					)
 					cw.w().EndLine()
-					cw.w().Unindent()
+				} else {
+					cw.w().AddComponents(
+						"return", "0", ";", "// not available on gpu",
+					)
 				}
-
-				cw.w().Unindent()
-				cw.w().AddComponents(
-					"}",
-				)
 				cw.w().EndLine()
-			} else {
-				cw.w().AddComponents(
-					"return", "0", ";", "// not available on gpu",
-				)
+				cw.w().Unindent()
 			}
-			cw.w().EndLine()
-			cw.w().Unindent()
 		}
 	}
 
@@ -1650,40 +1654,49 @@ func (cw *CWriter) WriteFunctionCaller(p *program.Program) {
 	cw.w().Indent()
 
 	// cases
-	for _, fns := range p.Functions {
-		for _, fid := range fns.Ids {
-			cw.w().AddComponents(
-				"case",
-				namespaceFunctionEnumId(fid),
-				":",
-			)
-			cw.w().EndLine()
-			cw.w().Indent()
+	for _, fs := range p.Functions.Functions {
+		if len(fs.Signature.Types) == 0 {
+			continue
+		}
 
-			if cw.CanWriteRequirement(fns.Signature.Location) {
+		for loc, ids := range fs.AllIds {
+			if !cw.CanWriteRequirement(loc) {
+				continue
+			}
+			for _, fid := range ids {
 				cw.w().AddComponents(
-					namespaceFunctionCallerId(fid),
-					"(",
+					"case",
+					namespaceFunctionEnumId(fid),
+					":",
 				)
+				cw.w().EndLine()
+				cw.w().Indent()
+
+				if cw.CanWriteRequirement(fs.Signature.Location) {
+					cw.w().AddComponents(
+						namespaceFunctionCallerId(fid),
+						"(",
+					)
+					cw.w().AddComponents(
+						namespaceExecutionContext(), ",",
+						"result", ",",
+						"args",
+						")",
+						";",
+					)
+				} else {
+					// this keeps the cl compiler happy
+					cw.w().AddComponent("// function not available on GPU")
+				}
+				cw.w().EndLine()
+
 				cw.w().AddComponents(
-					namespaceExecutionContext(), ",",
-					"result", ",",
-					"args",
-					")",
+					"break",
 					";",
 				)
-			} else {
-				// this keeps the cl compiler happy
-				cw.w().AddComponent("// function not available on GPU")
+				cw.w().EndLine()
+				cw.w().Unindent()
 			}
-			cw.w().EndLine()
-
-			cw.w().AddComponents(
-				"break",
-				";",
-			)
-			cw.w().EndLine()
-			cw.w().Unindent()
 		}
 	}
 
@@ -1710,7 +1723,7 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 		cw.w().AddComponents(
 			"#define",
 			"EYOT_RUNTIME_MAX_ARGS",
-			fmt.Sprintf("%v", p.MaxArgCount()),
+			fmt.Sprintf("%v", p.Functions.MaxArgCount()),
 		)
 		cw.w().EndLine()
 
@@ -1805,15 +1818,20 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 
 	cw.w().AddComponent("// Forward decls for all functions")
 	cw.w().EndLine()
-	for _, fns := range p.Functions {
-		if !cw.CanWriteRequirement(fns.Signature.Location) {
+	for _, fs := range p.Functions.Functions {
+		if len(fs.Signature.Types) == 0 {
 			continue
 		}
 
-		for _, id := range fns.Ids {
-			cw.WriteFunctionPrototype(fns.Signature, id)
-			cw.w().AddComponentNoSpace(";")
-			cw.w().EndLine()
+		for loc, ids := range fs.AllIds {
+			if !cw.CanWriteRequirement(loc) {
+				continue
+			}
+			for _, fid := range ids {
+				cw.WriteFunctionPrototype(fs.Signature, fid)
+				cw.w().AddComponentNoSpace(";")
+				cw.w().EndLine()
+			}
 		}
 	}
 	cw.w().EndLine()

@@ -172,7 +172,7 @@ func errMain() *errors.Errors {
 
 	if !(action == kPrint || action == kSilent) {
 		defs := map[string]string{
-			"EYOT_RUNTIME_MAX_ARGS": fmt.Sprintf("%v", p.MaxArgCount()),
+			"EYOT_RUNTIME_MAX_ARGS": fmt.Sprintf("%v", p.Functions.MaxArgCount()),
 		}
 
 		ffiFiles := []string{}
