@@ -682,7 +682,7 @@ EyWorker *ey_worker_create_opencl(const char *kernel_name, int input_size, int o
 
     if (closure_ptr) {
         wrkr->closure_buffer =
-            clCreateBuffer(wrkr->driver->context, CL_MEM_WRITE_ONLY, closure_size, NULL, NULL);
+            clCreateBuffer(wrkr->driver->context, CL_MEM_READ_ONLY, closure_size, NULL, NULL);
 
         cl_event wait_event = wrkr->ready_event;
 
