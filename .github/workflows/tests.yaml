@@ -135,7 +135,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
     - nix-tests
-    - host-tests
+    - mac-tests
+    - linux-tests
     if: always() # NB this also updates the .deb, so only do it on success
     permissions:
       pages: write
