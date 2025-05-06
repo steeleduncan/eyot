@@ -125,16 +125,8 @@ func (cr *CRunnerUnix) getCompileCommand(withOpenCl bool, defs map[string]string
 		}
 	}
 
-	/*
-	   We have the pattern
 
-	   typedef struct A A;
-	   typedef struct A { ... } A;
-
-	   For forward decls, this needs C11
-	   It is not hard to remove this pattern if <C11 is required
-	 */
-	args = append(args, "-std=c11")
+	args = append(args, "-std=c99")
 
 	args = append(args, "-o")
 	args = append(args, cr.outFile)

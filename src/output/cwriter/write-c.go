@@ -264,9 +264,7 @@ func (cw *CWriter) WriteExpression(re ast.Expression) {
 		ty := e.Type()
 
 		tupid := ty.TupleIdentifier()
-		cw.w().AddComponent("(")
-		cw.w().AddComponentNoSpace(tupid)
-		cw.w().AddComponentNoSpace(")")
+		cw.w().AddComponents("(", "struct", tupid, ")")
 		cw.w().AddComponent("{")
 		for ei, ee := range e.Expressions {
 			if ei > 0 {
@@ -401,6 +399,7 @@ func (cw *CWriter) WriteExpression(re ast.Expression) {
 	case *ast.StructLiteralExpression:
 		cw.w().AddComponents(
 			"(",
+			"struct",
 			namespaceStruct(e.Id),
 			")",
 			"{",
@@ -952,10 +951,10 @@ func (cw *CWriter) WriteType(ty ast.Type) {
 		cw.w().AddComponent("void")
 
 	case ast.KTypeTuple:
-		cw.w().AddComponent(ty.TupleIdentifier())
+		cw.w().AddComponents("struct", ty.TupleIdentifier())
 
 	case ast.KTypeStruct:
-		cw.w().AddComponent(namespaceStruct(ty.StructId))
+		cw.w().AddComponents("struct", namespaceStruct(ty.StructId))
 
 	case ast.KTypePointer:
 		cw.WriteType(ty.Types[0])
@@ -1770,7 +1769,7 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 			if si > 0 {
 				cw.w().EndLine()
 			}
-			cw.w().AddComponents("typedef", "struct", namespaceStruct(s.Id), namespaceStruct(s.Id), ";")
+			cw.w().AddComponents("struct", namespaceStruct(s.Id), ";")
 			cw.w().EndLine()
 		}
 	}
@@ -1788,7 +1787,6 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 				cw.w().EndLine()
 			}
 			cw.w().AddComponents(
-				"typedef",
 				"struct",
 				namespaced,
 				"{",
@@ -1806,11 +1804,7 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 			}
 
 			cw.w().Unindent()
-			cw.w().AddComponents(
-				"}",
-				namespaced,
-				";",
-			)
+			cw.w().AddComponents("}", ";")
 			cw.w().EndLine()
 		}
 	}
