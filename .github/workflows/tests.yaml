@@ -105,29 +105,6 @@ jobs:
       - run: nix develop -i -c "eyot" "run" "tests/helloworld.ey"
         name: Check the nix shell
 
-  # experiment with oclgrind
-  ocl-grind-expt:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-
-      # build and install deb via nix
-      - uses: DeterminateSystems/nix-installer-action@main
-      - run: nix build .#deb
-        name: Build the debian package
-      - run: sudo apt install --reinstall --yes ./result/eyot.deb
-        name: Install debian package
-
-      # build a binary
-      - run: sudo apt install gcc ocl-icd-opencl-dev intel-opencl-icd clinfo oclgrind -y
-      - name: Build binary
-        run: eyot build tests/workers/gpu/gpu-threads.ey
-      - name: Run without oclgrind
-        run: ./out.exe
-      - name: Run with oclgrind
-        run: oclgrind ./out.exe
-
   deploy-site:
     environment:
       name: github-pages
