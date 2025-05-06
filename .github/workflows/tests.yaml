@@ -4,33 +4,40 @@ on:
   push:
 
 jobs:
-  # unit tests running on "raw" machine
-  host-tests:
+  # unit tests running on "raw" machines
+  # The platform differences are enough to be cleaner with different blocks
+  linux-tests:
     strategy:
       matrix:
         os:
-        # intel mac
-        - "macos-13"
-        # aarch mac
-        - "macos-15"
-        # intel linuxes
-        - "ubuntu-22.04" # this should be glibc older than debian 12
+          # 22.04 worth testing because it is glibc older than debian 12
+        - "ubuntu-22.04" 
         - "ubuntu-24.04"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - run: brew install go
-        if: contains(matrix.os, 'macos')
       - run: sudo apt install oclgrind gcc ocl-icd-opencl-dev intel-opencl-icd golang -y
-        if: contains(matrix.os, 'ubuntu')
       - name: Unit tests (no vgpu)
         run: source contrib/env.sh && eyot_test
-#      - name: Unit tests (oclgrind)
-#        if: contains(matrix.os, 'ubuntu')
-#        run: source contrib/env.sh && eyot_test
-#        env:
-#          EyotTestOclGrind: y
+      - name: Unit tests (oclgrind)
+        run: source contrib/env.sh && eyot_test
+        env:
+          EyotTestOclGrind: y
+  mac-tests:
+    strategy:
+      matrix:
+        # 13 is intel, 15 is aarch, so both worth testing
+        os:
+        - "macos-13"
+        - "macos-15"
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install go
+      - name: Unit tests (no vgpu)
+        run: source contrib/env.sh && eyot_test
 
   # nix flake checks
   nix-tests:
