@@ -42,6 +42,7 @@ func usage() *errors.Errors {
 
   EnvironmentVariables:
     EyotRoot: the root of the eyot runtime libraries
+    EyotTestOclGrind: if 'y' it will use oclgrind
     CC: the C compiler to use for the backend code generation (Linux and macOS)
 `)
 	return nil
@@ -75,6 +76,8 @@ func errMain() *errors.Errors {
 
 	flags := map[string]bool{}
 	args := []string{}
+
+	useOclGrind := os.Getenv("EyotTestOclGrind") == "y"
 
 	for _, arg := range os.Args {
 		if len(arg) == 0 {
@@ -203,7 +206,13 @@ func errMain() *errors.Errors {
 	if action == kRun {
 		var stdOutStream io.Writer = os.Stdout
 
-		ocmd := exec.Command(outFile)
+		var ocmd *exec.Cmd = nil
+		if useOclGrind {
+			ocmd = exec.Command("oclgrind", outFile)
+		} else {
+			ocmd = exec.Command(outFile)
+		}
+
 		ocmd.Stdin = os.Stdin
 		ocmd.Stdout = stdOutStream
 		ocmd.Stderr = os.Stderr
