@@ -1,7 +1,5 @@
 package ast
 
-import ()
-
 type StructField struct {
 	Name string
 	Type Type
