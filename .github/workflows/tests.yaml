@@ -85,6 +85,9 @@ jobs:
       - run: eyot run test.ey
         name: Run eyot via the debian package
         if: contains(matrix.os, 'ubuntu')
+      - run: man eyot
+        name: Check eyot man page
+        if: contains(matrix.os, 'ubuntu')
 
       # upload the gh pages artefact
       # NB it is built as part of tests, so it is quickest to do this here

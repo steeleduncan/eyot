@@ -29,6 +29,15 @@
           '';
         };
 
+        man_page =
+          pkgs.stdenv.mkDerivation {
+            name = "eyot-manpage";
+            buildInputs = [ pkgs.pandoc ];
+            src = ./docs;
+            buildPhase = "pandoc -s -t man manpage.md -o manpage.1";
+            installPhase = "mv manpage.1 $out";
+          };
+
         lib_folder =
           pkgs.stdenv.mkDerivation {
             name = "eyot-lib";
@@ -54,8 +63,9 @@
               mkdir -p $DpkgRoot
               cp -r contrib/DEBIAN $DpkgRoot/
 
-              mkdir -p $DpkgRoot/usr/bin $DpkgRoot/usr/share
+              mkdir -p $DpkgRoot/usr/bin $DpkgRoot/usr/share $DpkgRoot/usr/share/man/man1
               cp -r ${lib_folder} $DpkgRoot/usr/share/eyot
+              cp ${man_page} $DpkgRoot/usr/share/man/man1/eyot.1
 
               pushd src
               GOOS=linux GOARCH=amd64 go build -ldflags "-X eyot/program.EyotRoot=/usr/share/eyot" -o $DpkgRoot/usr/bin/eyot eyot/cmd
@@ -150,6 +160,7 @@
           default = eyot_package;
           docs = docs;
           deb = deb;
+          man = man_page;
         };
 
         checks = {
@@ -157,6 +168,7 @@
 
           # builds
           build-eyot = eyot_package;
+          build-man = man_page;
           build-deb = deb;
           build-docs = docs;
 

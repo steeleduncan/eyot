@@ -102,7 +102,7 @@ nix run github:steeleduncan/eyot -- run /path/to/file.ey
 
 Please note that the flake is not setup right now to install ICDs, so it won't work with GPU threads (I'd welcome a pull request from anyone who knows how to use OpenCL from within a flake).
 
-## Without Nix
+## From source (e.g. for development)
 
 To run Eyot on a linux system you would need to install OpenCL, golang (>= 1.18) and either gcc or clang. On Ubuntu or Debian this would be `sudo apt install gcc ocl-icd-opencl-dev golang -y`. Likely you would also need the specific ICD for you GPU. For intel GPUs this would be `sudo apt install intel-opencl-icd -y` and for Nvidia replace `sudo apt install nvidia-opencl-icd -y`. (Please feel free to update this guide for other Linuxes or GPU manufacturers)
 
