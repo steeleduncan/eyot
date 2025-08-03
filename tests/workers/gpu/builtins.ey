@@ -1,0 +1,19 @@
+import std::runtime
+
+gpu fn sq(val f32) f32 {
+	return gpubuiltin::sqrt(val)
+}
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    let c = gpu sq
+    send(c, [f32]{ 4, 9, 16 })
+	for v: drain(c) {
+		print_ln("- ", v)
+	}
+}
+

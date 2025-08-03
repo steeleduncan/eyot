@@ -478,6 +478,23 @@ func (p *Parser) LiteralValueExpression() (ast.Expression, bool) {
 		return &ast.BooleanTerminal{Value: false}, true
 	}
 
+	_, fnd = p.Token(token.GpuBuiltin)
+	if fnd {
+		_, fnd = p.Token(token.ScopeResolution)
+		if !fnd {
+			p.LogExpectingError("::", "gpubuiltin")
+			return nil, false
+		}
+
+		it, fnd := p.Token(token.Identifier)
+		if !fnd {
+			p.LogExpectingError("identifier", "gpubuiltin")
+			return nil, false
+		}
+
+		return &ast.GpuBuiltinTerminal { Name: it.Tval }, true
+	}
+
 	mod, name, fnd := p.ResolvedId()
 	if fnd {
 		def, foundFunction := mod.LookupFunction(name)

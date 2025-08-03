@@ -50,6 +50,7 @@ const (
 	// keyword tokens (technically some two char tokens in here, but grouping as they are words)
 	Null
 	Function
+	GpuBuiltin
 	Break
 	Pipeline
 	As
@@ -172,6 +173,9 @@ func (t Token) String() string {
 
 	case As:
 		fmt.Fprintf(buf, "As")
+
+	case GpuBuiltin:
+		fmt.Fprintf(buf, "GpuBuiltin")
 
 	case Function:
 		fmt.Fprintf(buf, "Function")

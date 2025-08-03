@@ -133,6 +133,45 @@ func (st *StringTerminal) Check(ctx *CheckContext, scope *Scope) {
 	ctx.RequireType(st.Type(), scope)
 }
 
+type GpuBuiltinTerminal struct {
+	Name string
+}
+var _ Expression = &GpuBuiltinTerminal{}
+
+func (gt GpuBuiltinTerminal) String() string {
+	return fmt.Sprintf("GpuBuiltinTerminal(%v)", gt.Name)
+}
+
+func (gt GpuBuiltinTerminal) calculateType() (Type, bool) {
+	rty := Type {
+		Selector: KTypeFunction,
+		Location: KLocationGpu,
+	}
+
+	switch (gt.Name) {
+	case "sqrt":
+		rty.Types = []Type { Type { Selector: KTypeFloat, Width: 32 } }
+		rty.Return = &Type { Selector: KTypeFloat, Width: 32 }
+		return rty, true
+
+	default:
+		return rty, false
+	}
+}
+
+func (gt GpuBuiltinTerminal) Type() Type {
+	ty, _ := gt.calculateType()
+	return ty
+}
+
+func (gt GpuBuiltinTerminal) Check(ctx *CheckContext, scope *Scope) {
+	_, fnd := gt.calculateType()
+	if !fnd {
+		ctx.Errors.Errorf("No such gpu builtin %v", gt.Name)
+	}
+	ctx.NoteGpuRequired("gpu builtin")
+}
+
 // A literal identifier
 type IdentifierTerminal struct {
 	// The symbol of this identifier
@@ -704,8 +743,9 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 		}
 
 	case KPassMutate:
-		ae, calledIsAccess := ce.CalledExpression.(*AccessExpression)
-		if calledIsAccess {
+		if _, isGpuBuiltin := ce.CalledExpression.(*GpuBuiltinTerminal); isGpuBuiltin {
+			ce.SkipExecutionContext = true
+		} else if ae, calledIsAccess := ce.CalledExpression.(*AccessExpression); calledIsAccess {
 			ae.Check(ctx, scope)
 			if !ctx.Errors.Clean() {
 				return

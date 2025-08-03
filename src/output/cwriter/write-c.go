@@ -227,6 +227,9 @@ func (cw *CWriter) WriteExpression(re ast.Expression) {
 	case *ast.SelfTerminal:
 		cw.w().AddComponentf(`ey_self`)
 
+	case *ast.GpuBuiltinTerminal:
+		cw.w().AddComponentf(e.Name)
+
 	case *ast.DereferenceExpression:
 		cw.w().AddComponent(`*`)
 		cw.w().SuppressNextSpace()

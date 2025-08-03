@@ -405,6 +405,7 @@ func Tokenise(text string) ([]Token, error) {
 			"as":       As,
 			"new":      New,
 			"fn":       Function,
+			"gpubuiltin":       GpuBuiltin,
 			"null":     Null,
 			"break":    Break,
 			"range":    Range,

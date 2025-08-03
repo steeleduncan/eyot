@@ -19,9 +19,9 @@
         "let" "const"
         "bool" "string" "i64" "f32" "f64" "char"
 		"null"
-        "print" "print_ln"              ;
+        "print" "print_ln"
         "cpu" "gpu" "send" "receive" "worker" "drain"
-        "pixel" "vertex" "pipeline"
+        "pixel" "vertex" "pipeline" "gpubuiltin"
         "import" "as"
      )
 
