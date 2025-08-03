@@ -1,1 +1,1 @@
-Trying to send to non-worker type: void(i64)
+Trying to send to non-worker type: void(cpu)(i64)

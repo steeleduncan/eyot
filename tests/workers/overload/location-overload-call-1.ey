@@ -11,16 +11,16 @@ fn domult(val i64) i64 {
 }
 
 cpu fn main() {
-    let c = gpu domult
+    let c = cpu domult
     send(c, [i64]{ 2, 3, 4 })
     for v: drain(c) {
-        print_ln("- ", v)
+        print_ln("cpu: ", v)
     }
 
-    let d = gpu domult
-    send(d, [i64]{ 2, 3, 4 })
-    for v: drain(d) {
-        print_ln("+ ", v)
+    let g = gpu domult
+    send(g, [i64]{ 2, 3, 4 })
+    for v: drain(g) {
+        print_ln("gpu: ", v)
     }
 }
 

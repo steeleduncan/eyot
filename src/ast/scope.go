@@ -179,6 +179,26 @@ func (s *Scope) AddCFunctions(cfs []CFunction) {
 }
 
 func (s *Scope) SetVariable(ident string, ty Type, assignable bool) {
+	if ty.IsCallable() {
+		binding, fnd := s.VariableBindings[ident]
+		if fnd {
+			if binding.VariableType.IsCallable() {
+				// idk if the right approach
+				// but when we dual assign a cpu and gpu function, we pretend it is a call any
+				if binding.VariableType.Location == KLocationCpu && ty.Location == KLocationGpu {
+					binding.VariableType.Location = KLocationAnywhere
+					return
+				} else if binding.VariableType.Location == KLocationGpu && ty.Location == KLocationCpu {
+					binding.VariableType.Location = KLocationAnywhere
+					return
+				}
+			} else {
+				// maybe this should be an error?
+				panic("Incompatible type for variable assignment " + ident)
+			}
+		}
+	}
+
 	s.VariableBindings[ident] = &VariableBinding{
 		VariableType: ty,
 		Assignable:   assignable,

@@ -20,7 +20,11 @@ type FunctionId struct {
 }
 
 func (fi FunctionId) String() string {
-	return fmt.Sprintf("FunctionId(%v, %v, %v)", fi.Module.Key(), fi.Struct, fi.Name)
+	if fi.Struct.Blank() {
+		return fmt.Sprintf("FunctionId(%v, %v)", fi.Module.Key(), fi.Name)
+	} else {
+		return fmt.Sprintf("FunctionId(%v, %v, %v)", fi.Module.Key(), fi.Struct, fi.Name)
+	}
 }
 
 func (lhs FunctionId) IsEqual(rhs FunctionId) bool {
@@ -91,8 +95,23 @@ func (fs FunctionSignature) MapKey() string {
 	return buf.String()
 }
 
+func (fs FunctionSignature) String() string {
+	buf := bytes.NewBuffer([]byte{})
+	fmt.Fprint(buf, "FunctionSignature(")
+	fmt.Fprint(buf, fs.Return.String())
+	fmt.Fprint(buf, ", ")
+	for tyi, ty := range fs.Types {
+		if tyi > 0 {
+			fmt.Fprint(buf, ", ")
+		}
+		fmt.Fprint(buf, ty.String())
+	}
+	fmt.Fprint(buf, ")")
+	return buf.String()
+}
+
 /*
-   complete grouping of functions of a specific signature, along with type
+   A group of functions with the same signature
  */
 type FunctionSet struct {
 	// Common signature for all in the set
@@ -116,24 +135,22 @@ func NewFunctionSet(sig FunctionSignature) *FunctionSet {
 }
 
 func (fs *FunctionSet) UniqueIds() []FunctionId {
-	fmt.Println("UniqueIds")
 	mp := map[string]FunctionId {}
 
 	for _, ids := range fs.AllIds {
 		for _, id := range ids {
 			mp[id.String()] = id
-			fmt.Println("id = ", id)
 		}
 	}
 
 	ret := []FunctionId {}
 	for _, id := range mp {
 		ret = append(ret, id)
-		fmt.Println("out = ", id)
 	}
 	return ret
 }
 
+// Merge another function set with us
 func (fs *FunctionSet) MergeIn(ofs *FunctionSet) {
 	if fs.Signature.MapKey() != ofs.Signature.MapKey() {
 		panic(fmt.Sprintf("FunctionSet.MergeIn: Map keys do not match %v != %v", fs.Signature.MapKey(), ofs.Signature.MapKey()))
@@ -146,8 +163,9 @@ func (fs *FunctionSet) MergeIn(ofs *FunctionSet) {
 	}
 }
 
+// Container for a set of functions
 type FunctionGroup struct {
-	// functions indexed by FunctionSignature.MapKey()
+	// indexed by FunctionSignature.MapKey()
 	Functions map[string]*FunctionSet
 }
 
@@ -161,6 +179,18 @@ type FunctionEntry struct {
 
 	// Where this function entry is located
 	Location FunctionLocation
+}
+
+func (fg *FunctionGroup) String() string {
+	buf := bytes.NewBuffer([]byte{})
+	fmt.Fprintln(buf, "FunctionGroup:")
+	for _, fset := range fg.Functions {
+		for loc, id := range fset.AllIds {
+			fmt.Fprint(buf, "  ")
+			fmt.Fprintln(buf, loc, id)
+		}
+	}
+	return buf.String()
 }
 
 func (fg *FunctionGroup) FunctionEntries() []FunctionEntry {
@@ -225,6 +255,7 @@ func (fg *FunctionGroup) MergeIn(mfg *FunctionGroup) {
 	}
 }
 
+// Add a single function to the function group
 func (fg *FunctionGroup) Add(id FunctionId, fs FunctionSignature, loc FunctionLocation) {
 	key := fs.MapKey()
 

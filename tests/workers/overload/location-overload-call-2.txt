@@ -1,0 +1,6 @@
+cpu: 4
+cpu: 6
+cpu: 8
+gpu: 6
+gpu: 9
+gpu: 12

@@ -509,6 +509,13 @@ func (ty Type) String() string {
 		if ty.Selector == KTypeClosure {
 			llr += "(closure)"
 		}
+		switch ty.Location {
+		case KLocationCpu:
+			llr += "(cpu)"
+
+		case KLocationGpu:
+			llr += "(gpu)"
+		}
 		llr += "("
 		for ii, ity := range ty.Types {
 			if ii > 0 {

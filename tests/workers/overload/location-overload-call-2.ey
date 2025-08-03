@@ -1,0 +1,27 @@
+// although call-1 originally worked, this originally failed to compile...
+gpu fn mult(val i64) i64 {
+   return val * 3
+}
+
+cpu fn mult(val i64) i64 {
+   return val * 2
+}
+
+fn domult(val i64) i64 {
+   return mult(val)
+}
+
+cpu fn main() {
+    let c = cpu domult
+    send(c, [i64]{ 2, 3, 4 })
+    for v: drain(c) {
+        print_ln("cpu: ", v)
+    }
+
+    let g = gpu domult
+    send(g, [i64]{ 2, 3, 4 })
+    for v: drain(g) {
+        print_ln("gpu: ", v)
+    }
+}
+
