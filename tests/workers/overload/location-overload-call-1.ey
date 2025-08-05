@@ -1,3 +1,5 @@
+// this tests we can gpu/cpu overload at the point of calling
+
 cpu fn mult(val i64) i64 {
    return val * 2
 }

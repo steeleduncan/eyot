@@ -1,4 +1,6 @@
-// although call-1 originally worked, this originally failed to compile...
+// this tests we can gpu/cpu overload at the point of calling
+// although call-1 originally worked, this way around originally failed to compile
+
 gpu fn mult(val i64) i64 {
    return val * 3
 }

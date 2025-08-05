@@ -1,3 +1,5 @@
+// this tests we can gpu/cpu overload at the point of worker creation
+
 cpu fn mult(val i64) i64 {
    return val * 2
 }
@@ -7,16 +9,16 @@ gpu fn mult(val i64) i64 {
 }
 
 cpu fn main() {
-    let c = gpu mult
+    let c = cpu mult
     send(c, [i64]{ 2, 3, 4 })
     for v: drain(c) {
-        print_ln("- ", v)
+        print_ln("cpu: ", v)
     }
 
-    let d = gpu mult
-    send(d, [i64]{ 2, 3, 4 })
-    for v: drain(d) {
-        print_ln("+ ", v)
+    let g = gpu mult
+    send(g, [i64]{ 2, 3, 4 })
+    for v: drain(g) {
+        print_ln("gpu: ", v)
     }
 }
 
