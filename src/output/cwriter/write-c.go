@@ -1832,23 +1832,27 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 		}
 	}
 	cw.w().EndLine()
-	cw.w().AddComponent("// Forward decls for ffi")
-	cw.w().EndLine()
-	for _, m := range p.Modules {
-		if m.Ffid == nil {
-			continue
-		}
 
-		for _, cfn := range m.Ffid.Functions {
-			sig := ast.FunctionSignature{
-				Location: ast.KLocationCpu,
-				Return:   cfn.ReturnType,
-				Types:    cfn.ArgumentTypes,
+
+	if !cw.WritingGpu() {
+		cw.w().AddComponent("// Forward decls for ffi")
+		cw.w().EndLine()
+		for _, m := range p.Modules {
+			if m.Ffid == nil {
+				continue
 			}
 
-			cw.WriteFunctionPrototypeRawName(sig, cfn.Name)
-			cw.w().AddComponent(";")
-			cw.w().EndLine()
+			for _, cfn := range m.Ffid.Functions {
+				sig := ast.FunctionSignature{
+					Location: ast.KLocationCpu,
+					Return:   cfn.ReturnType,
+					Types:    cfn.ArgumentTypes,
+				}
+
+				cw.WriteFunctionPrototypeRawName(sig, cfn.Name)
+				cw.w().AddComponent(";")
+				cw.w().EndLine()
+			}
 		}
 	}
 

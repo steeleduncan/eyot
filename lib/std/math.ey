@@ -1,0 +1,14 @@
+// 64 bit float square root (cpu only)
+cpu fn sqrt(val f64) f64 {
+    return ey_stdlib_sqrtd(val)
+}
+
+// 32 bit float square root
+cpu fn sqrtf(val f32) f32 {
+    return ey_stdlib_sqrtf(val)
+}
+gpu fn sqrtf(val f32) f32 {
+    return gpubuiltin::sqrt(val)
+}
+
+

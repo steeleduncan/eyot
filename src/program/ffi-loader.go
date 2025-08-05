@@ -45,6 +45,12 @@ func convertFfiType(tyname string) (ast.Type, error) {
 	case "EyString":
 		return ast.Type{Selector: ast.KTypeString}, nil
 
+	case "EyFloat32":
+		return ast.Type{ Selector: ast.KTypeFloat, Width: 32 }, nil
+
+	case "EyFloat64":
+		return ast.Type{ Selector: ast.KTypeFloat, Width: 64 }, nil
+
 	case "":
 		return ast.Type{Selector: ast.KTypeVoid}, nil
 

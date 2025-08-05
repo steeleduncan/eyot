@@ -1,0 +1,21 @@
+import std::runtime
+import std::math
+
+cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
+    let c = gpu math::sqrtf
+    send(c, [f32]{ 4, 9, 16 })
+    for v: drain(c) {
+        print_ln("gpu ", v)
+    }
+
+    let d = cpu math::sqrtf
+    send(d, [f32]{ 4, 9, 16 })
+    for v: drain(d) {
+        print_ln("cpu ", v)
+    }
+}
