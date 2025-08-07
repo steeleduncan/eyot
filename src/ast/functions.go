@@ -95,6 +95,10 @@ func (fs FunctionSignature) MapKey() string {
 	return buf.String()
 }
 
+func (fs FunctionSignature) IsEqual(ofs FunctionSignature) bool {
+	return fs.MapKey() == ofs.MapKey()
+}
+
 func (fs FunctionSignature) String() string {
 	buf := bytes.NewBuffer([]byte{})
 	fmt.Fprint(buf, "FunctionSignature(")
@@ -255,8 +259,29 @@ func (fg *FunctionGroup) MergeIn(mfg *FunctionGroup) {
 	}
 }
 
+// find first signature for the function id
+func (fg *FunctionGroup) FindSignature(id FunctionId) (FunctionSignature, bool) {
+	for _, fs := range fg.Functions {
+		for _, fids := range fs.AllIds {
+			for _, fid := range fids {
+				if fid.IsEqual(id) {
+					return fs.Signature, true
+				}
+			}
+		}
+	}
+
+	return FunctionSignature {}, false
+}
+
 // Add a single function to the function group
-func (fg *FunctionGroup) Add(id FunctionId, fs FunctionSignature, loc FunctionLocation) {
+// If a string is returned, it is an error
+func (fg *FunctionGroup) Add(id FunctionId, fs FunctionSignature, loc FunctionLocation) string {
+	sig, fnd := fg.FindSignature(id)
+	if fnd && !sig.IsEqual(fs) {
+		return fmt.Sprintf("Inconsistent signature for %v. Got %v, expected %v", id, fs, sig)
+	}
+
 	key := fs.MapKey()
 
 	fsv, ok := fg.Functions[key]
@@ -279,6 +304,7 @@ func (fg *FunctionGroup) Add(id FunctionId, fs FunctionSignature, loc FunctionLo
 	}
 
 	fg.Functions[key] = fsv
+	return ""
 }
 
 type FunctionParameter struct {
@@ -398,7 +424,10 @@ func (fd *FunctionDefinition) Check(ctx *CheckContext, externalScope *Scope) {
 		if !ctx.Errors.Clean() {
 			return
 		}
-		ctx.Functions.Add(fd.Id, fd.Signature(), fd.Location)
+		err := ctx.Functions.Add(fd.Id, fd.Signature(), fd.Location)
+		if err != "" {
+			ctx.Errors.Errorf(err)
+		}
 
 	case KPassCheckTypes:
 		if fd.AvoidCheckPhase {
