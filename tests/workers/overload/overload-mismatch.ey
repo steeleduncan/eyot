@@ -1,0 +1,24 @@
+// check an error is thrown
+
+cpu fn mult(val f64) f64 {
+   return val * 2.0
+}
+
+gpu fn mult(val i64) i64 {
+   return val * 3
+}
+
+cpu fn main() {
+    let c = cpu mult
+    send(c, [i64]{ 2, 3, 4 })
+    for v: drain(c) {
+        print_ln("cpu: ", v)
+    }
+
+    let g = gpu mult
+    send(g, [i64]{ 2, 3, 4 })
+    for v: drain(g) {
+        print_ln("gpu: ", v)
+    }
+}
+
