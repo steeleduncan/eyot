@@ -1,4 +1,5 @@
 // check an error is thrown
+import std::runtime
 
 cpu fn mult(val f64) f64 {
    return val * 2.0
@@ -9,6 +10,11 @@ gpu fn mult(val i64) i64 {
 }
 
 cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
     let c = cpu mult
     send(c, [i64]{ 2, 3, 4 })
     for v: drain(c) {

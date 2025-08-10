@@ -1,4 +1,5 @@
 // this tests we can gpu/cpu overload at the point of calling
+import std::runtime
 
 cpu fn mult(val i64) i64 {
    return val * 2
@@ -13,6 +14,11 @@ fn domult(val i64) i64 {
 }
 
 cpu fn main() {
+	if not runtime::can_use_gpu() {
+		print_ln("ey-test-reserved-pass")
+        return
+    }
+
     let c = cpu domult
     send(c, [i64]{ 2, 3, 4 })
     for v: drain(c) {
