@@ -1816,10 +1816,6 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 	cw.w().AddComponent("// Forward decls for all functions")
 	cw.w().EndLine()
 	for _, fs := range p.Functions.Functions {
-		if len(fs.Signature.Types) == 0 {
-			continue
-		}
-
 		for loc, ids := range fs.AllIds {
 			if !cw.CanWriteRequirement(loc) {
 				continue
@@ -1832,7 +1828,6 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 		}
 	}
 	cw.w().EndLine()
-
 
 	if !cw.WritingGpu() {
 		cw.w().AddComponent("// Forward decls for ffi")
