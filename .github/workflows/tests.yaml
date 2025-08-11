@@ -4,14 +4,14 @@ on:
   push:
 
 jobs:
-  # unit tests running on "raw" machines
-  # The platform differences are enough to be cleaner with different blocks
-  linux-tests:
+  # In principle these could be merged with the macOS equivalents
+  # However platform differences are enough it seemed cleaner with different blocks
+  linux-raw-machine-tests:
     strategy:
       matrix:
         os:
           # 22.04 worth testing because it is glibc older than debian 12
-        - "ubuntu-22.04" 
+        - "ubuntu-22.04"
         - "ubuntu-24.04"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
@@ -24,7 +24,7 @@ jobs:
         run: source contrib/env.sh && eyot_test
         env:
           EyotTestOclGrind: y
-  mac-tests:
+  mac-raw-machine-tests:
     strategy:
       matrix:
         # 13 is intel, 15 is aarch, so both worth testing
