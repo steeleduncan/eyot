@@ -118,6 +118,15 @@
             '';
           };
 
+        todos = pkgs.stdenvNoCC.mkDerivation {
+          name = "eyot-todos";
+          src = ./.;
+          buildPhase = ''
+           grep -Hnr "TODO" --include \*.h --include \*.c --include \*.go . | sed -E 's/([^:]+):([^:]+):\s*(.*)\s*/\1:\2\n  \3\n/' > out.txt
+         '';
+          installPhase = "mv out.txt $out";
+        };
+
         docs =
           pkgs.stdenv.mkDerivation {
             name = "eyot-docs";
@@ -132,8 +141,10 @@
             '';
 
             installPhase = ''
-            mv site $out
+              mv site $out
               cp ${deb}/eyot.deb $out/installing/eyot-latest.deb
+              mkdir -p $out/dev
+              cp ${todos} $out/dev/todos.txt
             '';
           };
 
@@ -161,6 +172,7 @@
           docs = docs;
           deb = deb;
           man = man_page;
+          todos = todos;
         };
 
         checks = {
