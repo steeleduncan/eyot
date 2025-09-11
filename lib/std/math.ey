@@ -3,6 +3,10 @@ cpu fn sqrt(val f64) f64 {
     return ey_stdlib_sqrtd(val)
 }
 
+cpu fn exp(val f64) f64 {
+    return ey_stdlib_expd(val)
+}
+
 // 32 bit float square root
 cpu fn sqrtf(val f32) f32 {
     return ey_stdlib_sqrtf(val)

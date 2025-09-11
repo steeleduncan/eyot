@@ -9,6 +9,11 @@
             "name": "ey_stdlib_sqrtd",
             "return": "EyFloat64",
             "arguments": [ "EyFloat64" ]
+        },
+        {
+            "name": "ey_stdlib_expd",
+            "return": "EyFloat64",
+            "arguments": [ "EyFloat64" ]
         }
     ],
     "linkerflags" : [

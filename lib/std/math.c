@@ -5,6 +5,10 @@ EyFloat64 ey_stdlib_sqrtd(EyExecutionContext *ctx, EyFloat64 val) {
     return sqrt(val);
 }
 
+EyFloat64 ey_stdlib_expd(EyExecutionContext *ctx, EyFloat64 val) {
+    return exp(val);
+}
+
 EyFloat32 ey_stdlib_sqrtf(EyExecutionContext *ctx, EyFloat32 val) {
     return sqrtf(val);
 }
