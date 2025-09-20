@@ -1,0 +1,5 @@
+cpu fn main() {
+    let weights = [[f64]] { }
+    weights.append([f64]{ 1, 2, 3 })
+    print_ln("ok")
+}

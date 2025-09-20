@@ -1,0 +1,9 @@
+cpu fn mvec() [f64] {
+    return [f64]{ 1, 2, 3 }
+}
+
+cpu fn main() {
+    let weights = [[f64]] { }
+    weights.append(mvec())
+    print_ln("ok")
+}
