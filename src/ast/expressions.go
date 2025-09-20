@@ -844,21 +844,36 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 						ctx.Errors.Errorf("Vector.erase's first argument should be an integer")
 						return
 					}
+
+					// NB we need to fill in the compiler pass
+					// This is a symptom of the hacky implementation of these methods
+					position := ce.Arguments[0]
+					position.Check(ctx, scope)
+					if !ctx.Errors.Clean() {
+						return
+					}
+
 					if len(ce.Arguments) > 1 {
 						if ce.Arguments[1].Type().Selector != KTypeInteger {
 							ctx.Errors.Errorf("Vector.erase's second argument should be an integer")
 							return
 						}
 
+						deleteLength := ce.Arguments[1]
+						deleteLength.Check(ctx, scope)
+						if !ctx.Errors.Clean() {
+							return
+						}
+
 						ce.Arguments = []Expression{
 							ae.Accessed,
-							ce.Arguments[0],
-							ce.Arguments[1],
+							position,
+							deleteLength,
 						}
 					} else {
 						ce.Arguments = []Expression{
 							ae.Accessed,
-							ce.Arguments[0],
+							position,
 							&IntegerTerminal{
 								Value: 1,
 							},
@@ -882,6 +897,12 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 						return
 					}
 
+					appended := ce.Arguments[0]
+					appended.Check(ctx, scope)
+					if !ctx.Errors.Clean() {
+						return
+					}
+
 					// we can't write &3 or soemthing, so we must assign it to a temporary variable first
 					varName := ctx.GetTemporaryName()
 					ctx.InsertStatementBefore(&AssignStatement{
@@ -889,8 +910,8 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 							Name: varName,
 						},
 						PinPointers: false,
-						NewType:     ce.Arguments[0].Type(),
-						Rhs:         ce.Arguments[0],
+						NewType:     appended.Type(),
+						Rhs:         appended,
 						Type:        KAssignLet,
 					})
 
@@ -918,7 +939,14 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 						ctx.Errors.Errorf("Vector.resize() takes a single integer argument")
 						return
 					}
-					ce.Arguments = append([]Expression{ae.Accessed, ce.Arguments[0]})
+
+					newSize := ce.Arguments[0]
+					newSize.Check(ctx, scope)
+					if !ctx.Errors.Clean() {
+						return
+					}
+
+					ce.Arguments = append([]Expression{ae.Accessed, newSize})
 
 				case "length":
 					ce.IgnoreTypeChecks = true
