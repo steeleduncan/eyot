@@ -172,12 +172,6 @@ func (s *Scope) AddCFunction(builtin CFunction) {
 	s.SetVariable(builtin.Name, ty, false)
 }
 
-func (s *Scope) AddCFunctions(cfs []CFunction) {
-	for _, cf := range cfs {
-		s.AddCFunction(cf)
-	}
-}
-
 func (s *Scope) SetVariable(ident string, ty Type, assignable bool) {
 	if ty.IsCallable() {
 		binding, fnd := s.VariableBindings[ident]

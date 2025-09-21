@@ -10,6 +10,9 @@ import (
 	"eyot/token"
 )
 
+// the whole program
+// NB a bunch of this stuff is per module that could be moved to a struct and merged
+// e.g. GpuRequired, MaximumClosureSize, Vectors, Strings (NB FunctionGroup already has such a merge method)
 type Program struct {
 	// true when gpu is required for something in this program
 	GpuRequired bool
@@ -28,6 +31,9 @@ type Program struct {
 
 	Strings map[string]int
 
+	// all vector types found in the program (that must be later 
+	Vectors map[string]ast.Type
+
 	es *errors.Errors
 }
 
@@ -36,6 +42,7 @@ var _ parser.ModuleProvider = &Program{}
 func NewProgram(e *Environment, es *errors.Errors) *Program {
 	return &Program{
 		Modules:            map[string]*ast.Module{},
+		Vectors:            map[string]ast.Type {},
 		GpuRequired:        false,
 		Env:                e,
 		es:                 es,
@@ -151,6 +158,7 @@ func (p *Program) CheckModule(m *ast.Module) {
 	m.Check(ctx)
 
 	// the manually expanded loop is because the Definition.Check can add to the end of the structs array
+	// TODO remove this and rerun tests, it is probably fine without
 	i := 0
 	for i < len(ctx.Structs) {
 		rstr := ctx.Structs[i]
@@ -159,6 +167,11 @@ func (p *Program) CheckModule(m *ast.Module) {
 		}
 
 		i += 1
+	}
+
+	for vecId, vec := range ctx.Vectors {
+		// it is ok to overwrite
+		p.Vectors[vecId] = vec
 	}
 
 	ctx.Pass = ast.KPassMutate

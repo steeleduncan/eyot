@@ -42,14 +42,16 @@ type Type struct {
 	// Base type
 	Selector TypeSelector
 
-	// In the case of tuples, these are the constituent types
-	// or for a pointer type, [0] will be the type it points to
+	// For tuples: these are the constituent types
+	// For pointers: [0] will be the type it points to
+	// For functions: these are the argument types
 	Types []Type
 
 	// The typename (used for structs)
 	StructId StructId
 
 	// In the case this is callable, this is the return type
+	// The pointer is used to avoid a recursive definition
 	// TODO swap this to a .Signature instead, but then we need to be sure no lambdas are using .Types
 	Return *Type
 
@@ -92,6 +94,11 @@ func (ty Type) Unwrapped() Type {
 	return r
 }
 
+func MakeVoid() Type {
+	return Type { Selector: KTypeVoid }
+}
+
+// TODO make this a method on type
 func MakePointer(ty Type) Type {
 	return Type{
 		Selector: KTypePointer,
@@ -99,6 +106,7 @@ func MakePointer(ty Type) Type {
 	}
 }
 
+// TODO make this a method on type
 func MakeVector(ty Type) Type {
 	return MakePointer(Type{
 		Selector: KTypeVector,
@@ -257,6 +265,11 @@ func (ty Type) TupleIdentifier() string {
 
 func (ty Type) RawIdentifier() string {
 	return ty.namespacedIdentifier("")
+}
+
+// the function name for adding this type to a vector
+func (ty Type) VectorAddName() string {
+	return ty.namespacedIdentifier("vector_add_")
 }
 
 // Check that we can assign the given lhs type to the rhs type

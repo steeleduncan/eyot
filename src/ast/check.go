@@ -19,6 +19,13 @@ type RequiredStruct struct {
 	Definition StructDefinition
 }
 
+// A type of vector used in the program
+// A number of functions must be generated to support this
+type RequiredVector struct {
+	// unique A lookup id so we don't include the same thing many times
+	ElementType Type
+}
+
 type CheckPass int
 
 const (
@@ -32,10 +39,14 @@ const (
 	KPassCheckTypes
 )
 
+/*
+   A Check context is the overall record of typechecking a module
+ */
 type CheckContext struct {
 	Pass                  CheckPass
 	Errors                *errors.Errors
 	Structs               []*RequiredStruct
+	Vectors               map[string]Type
 	insertStatements      [][]Statement
 	insertElements        []TopLevelElement
 	returnTypes           []Type
@@ -56,6 +67,25 @@ type CheckContext struct {
 	Strings map[string]int
 
 	currentModule *Module
+}
+
+func NewCheckContext(es *errors.Errors, sp map[string]int) *CheckContext {
+	return &CheckContext{
+		Errors:                es,
+		Structs:               []*RequiredStruct{},
+		Vectors:               map[string]Type {},
+		returnTypes:           []Type{},
+		insertStatements:      [][]Statement{},
+		insertElements:        []TopLevelElement{},
+		shouldRemoveStatement: false,
+		inCpuMethodCount:      0,
+		inGpuMethodCount:      0,
+		maximumClosureSize:    0,
+		tempCount:             0,
+		Strings:               sp,
+		gpuRequired:           false,
+		Functions:             NewFunctionGroup(),
+	}
 }
 
 func (ctx *CheckContext) GetStringId(s string) int {
@@ -87,24 +117,6 @@ func (ctx *CheckContext) MaximumClosureSize() int {
 
 func (ctx *CheckContext) CurrentModule() *Module {
 	return ctx.currentModule
-}
-
-func NewCheckContext(es *errors.Errors, sp map[string]int) *CheckContext {
-	return &CheckContext{
-		Errors:                es,
-		Structs:               []*RequiredStruct{},
-		returnTypes:           []Type{},
-		insertStatements:      [][]Statement{},
-		insertElements:        []TopLevelElement{},
-		shouldRemoveStatement: false,
-		inCpuMethodCount:      0,
-		inGpuMethodCount:      0,
-		maximumClosureSize:    0,
-		tempCount:             0,
-		Strings:               sp,
-		gpuRequired:           false,
-		Functions:             NewFunctionGroup(),
-	}
 }
 
 func (cc *CheckContext) GpuRequired() bool {
@@ -279,7 +291,23 @@ func TupleFieldName(i int) string {
 func (cc *CheckContext) PrepareForPass(mod *Module) {
 	// clear out old structs from previous passes
 	cc.Structs = []*RequiredStruct{}
+	cc.Vectors = map[string]Type { }
 	cc.currentModule = mod
+}
+
+func (cc *CheckContext) RequireVector(ty Type, scope *Scope) {
+	id := ty.RawIdentifier()
+	if _, fnd := cc.Vectors[id]; fnd {
+		return
+	}
+
+	cc.Vectors[id] = ty
+
+	scope.AddCFunction(CFunction {
+		Name: ty.VectorAddName(),
+		ReturnType: MakeVoid(),
+		ArgumentTypes: []Type { ty },
+	})
 }
 
 func (cc *CheckContext) RequireType(ty Type, scope *Scope) {

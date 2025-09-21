@@ -740,6 +740,14 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 			if !ctx.Errors.Clean() {
 				return
 			}
+
+
+			if ae, calledIsAccess := ce.CalledExpression.(*AccessExpression); calledIsAccess {
+				ty := ae.Accessed.Type().Unwrapped()
+				if ty.Selector == KTypeVector {
+					ctx.RequireVector(ty, scope)
+				}
+			}
 		}
 
 	case KPassMutate:
@@ -881,48 +889,25 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 					}
 
 				case "append":
-					ce.CalledExpression = &IdentifierTerminal{
-						Name:          "ey_vector_append",
-						DontNamespace: true,
-						CachedType:    voidFunction(),
+					vt := MakeVoid()
+					newCalled := &CallExpression {
+						IgnoreTypeChecks: false,
+						CalledExpression: &IdentifierTerminal{
+							Name:          at.VectorAddName(),
+							DontNamespace: true,
+							CachedType:    	Type{
+								Selector: KTypeFunction,
+								Types: []Type { at },
+								Return:   &vt,
+							},
+						},
+						Arguments: []Expression{ ce.Arguments[0] },
+						cachedType: Type{Selector: KTypeVoid},
 					}
-					ce.IgnoreTypeChecks = true
-					if len(ce.Arguments) != 1 {
-						ctx.Errors.Errorf("Currently vector append only supports a single argument")
-						return
-					}
-
-					if !at.Types[0].CanAssignTo(ce.Arguments[0].Type()) {
-						ctx.Errors.Errorf("Bad type in vector append. Have %v, expecting %v", ce.Arguments[0].Type(), at.Types[0])
-						return
-					}
-
-					appended := ce.Arguments[0]
-					appended.Check(ctx, scope)
+					newCalled.Check(ctx, scope)
 					if !ctx.Errors.Clean() {
 						return
 					}
-
-					// we can't write &3 or soemthing, so we must assign it to a temporary variable first
-					varName := ctx.GetTemporaryName()
-					ctx.InsertStatementBefore(&AssignStatement{
-						Lhs: &IdentifierLValue{
-							Name: varName,
-						},
-						PinPointers: false,
-						NewType:     appended.Type(),
-						Rhs:         appended,
-						Type:        KAssignLet,
-					})
-
-					ampersand := &UnaryExpression{
-						Rhs: &IdentifierTerminal{
-							Name:          varName,
-							DontNamespace: true,
-						},
-						Operator: KOperatorAddressOf,
-					}
-					ce.Arguments = []Expression{ae.Accessed, ampersand}
 
 				case "resize":
 					ce.IgnoreTypeChecks = true

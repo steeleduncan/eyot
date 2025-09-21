@@ -56,7 +56,9 @@ type Parser struct {
 func NewParser(mp ModuleProvider, id ast.ModuleId, tkns []token.Token, es *errors.Errors, noImportIds map[string]bool, ffid *ast.FfiDefinitions) *Parser {
 	rootScope := ast.NewScope(nil)
 	if ffid != nil {
-		rootScope.AddCFunctions(ffid.Functions)
+		for _, cf := range ffid.Functions {
+			rootScope.AddCFunction(cf)
+		}
 	}
 
 	return &Parser{
