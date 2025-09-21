@@ -24,6 +24,7 @@ jobs:
         run: source contrib/env.sh && eyot_test
         env:
           EyotTestOclGrind: y
+
   mac-raw-machine-tests:
     strategy:
       matrix:
@@ -38,6 +39,17 @@ jobs:
       - run: brew install go
       - name: Unit tests (no vgpu)
         run: source contrib/env.sh && eyot_test
+
+  # check the example that runs using nix (NB a failure here shouldn't block deploy)
+  nix-example-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Check nix flake example
+        working-directory: ${{runner.workspace}}/eyot/examples/consume-flake
+        run: nix build . && ./result/bin/out.exe
 
   # nix flake checks
   nix-tests:

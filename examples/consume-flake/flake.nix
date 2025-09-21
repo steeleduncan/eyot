@@ -20,7 +20,7 @@
             ];
             src = ./.;
             buildPhase = ''
-              eyot build hello.ey
+              eyot build main.ey
             '';
 
             installPhase = ''
