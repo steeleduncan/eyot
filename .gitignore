@@ -3,6 +3,7 @@
 
 # avoid build products getting checked in
 *.exe
+*.dSYM/
 
 # helpful to have a test.ey around
 test*.ey

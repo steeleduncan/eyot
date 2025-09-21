@@ -1,4 +1,3 @@
-// currently part of eyot-runtime
 #include <stdlib.h>
 #include "eyot-runtime-cpu.h"
 
