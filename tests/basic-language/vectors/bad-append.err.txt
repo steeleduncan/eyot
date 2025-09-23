@@ -1,1 +1,1 @@
-Bad type in vector append.
+wrong argument type

@@ -744,7 +744,7 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 			if ae, calledIsAccess := ce.CalledExpression.(*AccessExpression); calledIsAccess {
 				ty := ae.Accessed.Type().Unwrapped()
 				if ty.Selector == KTypeVector {
-					ctx.RequireVector(ty, scope)
+					ctx.RequireVector(ty.Types[0], scope)
 				}
 			}
 		}
@@ -889,12 +889,13 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 
 				case "append":
 					vt := MakeVoid()
+					it := at.Types[0]
 					newCalled := &IdentifierTerminal{
-						Name:          at.VectorAddName(),
+						Name:          it.VectorAddName(),
 						DontNamespace: true,
 						CachedType:    	Type{
 							Selector: KTypeFunction,
-							Types: []Type { at.Types[0] },
+							Types: []Type { ae.Accessed.Type(), it },
 							Return:   &vt,
 							Builtin: true,
 						},
@@ -903,6 +904,7 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 					if !ctx.Errors.Clean() {
 						return
 					}
+					ce.Arguments = append([]Expression { ae.Accessed }, ce.Arguments...)
 					ce.CalledExpression = newCalled
 
 				case "resize":

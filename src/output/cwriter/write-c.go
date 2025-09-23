@@ -1827,6 +1827,16 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 			}
 		}
 	}
+	for _, vt := range p.Vectors {
+		cw.w().AddComponents(
+			"void", vt.VectorAddName(), "(",
+			"EyExecutionContext", "*", namespaceExecutionContext(), ",",
+			"EyVector", "*", "vec", ",",
+		)
+		cw.WriteType(vt)
+		cw.w().AddComponents("val", ")", ";")
+		cw.w().EndLine()
+	}
 	cw.w().EndLine()
 
 	if !cw.WritingGpu() {
@@ -1875,6 +1885,32 @@ func (cw *CWriter) writeProgram(p *program.Program) {
 	cw.w().EndLine()
 	for _, m := range p.Modules {
 		cw.WriteFile(m, false, pool)
+	}
+
+	cw.w().AddComponent("// Synthesized code")
+	cw.w().EndLine()
+	for _, vt := range p.Vectors {
+		cw.w().AddComponents(
+			"void", vt.VectorAddName(), "(",
+			"EyExecutionContext", "*", namespaceExecutionContext(), ",",
+			"EyVector", "*", "vec", ",",
+		)
+		cw.WriteType(vt)
+		cw.w().AddComponents("val", ")", "{")
+		cw.w().EndLine()
+		cw.w().Indent()
+
+		cw.w().AddComponents(
+			"ey_vector_append", "(",
+			namespaceExecutionContext(), ",",
+			"vec",
+			",", "&", "val", ")", ";",
+		)
+		cw.w().EndLine()
+		cw.w().Unindent()
+
+		cw.w().AddComponents("}")
+		cw.w().EndLine()
 	}
 
 	cw.w().AddComponent("// Function shims")
