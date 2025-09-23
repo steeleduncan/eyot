@@ -741,7 +741,6 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 				return
 			}
 
-
 			if ae, calledIsAccess := ce.CalledExpression.(*AccessExpression); calledIsAccess {
 				ty := ae.Accessed.Type().Unwrapped()
 				if ty.Selector == KTypeVector {
@@ -890,24 +889,21 @@ func (ce *CallExpression) Check(ctx *CheckContext, scope *Scope) {
 
 				case "append":
 					vt := MakeVoid()
-					newCalled := &CallExpression {
-						IgnoreTypeChecks: false,
-						CalledExpression: &IdentifierTerminal{
-							Name:          at.VectorAddName(),
-							DontNamespace: true,
-							CachedType:    	Type{
-								Selector: KTypeFunction,
-								Types: []Type { at },
-								Return:   &vt,
-							},
+					newCalled := &IdentifierTerminal{
+						Name:          at.VectorAddName(),
+						DontNamespace: true,
+						CachedType:    	Type{
+							Selector: KTypeFunction,
+							Types: []Type { at.Types[0] },
+							Return:   &vt,
+							Builtin: true,
 						},
-						Arguments: []Expression{ ce.Arguments[0] },
-						cachedType: Type{Selector: KTypeVoid},
 					}
 					newCalled.Check(ctx, scope)
 					if !ctx.Errors.Clean() {
 						return
 					}
+					ce.CalledExpression = newCalled
 
 				case "resize":
 					ce.IgnoreTypeChecks = true

@@ -1,10 +1,9 @@
+fn one() i64 {
+   return 1
+}
+
 cpu fn main() {
     let v = [f64] { }
-    for i: range(0, 10) {
-        v.append(i)
-    }
-
-    for i: range(0, 10) {
-        print_ln(v[i])
-    }
+    v.append(one())
+    print_ln(v[0])
 }
