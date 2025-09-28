@@ -1,0 +1,19 @@
+cpu fn main() {
+    let outer = [[f64]] { }
+    for i: range(0, 10) {
+        let inner = [f64]{}
+        for i: range(0, 10) {
+            inner.append(5.0)
+        }
+
+        outer.append(inner)
+    }
+
+    outer[0][1] = 12.0
+    outer[1][0] = 7.0
+
+    print_ln(outer[0][0])
+    print_ln(outer[1][0])
+    print_ln(outer[0][1])
+    print_ln(outer[1][1])
+}

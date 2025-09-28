@@ -1192,8 +1192,12 @@ func (p *Parser) IndexingLValue() (ast.LValue, bool) {
 		return nil, false
 	}
 
-	_, fnd = p.Token(token.OpenSquare)
-	if fnd {
+	for {
+		_, fnd = p.Token(token.OpenSquare)
+		if !fnd {
+			break
+		}
+
 		ind, fnd := p.Expression()
 		if !fnd {
 			p.LogError("Expected an expression after '[' in accessor lvalue")
@@ -1206,10 +1210,10 @@ func (p *Parser) IndexingLValue() (ast.LValue, bool) {
 			return nil, false
 		}
 
-		return &ast.IndexLValue{
+		lv = &ast.IndexLValue{
 			Indexed: lv,
 			Index:   ind,
-		}, true
+		}
 	}
 
 	return lv, true
