@@ -50,8 +50,6 @@ jobs:
     strategy:
       matrix:
         os:
-          # intel mac
-          - "macos-13"
           # aarch mac
           - "macos-15"
           # intel linux, no point on more than version as it is under nix
