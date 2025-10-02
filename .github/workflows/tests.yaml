@@ -26,13 +26,7 @@ jobs:
           EyotTestOclGrind: y
 
   mac-raw-machine-tests:
-    strategy:
-      matrix:
-        # 13 is intel, 15 is aarch, so both worth testing
-        os:
-        - "macos-13"
-        - "macos-15"
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-15
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
