@@ -556,7 +556,7 @@ func (p *Parser) LiteralValueExpression() (ast.Expression, bool) {
 			p.LogError("No open curly found for vector type")
 		}
 
-		es, fnd := p.ExpressionList(false)
+		es, fnd := p.ExpressionList(false, true)
 		if !fnd {
 			p.LogError("Expecting expression list in vector literal")
 		}
@@ -597,7 +597,7 @@ func (p *Parser) PrimaryExpression() (ast.Expression, bool) {
 // Parse an expression list
 //
 // When allowPlaceholders is true, it will parse for _, and leave nil in those cases
-func (p *Parser) ExpressionList(allowPlaceholders bool) ([]ast.Expression, bool) {
+func (p *Parser) ExpressionList(allowPlaceholders, allowTrailingComma bool) ([]ast.Expression, bool) {
 	el := []ast.Expression{}
 
 	checkLeading := true
@@ -635,8 +635,12 @@ func (p *Parser) ExpressionList(allowPlaceholders bool) ([]ast.Expression, bool)
 
 		nextExpression, fnd := p.Expression()
 		if !fnd {
-			p.LogError("Expecting expression after command in expression list")
-			return nil, false
+			if allowTrailingComma {
+				break
+			} else {
+				p.LogError("Expecting expression after command in expression list")
+				return nil, false
+			}
 		}
 
 		el = append(el, nextExpression)
@@ -679,7 +683,7 @@ func (p *Parser) PostfixExpression() (ast.Expression, bool) {
 	for {
 		_, fnd = p.Token(token.OpenCurved)
 		if fnd {
-			el, fnd := p.ExpressionList(false)
+			el, fnd := p.ExpressionList(false, false)
 			if !fnd {
 				// this should already have printed a more useful error than we can generate here
 				return nil, false
@@ -994,7 +998,7 @@ func (p *Parser) PrefixedExpression() (ast.Expression, bool) {
 			return nil, false
 		}
 
-		el, fnd := p.ExpressionList(true)
+		el, fnd := p.ExpressionList(true, false)
 		if !fnd {
 			// this should already have printed a more useful error than we can generate here
 			p.Reject()

@@ -1,0 +1,10 @@
+cpu fn main() {
+    // checcking the behaviour breaking over lines
+	let a = [[f64]] { [f64] { 0.0, 0.0 } }
+	let b = [[f64]] { [f64] { 0.0, 0.0 }, }
+	let broken = [[f64]] {
+        [f64] { 0.0, 0.0 },
+    }
+
+    print_ln("ok")
+}
