@@ -1,6 +1,16 @@
 {
     "functions": [
         {
+            "name": "ey_stdlib_rand",
+            "return": "EyInteger",
+            "arguments": [ ]
+        },
+        {
+            "name": "ey_stdlib_rand_max",
+            "return": "EyInteger",
+            "arguments": [ ]
+        },
+        {
             "name": "ey_stdlib_sqrtf",
             "return": "EyFloat32",
             "arguments": [ "EyFloat32" ]
@@ -12,6 +22,26 @@
         },
         {
             "name": "ey_stdlib_expd",
+            "return": "EyFloat64",
+            "arguments": [ "EyFloat64" ]
+        },
+        {
+            "name": "ey_stdlib_cosd",
+            "return": "EyFloat64",
+            "arguments": [ "EyFloat64" ]
+        },
+        {
+            "name": "ey_stdlib_logd",
+            "return": "EyFloat64",
+            "arguments": [ "EyFloat64" ]
+        },
+        {
+            "name": "ey_stdlib_sind",
+            "return": "EyFloat64",
+            "arguments": [ "EyFloat64" ]
+        },
+        {
+            "name": "ey_stdlib_tand",
             "return": "EyFloat64",
             "arguments": [ "EyFloat64" ]
         }

@@ -1,10 +1,21 @@
-// 64 bit float square root (cpu only)
+// 64 bit float arithmetic (cpu only)
 cpu fn sqrt(val f64) f64 {
     return ey_stdlib_sqrtd(val)
 }
-
 cpu fn exp(val f64) f64 {
     return ey_stdlib_expd(val)
+}
+cpu fn cos(val f64) f64 {
+    return ey_stdlib_cosd(val)
+}
+cpu fn sin(val f64) f64 {
+    return ey_stdlib_sind(val)
+}
+cpu fn tan(val f64) f64 {
+    return ey_stdlib_tand(val)
+}
+cpu fn log(val f64) f64 {
+    return ey_stdlib_logd(val)
 }
 
 // 32 bit float square root
@@ -15,4 +26,46 @@ gpu fn sqrtf(val f32) f32 {
     return gpubuiltin::sqrt(val)
 }
 
+cpu fn pi() f64 {
+    return 3.14159265359
+}
 
+// TODO these should be replaced with native variants
+cpu fn rand() i64 {
+    return ey_stdlib_rand()
+}
+
+cpu fn rand_max() i64 {
+    return ey_stdlib_rand_max()
+}
+
+// TODO this is temp until i add the cast keyword
+cpu fn cast_f64(val i64) f64 {
+    return val
+}
+
+// box muller transform for a random variable with mean 0, standard deviation 1
+cpu fn rand_normal() f64 {
+    const epsilon = 0.00000001
+    
+    let u1 = 0.0
+    let u2 = 0.0
+
+    while true {
+        u1 = cast_f64(rand()) / (cast_f64(rand_max()) + 1.0);
+        if u1 >= epsilon {
+            break
+        }
+    }
+    while true {
+        u2 = cast_f64(rand()) / (cast_f64(rand_max()) + 1.0);
+        if u2 >= epsilon {
+            break
+        }
+    }
+    const magnitude = sqrt(-2.0 * log(u1));
+
+    return magnitude * cos(2.0 * pi() * u2);
+
+    // NB there is a second useable value: magnitude * sin(2.0 * M_PI * u2);
+}
