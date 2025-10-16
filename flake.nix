@@ -185,6 +185,7 @@
           build-docs = docs;
 
           example-hello = check_example "hello-world";
+          example-backpropagation = check_example "backpropagation";
 
           # Check the reformat script is working
           # NB this needs to mutate the source folder so it can't use the default immutable folder

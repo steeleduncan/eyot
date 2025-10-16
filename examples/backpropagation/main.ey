@@ -1,0 +1,327 @@
+// Eyot backpropagation implementation
+// Thanks to https://dev.to/andrey_matveyev/developing-a-neural-network-in-golang-bl8
+
+import std::math
+import std::runtime
+
+cpu fn sigmoid(x f64) f64 {
+	return 1.0 / (1.0 + math::exp(-x))
+}
+
+cpu fn sigmoid_derivative(x f64) f64 {
+    const s = sigmoid(x)
+	return s * (1.0 - s)
+}
+
+// TODO this needs replacement with a builtin
+cpu fn make_f64(len i64, value f64) [f64] {
+    let r = [f64]{}
+    for i: range(0, len) {
+        r.append(value)
+    }
+    return r
+}
+
+cpu fn make_f64_2d(cols, rows i64, value f64) [[f64]] {
+    let r = [[f64]]{}
+    for i: range(0, cols) {
+        r.append(make_f64(rows, value))
+    }
+    return r
+}
+
+// TODO this is a bit questionable translation
+cpu fn outer_product(a, b [f64]) [[f64]] {
+	const rows = a.length()
+	const cols = b.length()
+	let result = [[f64]] {}
+    for i : range(0, rows) {
+        let row = [f64] {}
+        for j : range(0, cols) {
+            row.append(a[i] * b[j])
+		}
+		result.append(row)
+	}
+	return result
+}
+
+cpu fn transpose_matrix(matrix [[f64]]) [[f64]] {
+	const rows = matrix.length()
+	if rows == 0 {
+       runtime::panic("transpose_matrix: empty matrix")
+	}
+
+	const cols = matrix[0].length()
+	let transposed = make_f64_2d(cols, rows, 0)
+	for i: range(0, rows) {
+        for j: range(0, cols) {
+			transposed[j][i] = matrix[i][j]
+		}
+	}
+
+	return transposed
+}
+
+cpu fn multiply_vectors(a, b [f64]) [f64] {
+	let result = make_f64(a.length(), 0)
+	for i : range(0, a.length()) {
+		result[i] = a[i] * b[i]
+	}
+	return result
+}
+
+cpu fn add_vectors(a, b [f64]) [f64] {
+	let result = make_f64(a.length(), 0)
+	for i: range(0, a.length()) {
+		result[i] = a[i] + b[i]
+	}
+	return result
+}
+
+cpu fn dot_product(a, b [f64]) f64 {
+	let sum = 0.0
+	for i: range(0, a.length()) {
+		sum = sum + a[i] * b[i]
+	}
+	return sum
+}
+
+cpu fn multiply_matrix_vector(matrix [[f64]], vector [f64]) [f64] {
+	let result = [f64] {}
+	for i: range(0, matrix.length()) {
+        result.append(dot_product(matrix[i], vector))
+	}
+	return result
+}
+
+struct Layer {
+   input_size, output_size i64
+
+   // if true, sigmoid, if false, linear
+   sigmoid bool
+
+   weights [[f64]]
+   biases [f64]
+
+   // essentially a record of the last input
+   input_vector [f64]
+   weighted_sums [f64]
+   output_vector [f64]
+
+   weight_gradients [[f64]]
+   bias_gradients [f64]
+   input_gradient [f64]
+
+   cpu fn activation(val f64) f64 {
+       if self.sigmoid {
+           return sigmoid(val)
+       } else {
+           return val
+       }
+   }
+
+   cpu fn derivative(val f64) f64 {
+       if self.sigmoid {
+           return sigmoid_derivative(val)
+       } else {
+           return 1.0
+       }
+    }
+
+    // forward prop is inference
+    cpu fn forward(input [f64]) [f64] {
+        self.input_vector = input
+
+        self.weighted_sums = multiply_matrix_vector(self.weights, input)
+        self.weighted_sums = add_vectors(self.weighted_sums, self.biases)
+
+        // 2. Activation
+        self.output_vector = make_f64(self.weighted_sums.length(), 0)
+        for i : range(0, self.weighted_sums.length()) {
+            self.output_vector[i] = self.activation(self.weighted_sums[i])
+        }
+        return self.output_vector
+    }
+
+    // backward is learning
+    cpu fn backward(output_gradient [f64]) [f64] {
+        let activation_gradient = make_f64(self.weighted_sums.length(), 0)
+        for i : range(0, self.weighted_sums.length()) {
+            activation_gradient[i] = self.derivative(self.weighted_sums[i])
+        }
+        let gradient_after_activation = multiply_vectors(output_gradient, activation_gradient)
+        self.bias_gradients = gradient_after_activation
+        self.weight_gradients = outer_product(gradient_after_activation, self.input_vector)
+        let transposed_weights = transpose_matrix(self.weights)
+        self.input_gradient = multiply_matrix_vector(transposed_weights, gradient_after_activation)
+        return self.input_gradient
+    }
+
+
+    cpu fn update(learning_rate f64) {
+        for i: range(0, self.weights.length()) {
+            for j: range(0, self.weights[i].length()) {
+                self.weights[i][j] -= learning_rate * self.weight_gradients[i][j]
+            }
+        }
+        for i : range(0, self.biases.length()) {
+            self.biases[i] -= learning_rate * self.bias_gradients[i]
+        }
+    }
+}
+
+// TODO should be easy to do implicitly
+cpu fn itof64(val i64) f64 {
+    return val
+}
+
+cpu fn new_layer(inputs, outputs i64, sigmoid bool) *Layer {
+    const weight_scale = math::sqrt(1.0 / itof64(inputs))
+
+    let weights = [[f64]] { }
+    for i: range(0, outputs) {
+        weights.append(make_f64(inputs, 0))
+
+        for j: range(0, inputs) {
+            weights[i][j] = math::rand_normal() * weight_scale
+        }
+    }
+
+    let layer = new Layer {
+        input_size: inputs,
+        output_size: outputs,
+        sigmoid: sigmoid,
+        weights: weights,
+        biases: make_f64(outputs, 0.0),
+    }
+
+    return layer
+}
+
+struct NeuralNetwork {
+	layers [*Layer]
+
+    cpu fn predict(input [f64]) [f64] {
+        let output = input
+        for layer: self.layers {
+            output = layer.forward(output)
+        }
+        return output
+    }
+
+    cpu fn train(input [f64], target_output [f64], learning_rate f64) {
+        let predicted_output = self.predict(input)
+
+        let output_gradient = make_f64(predicted_output.length(), 0)
+        for i: range(0, predicted_output.length()) {
+            output_gradient[i] = 2.0 * (predicted_output[i] - target_output[i])
+        }
+
+        let current_gradient = output_gradient
+        for i: range(self.layers.length() - 1, -1, -1) {
+            current_gradient = self.layers[i].backward(current_gradient)
+        }
+
+        for layer: self.layers {
+            layer.update(learning_rate)
+        }
+    }
+}
+
+cpu fn new_neural_network(input_size i64, hidden_sizes [i64], output_size i64) *NeuralNetwork {
+	let net = new NeuralNetwork {
+        layers: [*Layer] {},
+    }
+
+	let cis = input_size
+	for hs: hidden_sizes {
+		net.layers.append(new_layer(cis, hs, true))
+		cis = hs
+	}
+
+	net.layers.append(new_layer(cis, output_size, false))
+	return net
+}
+
+cpu fn print_f64(vals [f64]) {
+    for v: vals {
+        print(v)
+        print(", ")
+    }
+}
+
+cpu fn main() {
+	let xor_inputs = [[f64]] {
+		[f64] { 0.0, 0.0 },
+		[f64] { 0.0, 1.0 },
+		[f64] { 1.0, 0.0 },
+		[f64] { 1.0, 1.0 },
+	}
+
+	let xor_outputs = [[f64]] {
+		[f64] { 0.0 },
+		[f64] { 1.0 },
+		[f64] { 1.0 },
+		[f64] { 0.0 },
+	}
+
+	let nn = new_neural_network(2, [i64]{ 2 }, 1)
+	
+	print_ln("Testing the non-trained network:")
+	for i: range(0, xor_inputs.length()) {
+        let input = xor_inputs[i]
+        
+		let predicted_output = nn.predict(input)
+        print("Input: ")
+        print_f64(input)
+        print("Expected: ")
+        print_f64(xor_outputs[i])
+        print("Prediction: ")
+        print_f64(predicted_output)
+        print_ln()
+	}
+
+	print_ln("Starting XOR training...")
+
+	let learning_rate = 0.01
+	let epochs = 20000 // Number of training epochs
+
+	for i: range(0, epochs) {
+		let total_loss = 0.0
+		for j: range (0, xor_inputs.length()) {
+			let input = xor_inputs[j]
+			let target = xor_outputs[j]
+
+			nn.train(input, target, learning_rate)
+
+			let predicted = nn.predict(input)
+			let loss = 0.0
+			for k: range(0, predicted.length()) {
+				const diff = predicted[k] - target[k]
+				loss += diff * diff
+			}
+			total_loss += loss
+		}
+
+		if (i+1) % 1000 == 0 {
+            print_ln("Epoch ", i + 1, ", Average Loss: ", total_loss / itof64(xor_inputs.length()))
+        }
+	}
+
+	print_ln("XOR training finished.")
+
+	print_ln("Testing the trained network:")
+	for i: range(0, xor_inputs.length()) {
+        let input = xor_inputs[i]
+        
+		let predicted_output = nn.predict(input)
+        print("Input: ")
+        print_f64(input)
+        print("Expected: ")
+        print_f64(xor_outputs[i])
+        print("Prediction: ")
+        print_f64(predicted_output)
+        print_ln()
+	}
+
+}
