@@ -26,7 +26,12 @@ jobs:
           EyotTestOclGrind: y
 
   mac-raw-machine-tests:
-    runs-on: macos-15
+    strategy:
+      matrix:
+        os:
+          - "macos-15"
+          - "macos-15-intel"
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -50,9 +55,8 @@ jobs:
     strategy:
       matrix:
         os:
-          # aarch mac
           - "macos-15"
-          # intel linux, no point on more than version as it is under nix
+          - "macos-15-intel"
           - "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
