@@ -1,0 +1,1 @@
+unexported_square in module testlib::lib is not exported

@@ -318,6 +318,9 @@ type FunctionDefinition struct {
 	AvoidCheckPhase bool
 	Location        FunctionLocation
 
+	// is this exported from its module
+	Exported        bool
+
 	// scope including function parameters
 	Scope *Scope
 

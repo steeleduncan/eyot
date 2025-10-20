@@ -1,3 +1,3 @@
-fn square(val i64) i64 {
+export fn square(val i64) i64 {
     return val * val
 }

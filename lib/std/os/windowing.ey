@@ -8,7 +8,7 @@ struct SdlInstance {
   }
 }
 
-cpu fn new_instance(w, h i64) *SdlInstance {
+export cpu fn new_instance(w, h i64) *SdlInstance {
    let i = new SdlInstance {}
    sdleyot_init(w, h) 
    return i

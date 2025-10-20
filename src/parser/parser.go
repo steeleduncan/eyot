@@ -502,6 +502,11 @@ func (p *Parser) LiteralValueExpression() (ast.Expression, bool) {
 		def, foundFunction := mod.LookupFunction(name)
 		if foundFunction {
 			fid := def.Id
+			if !def.Exported {
+				p.LogError("Function %v in module %v is not exported", name, mod.Id.DisplayName())
+				return nil, false
+			}
+
 			return &ast.IdentifierTerminal{
 				Name:           name,
 				DontNamespace:  false,
@@ -1945,6 +1950,8 @@ func (p *Parser) FunctionDefinition() (*ast.FunctionDefinition, bool) {
 
 	loc := ast.KLocationAnywhere
 
+	_, exported := p.Token(token.Export)
+
 	if _, cpuKeyword := p.Token(token.Cpu); cpuKeyword {
 		loc = ast.KLocationCpu
 	} else if _, gpuKeyword := p.Token(token.Gpu); gpuKeyword {
@@ -2008,6 +2015,7 @@ func (p *Parser) FunctionDefinition() (*ast.FunctionDefinition, bool) {
 			Struct: ast.BlankStructId(),
 			Module: p.id,
 		},
+		Exported: exported,
 		Return:          returnType,
 		AvoidCheckPhase: false,
 		Scope:           ourScope,

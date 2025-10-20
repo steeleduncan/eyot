@@ -49,6 +49,7 @@ const (
 
 	// keyword tokens (technically some two char tokens in here, but grouping as they are words)
 	Null
+	Export
 	Function
 	GpuBuiltin
 	Break
@@ -179,6 +180,9 @@ func (t Token) String() string {
 
 	case Function:
 		fmt.Fprintf(buf, "Function")
+
+	case Export:
+		fmt.Fprintf(buf, "Export")
 
 	case Null:
 		fmt.Fprintf(buf, "Null")

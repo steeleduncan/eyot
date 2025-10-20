@@ -13,7 +13,7 @@
 
     ; keywords
     '(
-        "fn" "partial" "_"
+        "fn" "partial" "_" "export"
         "struct" "self" "true" "false"  "return" "if" "else" "elseif" "and" "not" "or" "placeholder" "new" "range"
         "for" "while" "break"
         "let" "const"

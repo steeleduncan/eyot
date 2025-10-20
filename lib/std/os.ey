@@ -1,17 +1,17 @@
 // os interface for Eyot
 
-cpu fn sleep(count i64) {
+export cpu fn sleep(count i64) {
     ffi_os_usleep(count * 1000000)
 }
 
-cpu fn usleep(count i64) {
+export cpu fn usleep(count i64) {
     ffi_os_usleep(count)
 }
 
-cpu fn exit(code i64) {
+export cpu fn exit(code i64) {
     ffi_os_exit(code)
 }
 
-cpu fn args() [string] {
+export cpu fn args() [string] {
     return ey_runtime_get_args()
 }

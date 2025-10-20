@@ -8,6 +8,18 @@ import foo::bar
 
 would import `foo/bar.ey`. There is currently no visibility system for modules, so all symbols from `bar.ey` are imported and added to the `foo::bar` namespace. For example if you had a function `square` in `bar.ey` you would refer to it as `bar::square`
 
+## Exporting
+
+By default no symbol is exported from its module. To alter this you should add the `export` keyword as the first part of the definition. For example
+
+```
+export cpu fn double(val: f64) f64 {
+   ...
+}
+```
+
+would be exported.
+
 ## Convention
 
 Some conventions with the standard library rather:

@@ -1,4 +1,4 @@
-fn is_newline(c char) bool {
+export fn is_newline(c char) bool {
 	if c == '\n' {
 		return true	
 	}	
@@ -10,7 +10,7 @@ fn is_newline(c char) bool {
 	return false
 }
 
-fn is_whitespace(c char) bool {
+export fn is_whitespace(c char) bool {
 	if c == ' ' {
 		return true	
 	}	
@@ -22,7 +22,7 @@ fn is_whitespace(c char) bool {
 	return false
 }
 
-cpu fn substring(s string, start, length i64) string {
+export cpu fn substring(s string, start, length i64) string {
 	// far from efficient, but will do for now
 	let ret = ""
 	ret.resize(length)
@@ -52,7 +52,7 @@ cpu fn trim_whitespace_right(s string) string {
 }
 */
 
-cpu fn trim_whitespace(s string) string {
+export cpu fn trim_whitespace(s string) string {
 	while s.length() > 0 and is_whitespace(s[0]) {
 		s = substring(s, 1, s.length() - 1)
 	}

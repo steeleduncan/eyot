@@ -1,4 +1,8 @@
-fn square(val i64) i64 {
+export fn square(val i64) i64 {
+   return val * val
+}
+
+fn unexported_square(val i64) i64 {
    return val * val
 }
 
@@ -10,6 +14,6 @@ struct Squarer {
    }
 }
 
-fn is_positive(val i64) bool {
+export fn is_positive(val i64) bool {
 	return val > 0
 }
