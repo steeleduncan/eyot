@@ -18,11 +18,13 @@ It is unlikely to go anywhere in the near future, but it will eventually move to
 
 Global variables are disallowed for now as they are complex to share with the GPU.
 
-## Integers
+## Types
+
+### Integers
 
 The only integer type so far is `i64`, which denotes a 64 bit signed integer.
 
-## Float
+### Float
 
 Currently there are 32 and 64 bit floating point types `f32` and `f64` respectively.
 Due to limitations in the standard profile of OpenCL, only 32 bit floats are allowed in GPU code.
@@ -30,7 +32,7 @@ I hope to lift this restriction by moving to a different back end on day.
 
 `1.0` is an `f64` literal, and `1.0f` is an `f32` literal.
 
-## Boolean
+### Boolean
 
 `bool` is a boolean type, of which `true` and `false` represent the only two values.
 
@@ -38,7 +40,7 @@ Eyot has the usual numerical comparison operators (`==`, `!=`, `<`, `>`, `<=`, `
 
 `bool` values can be negated with the `not` keyword 
 
-## Vector
+### Vector
 
 A vector (flexible array) of values is denoted by square brackets around the type it contains.
 E.g. `[i64]`.
@@ -60,7 +62,7 @@ Additionally vectors support the following builtin functions
 - `x.resize(20)` resizes the vector to have space for `20` slots
 - `x.append(1)` would add a new value to the vector
 
-## Strings and Characters
+### Strings and Characters
 
 String literals are created with quotes
 
@@ -81,3 +83,6 @@ For now the details of how they may be stored are opaque to users of Eyot, and t
 
 The access operator, `[]`, takes the code point index as a value, and returns a `char` type, which is a type sufficient to represent all Unicode code points
 
+### Casting
+
+You can cast with the `as` keyword. For example `let u = 1` would declare u to be a variable of type `i64`, however `let u = 1 as f64` would declare u to be a variable of type `f64`.

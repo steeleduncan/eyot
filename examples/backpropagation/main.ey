@@ -170,13 +170,8 @@ struct Layer {
     }
 }
 
-// TODO should be easy to do implicitly
-cpu fn itof64(val i64) f64 {
-    return val
-}
-
 cpu fn new_layer(inputs, outputs i64, sigmoid bool) *Layer {
-    const weight_scale = math::sqrt(1.0 / itof64(inputs))
+    const weight_scale = math::sqrt(1.0 / (inputs as f64))
 
     let weights = [[f64]] { }
     for i: range(0, outputs) {
@@ -304,7 +299,7 @@ cpu fn main() {
 		}
 
 		if (i+1) % 1000 == 0 {
-            print_ln("Epoch ", i + 1, ", Average Loss: ", total_loss / itof64(xor_inputs.length()))
+            print_ln("Epoch ", i + 1, ", Average Loss: ", total_loss / (xor_inputs.length() as f64))
         }
 	}
 

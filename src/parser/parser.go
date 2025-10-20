@@ -681,6 +681,20 @@ func (p *Parser) PostfixExpression() (ast.Expression, bool) {
 	}
 
 	for {
+		_, fnd = p.Token(token.As)
+		if fnd {
+			ty, fnd := p.Type()
+			if !fnd {
+				p.LogExpectingError("type", "cast expression")
+			}
+
+			pe = &ast.CastExpression {
+				NewType: ty,
+				Casted: pe,
+				CheckCastable: true,
+			}
+		}
+		
 		_, fnd = p.Token(token.OpenCurved)
 		if fnd {
 			el, fnd := p.ExpressionList(false, false)
@@ -691,7 +705,7 @@ func (p *Parser) PostfixExpression() (ast.Expression, bool) {
 
 			_, fnd = p.Token(token.CloseCurved)
 			if !fnd {
-				p.LogError(fmt.Sprintf("Expecting ')' in call statement, have %v", p.DebugPeekToken()))
+				p.LogExpectingError("')'", "call statement")
 				return nil, false
 			}
 

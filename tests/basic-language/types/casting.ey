@@ -1,0 +1,8 @@
+cpu fn main() {
+    let u = 1
+    let v = 1 as f64
+    print_ln("u = ", u)
+
+    // ensure float printing is triggered
+    print_ln("v = ", v)
+}

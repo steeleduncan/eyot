@@ -494,6 +494,7 @@ func (ty Type) writeCType(w io.Writer) {
 	}
 }
 
+// human readable, can be passed in error messages
 func (ty Type) String() string {
 	switch ty.Selector {
 	case KTypeInteger:

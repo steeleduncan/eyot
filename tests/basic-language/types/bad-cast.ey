@@ -1,0 +1,4 @@
+cpu fn main() {
+    let u = "1" as i64
+    print_ln("u = ", u)
+}

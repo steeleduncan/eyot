@@ -31,6 +31,7 @@ func (st *NullLiteral) Check(ctx *CheckContext, scope *Scope) {
 type CastExpression struct {
 	NewType Type
 	Casted  Expression
+	CheckCastable bool
 }
 
 var _ Expression = &CastExpression{}
@@ -44,7 +45,21 @@ func (ce CastExpression) String() string {
 }
 
 func (ce *CastExpression) Check(ctx *CheckContext, scope *Scope) {
-	ctx.RequireType(ce.NewType, scope)
+	ce.Casted.Check(ctx, scope)
+	if !ctx.Errors.Clean() {
+		return
+	}
+
+	switch ctx.CurrentPass() {
+	case KPassSetTypes:
+		ctx.RequireType(ce.NewType, scope)
+
+	case KPassCheckTypes:
+		if ce.CheckCastable && !ce.Casted.Type().CanAssignTo(ce.NewType) {
+			ctx.Errors.Errorf("cannot cast %v to %v", ce.Casted.Type().String(), ce.NewType.String())
+			return
+		}
+	}
 }
 
 type SelfTerminal struct {

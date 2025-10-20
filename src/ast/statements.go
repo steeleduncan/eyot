@@ -298,6 +298,7 @@ func (rs *ReturnStatement) Check(ctx *CheckContext, scope *Scope) {
 					ce := &CastExpression{
 						Casted:  e,
 						NewType: functionReturnType.Types[rti],
+						CheckCastable: false,
 					}
 					returnedTuple.Expressions[rti] = ce
 				}
