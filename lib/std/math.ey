@@ -39,11 +39,6 @@ cpu fn rand_max() i64 {
     return ey_stdlib_rand_max()
 }
 
-// TODO this is temp until i add the cast keyword
-cpu fn cast_f64(val i64) f64 {
-    return val
-}
-
 // box muller transform for a random variable with mean 0, standard deviation 1
 cpu fn rand_normal() f64 {
     const epsilon = 0.00000001
@@ -52,13 +47,13 @@ cpu fn rand_normal() f64 {
     let u2 = 0.0
 
     while true {
-        u1 = cast_f64(rand()) / (cast_f64(rand_max()) + 1.0);
+        u1 = (rand() as f64) / ((rand_max() as f64) + 1.0);
         if u1 >= epsilon {
             break
         }
     }
     while true {
-        u2 = cast_f64(rand()) / (cast_f64(rand_max()) + 1.0);
+        u2 = (rand() as f64) / ((rand_max() as f64) + 1.0);
         if u2 >= epsilon {
             break
         }
