@@ -161,6 +161,7 @@ func (es *ExpressionStatement) Check(ctx *CheckContext, scope *Scope) {
 }
 
 type StructDefinitionStatement struct {
+	Exported   bool
 	Id         StructId
 	Definition StructDefinition
 }

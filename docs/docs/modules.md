@@ -18,7 +18,7 @@ export cpu fn double(val: f64) f64 {
 }
 ```
 
-would be exported.
+would be exported. Similarly, placing the `export` keyword before a struct makes it available outside that module
 
 ## Convention
 

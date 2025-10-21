@@ -1,0 +1,1 @@
+struct UnexportedSquarer in module testlib::lib is not exported

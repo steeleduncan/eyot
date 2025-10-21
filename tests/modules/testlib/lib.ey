@@ -1,12 +1,20 @@
-export fn square(val i64) i64 {
-   return val * val
-}
-
 fn unexported_square(val i64) i64 {
    return val * val
 }
 
-struct Squarer {
+export fn square(val i64) i64 {
+   return unexported_square(val)
+}
+
+struct UnexportedSquarer {
+   val i64
+
+   fn calc() i64 {
+      return self.val * self.val
+   }
+}
+
+export struct Squarer {
    val i64
 
    fn calc() i64 {

@@ -1,0 +1,6 @@
+import testlib::lib
+
+cpu fn main() {
+    let s = lib::UnexportedSquarer { val: 4 }
+    print_ln(s.calc())
+}

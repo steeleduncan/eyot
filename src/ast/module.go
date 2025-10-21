@@ -26,6 +26,17 @@ func (f *Module) LookupFunction(name string) (*FunctionDefinition, bool) {
 	return nil, false
 }
 
+func (f *Module) LookupStruct(name string) (*StructDefinitionStatement, bool) {
+	for _, tlec := range f.TopLevelElements {
+		sd, ok := tlec.TopLevelElement.(*StructDefinitionStatement)
+		if ok && sd.Id.Name == name {
+			return sd, true
+		}
+	}
+
+	return nil, false
+}
+
 func (f *Module) Check(ctx *CheckContext) {
 	newTlecs := []TopLevelElementContainer{}
 

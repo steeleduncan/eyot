@@ -500,6 +500,7 @@ func (p *Parser) LiteralValueExpression() (ast.Expression, bool) {
 	mod, name, fnd := p.ResolvedId()
 	if fnd {
 		def, foundFunction := mod.LookupFunction(name)
+		sd, foundStruct := mod.LookupStruct(name)
 		if foundFunction {
 			fid := def.Id
 			if !def.Exported {
@@ -517,7 +518,12 @@ func (p *Parser) LiteralValueExpression() (ast.Expression, bool) {
 		} else if p.structLiteralOk < 0 {
 			p.LogError("Cannot parse a struct literal in this context (not a function, so interpreted that way)")
 			return nil, false
-		} else if sl, fnd := p.StructLiteralBody(mod.Id, name); fnd {
+		} else if sl, fnd := p.StructLiteralBody(mod.Id, name); fnd && foundStruct {
+			if !sd.Exported {
+				p.LogError("struct %v in module %v is not exported", name, mod.Id.DisplayName())
+				return nil, false
+			}
+
 			return sl, true
 		} else {
 			p.LogError("Do not recognise the scoped identifier in this context")
@@ -1356,10 +1362,15 @@ func (p *Parser) ImportLine() (ast.TopLevelElement, bool) {
 }
 
 func (p *Parser) StructDefinition() (ast.TopLevelElement, bool) {
+	p.Save()
+	_, exported := p.Token(token.Export)
+
 	_, fnd := p.Token(token.Struct)
 	if !fnd {
+		p.Reject()
 		return nil, false
 	}
+	p.Accept()
 
 	structNameTok, fnd := p.Token(token.Identifier)
 	if !fnd {
@@ -1420,6 +1431,7 @@ func (p *Parser) StructDefinition() (ast.TopLevelElement, bool) {
 	}
 
 	return &ast.StructDefinitionStatement{
+		Exported:   exported,
 		Id:         structId,
 		Definition: sd,
 	}, true
