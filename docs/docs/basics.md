@@ -28,7 +28,7 @@ The only integer type so far is `i64`, which denotes a 64 bit signed integer.
 
 Currently there are 32 and 64 bit floating point types `f32` and `f64` respectively.
 Due to limitations in the standard profile of OpenCL, only 32 bit floats are allowed in GPU code.
-I hope to lift this restriction by moving to a different back end on day.
+I hope to lift this restriction by moving to a different back end one day.
 
 `1.0` is an `f64` literal, and `1.0f` is an `f32` literal.
 
