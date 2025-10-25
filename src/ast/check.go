@@ -29,8 +29,11 @@ type RequiredVector struct {
 type CheckPass int
 
 const (
+	// Apply TLEs everywhere, e.g. functions. This allows the SetTypes pass to use these results
+	KPassSetTleTypes CheckPass = iota
+
 	// Set cached types everywhere
-	KPassSetTypes CheckPass = iota
+	KPassSetTypes
 
 	// Mutate the tree as needed
 	KPassMutate
@@ -310,7 +313,12 @@ func (cc *CheckContext) RequireVector(ty Type, scope *Scope) {
 	})
 }
 
+
 func (cc *CheckContext) RequireType(ty Type, scope *Scope) {
+	if cc.CurrentPass() != KPassSetTypes {
+		panic("CheckContext.RequireType should only be called during KPassSetTypes")
+	}
+
 	if ty.Selector == KTypeFloat && ty.Width != 32 {
 		cc.NoteCpuRequired("64 bit float")
 	}

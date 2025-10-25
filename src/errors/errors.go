@@ -21,16 +21,22 @@ func (sl *SourceLocation) String() string {
 type ErrorMessage struct {
 	Location SourceLocation
 	Message  string
+	Activity string
 }
 
 func (em *ErrorMessage) String() string {
-	return fmt.Sprintf("%v: %v", em.Location.String(), em.Message)
+	s := fmt.Sprintf("%v: %v", em.Location.String(), em.Message)
+	if em.Activity != "" {
+		s += fmt.Sprintf(" (%v)", em.Activity)
+	}
+	return s
 }
 
 type Errors struct {
 	errorMessages     []ErrorMessage
 	lastKnownLocation SourceLocation
 	internalError     error
+	activity          string
 }
 
 func NewErrors() *Errors {
@@ -38,6 +44,10 @@ func NewErrors() *Errors {
 		errorMessages: []ErrorMessage{},
 		internalError: nil,
 	}
+}
+
+func (es *Errors) SetActivity(a string) {
+	es.activity = a
 }
 
 // return any internal error
@@ -58,6 +68,7 @@ func (es *Errors) Errorf(format string, args ...interface{}) {
 	em := ErrorMessage{
 		Location: es.lastKnownLocation,
 		Message:  fmt.Sprintf(format, args...),
+		Activity: es.activity,
 	}
 	es.errorMessages = append(es.errorMessages, em)
 }

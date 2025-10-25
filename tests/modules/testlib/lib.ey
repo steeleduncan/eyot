@@ -1,9 +1,9 @@
-fn unexported_square(val i64) i64 {
-   return val * val
-}
-
 export fn square(val i64) i64 {
    return unexported_square(val)
+}
+
+fn unexported_square(val i64) i64 {
+   return val * val
 }
 
 struct UnexportedSquarer {

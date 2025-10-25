@@ -90,27 +90,11 @@ type AssignStatement struct {
 var _ Statement = &AssignStatement{}
 
 func (as *AssignStatement) Check(ctx *CheckContext, scope *Scope) {
-	// this is simply a declaration
 	if as.Rhs != nil {
 		as.Rhs.Check(ctx, scope)
-	}
-
-	/*
-	   In the normal case we can (and should) grab our type from the context
-	   In the let case it needs to be set
-	*/
-	if as.Type == KAssignNormal {
-		assignable := as.Lhs.CheckAssignable(ctx, scope)
-
-		if ctx.CurrentPass() == KPassCheckTypes {
-			if !assignable {
-				ctx.Errors.Errorf("Unable to reassign %v", as.Lhs)
-				return
-			}
+		if !ctx.Errors.Clean() {
+			return
 		}
-	}
-	if !ctx.Errors.Clean() {
-		return
 	}
 
 	switch ctx.CurrentPass() {
@@ -132,7 +116,30 @@ func (as *AssignStatement) Check(ctx *CheckContext, scope *Scope) {
 
 		}
 
+		as.Lhs.CheckAssignable(ctx, scope)
+
+	case KPassMutate:
+		as.Lhs.CheckAssignable(ctx, scope)
+
 	case KPassCheckTypes:
+		/*
+		In the normal case we can (and should) grab our type from the context
+		In the let case it needs to be set
+		*/
+		if as.Type == KAssignNormal {
+			assignable := as.Lhs.CheckAssignable(ctx, scope)
+
+			if ctx.CurrentPass() == KPassCheckTypes {
+				if !assignable {
+					ctx.Errors.Errorf("Unable to reassign %v", as.Lhs)
+					return
+				}
+			}
+		}
+		if !ctx.Errors.Clean() {
+			return
+		}
+
 		if as.NewType.Selector == KTypeVoid {
 			ctx.Errors.Errorf("Cannot assign to void")
 			return
@@ -324,12 +331,14 @@ func (sps *SendPipeStatement) Check(ctx *CheckContext, scope *Scope) {
 		return
 	}
 
-	if sps.Pipe.Type().Selector != KTypeWorker {
-		ctx.Errors.Errorf("Trying to send to non-worker type: %v", sps.Pipe.Type().String())
-		return
-	}
+	switch ctx.CurrentPass() {
+	case KPassCheckTypes:
+		if sps.Pipe.Type().Selector != KTypeWorker {
+			ctx.Errors.Errorf("Trying to send to non-worker type: %v", sps.Pipe.Type().String())
+			return
+		}
 
-	if ctx.CurrentPass() == KPassSetTypes {
+	case KPassSetTypes:
 		pipeSendType := sps.Pipe.Type().Types[0]
 		sentValueType := sps.Value.Type()
 
@@ -468,12 +477,16 @@ type ModifyInPlaceStatement struct {
 var _ Statement = &ModifyInPlaceStatement{}
 
 func (ms *ModifyInPlaceStatement) Check(ctx *CheckContext, scope *Scope) {
-	assignable := ms.Modified.CheckAssignable(ctx, scope)
-	if ctx.CurrentPass() == KPassCheckTypes {
-		if !assignable {
+	switch ctx.CurrentPass()  {
+	case KPassSetTypes, KPassMutate, KPassCheckTypes:
+		if !ms.Modified.CheckAssignable(ctx, scope) {
 			ctx.Errors.Errorf("Unable to reassign %v", ms.Modified)
+			if !ctx.Errors.Clean() {
+				return
+			}
 		}
 	}
+
 	ms.Expression.Check(ctx, scope)
 }
 

@@ -153,6 +153,12 @@ func (p *Program) CheckModule(m *ast.Module) {
 
 	ctx := ast.NewCheckContext(p.es, p.Strings)
 
+	ctx.Errors.SetActivity("Set top level types")
+	ctx.Pass = ast.KPassSetTleTypes
+	ctx.PrepareForPass(m)
+	m.Check(ctx)
+
+	ctx.Errors.SetActivity("Set types")
 	ctx.Pass = ast.KPassSetTypes
 	ctx.PrepareForPass(m)
 	m.Check(ctx)
@@ -174,6 +180,7 @@ func (p *Program) CheckModule(m *ast.Module) {
 		p.Vectors[vecId] = vec
 	}
 
+	ctx.Errors.SetActivity("Mutate tree")
 	ctx.Pass = ast.KPassMutate
 	ctx.PrepareForPass(m)
 	m.Check(ctx)
@@ -181,6 +188,7 @@ func (p *Program) CheckModule(m *ast.Module) {
 		return
 	}
 
+	ctx.Errors.SetActivity("Check types")
 	ctx.Pass = ast.KPassCheckTypes
 	ctx.PrepareForPass(m)
 	m.Check(ctx)
@@ -188,6 +196,8 @@ func (p *Program) CheckModule(m *ast.Module) {
 	if !p.es.Clean() {
 		return
 	}
+
+	ctx.Errors.SetActivity("")
 
 	if !p.GpuRequired {
 		p.GpuRequired = ctx.GpuRequired()

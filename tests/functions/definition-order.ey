@@ -1,0 +1,20 @@
+fn a(val i64) i64 {
+   return a_b(val)
+}
+
+fn a_b(val i64) i64 {
+   return val * val
+}
+
+fn c_b(val i64) i64 {
+   return val * val
+}
+
+fn c(val i64) i64 {
+   return c_b(val)
+}
+
+cpu fn main() {
+    print_ln(a(4))
+    print_ln(a(5))
+}

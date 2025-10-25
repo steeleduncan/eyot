@@ -406,7 +406,7 @@ func (fd *FunctionDefinition) Check(ctx *CheckContext, externalScope *Scope) {
 	}
 
 	switch ctx.CurrentPass() {
-	case KPassSetTypes:
+	case KPassSetTleTypes:
 		if fd.Return.Selector != KTypeVoid {
 			if !CheckStatementBlockEndsWithReturn(fd.Block) {
 				ctx.Errors.Errorf("A non-void function must end with a return")
@@ -414,22 +414,23 @@ func (fd *FunctionDefinition) Check(ctx *CheckContext, externalScope *Scope) {
 			}
 		}
 
-		for _, arg := range fd.Parameters {
-			ctx.RequireType(arg.Type, externalScope)
-		}
-
 		// struct functions should not be readily accessible in the local namespace
 		if fd.Id.Struct.Blank() {
 			externalScope.SetVariable(fd.Id.Name, fd.OurType(), false)
 		}
 
+		err := ctx.Functions.Add(fd.Id, fd.Signature(), fd.Location)
+		if err != "" {
+			ctx.Errors.Errorf(err)
+		}
+
+	case KPassSetTypes:
 		ctx.RequireType(fd.Return, externalScope)
 		if !ctx.Errors.Clean() {
 			return
 		}
-		err := ctx.Functions.Add(fd.Id, fd.Signature(), fd.Location)
-		if err != "" {
-			ctx.Errors.Errorf(err)
+		for _, arg := range fd.Parameters {
+			ctx.RequireType(arg.Type, externalScope)
 		}
 
 	case KPassCheckTypes:

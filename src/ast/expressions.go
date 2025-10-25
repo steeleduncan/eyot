@@ -102,7 +102,10 @@ func (bt BooleanTerminal) String() string {
 }
 
 func (bt *BooleanTerminal) Check(ctx *CheckContext, scope *Scope) {
-	ctx.RequireType(bt.Type(), scope)
+	switch ctx.CurrentPass() {
+	case KPassSetTypes:
+		ctx.RequireType(bt.Type(), scope)
+	}
 }
 
 type CharacterTerminal struct {
@@ -120,7 +123,10 @@ func (bt CharacterTerminal) String() string {
 }
 
 func (bt *CharacterTerminal) Check(ctx *CheckContext, scope *Scope) {
-	ctx.RequireType(bt.Type(), scope)
+	switch ctx.CurrentPass() {
+	case KPassSetTypes:
+		ctx.RequireType(bt.Type(), scope)
+	}
 }
 
 type StringTerminal struct {
@@ -142,10 +148,13 @@ func (st StringTerminal) String() string {
 }
 
 func (st *StringTerminal) Check(ctx *CheckContext, scope *Scope) {
-	if ctx.CurrentPass() == KPassCheckTypes {
+	switch ctx.CurrentPass() {
+	case KPassCheckTypes:
 		st.Id = ctx.GetStringId(st.Value)
+
+	case KPassSetTypes:
+		ctx.RequireType(st.Type(), scope)
 	}
-	ctx.RequireType(st.Type(), scope)
 }
 
 type GpuBuiltinTerminal struct {
@@ -278,7 +287,8 @@ func (sle *StructLiteralExpression) Check(ctx *CheckContext, scope *Scope) {
 		}
 	}
 
-	if ctx.CurrentPass() == KPassMutate {
+	switch ctx.CurrentPass() {
+	case KPassMutate:
 		existingKeys := map[string]bool{}
 		for _, pr := range sle.Pairs {
 			existingKeys[pr.FieldName] = true
@@ -301,9 +311,10 @@ func (sle *StructLiteralExpression) Check(ctx *CheckContext, scope *Scope) {
 				}
 			}
 		}
-	}
 
-	ctx.RequireType(sle.Type(), scope)
+	case KPassSetTypes:
+		ctx.RequireType(sle.Type(), scope)
+	}
 }
 
 type TupleExpression struct {
@@ -347,7 +358,10 @@ func (te *TupleExpression) Check(ctx *CheckContext, scope *Scope) {
 		}
 	}
 
-	ctx.RequireType(te.Type(), scope)
+	switch ctx.CurrentPass() {
+	case KPassSetTypes:
+		ctx.RequireType(te.Type(), scope)
+	}
 }
 
 type AccessExpression struct {
@@ -669,7 +683,10 @@ func (it IntegerTerminal) String() string {
 }
 
 func (it *IntegerTerminal) Check(ctx *CheckContext, scope *Scope) {
-	ctx.RequireType(it.Type(), scope)
+	switch ctx.CurrentPass() {
+	case KPassSetTypes:
+		ctx.RequireType(it.Type(), scope)
+	}
 }
 
 type FloatTerminal struct {
@@ -680,7 +697,10 @@ type FloatTerminal struct {
 var _ Expression = &FloatTerminal{}
 
 func (ft *FloatTerminal) Check(ctx *CheckContext, scope *Scope) {
-	ctx.RequireType(ft.Type(), scope)
+	switch ctx.CurrentPass() {
+	case KPassSetTypes:
+		ctx.RequireType(ft.Type(), scope)
+	}
 }
 
 func (it *FloatTerminal) Type() Type {
@@ -1332,8 +1352,11 @@ func (de *DereferenceExpression) Check(ctx *CheckContext, scope *Scope) {
 		return
 	}
 
-	if de.Pointer.Type().Selector != KTypePointer {
-		ctx.Errors.Errorf("Attempting to deference something that is not a pointer")
+	switch ctx.CurrentPass() {
+	case KPassCheckTypes:
+		if de.Pointer.Type().Selector != KTypePointer {
+			ctx.Errors.Errorf("Attempting to deference %v, only pointers can be deferenced", de.Pointer.Type())
+		}
 	}
 }
 
@@ -1371,14 +1394,20 @@ func (vl *VectorLiteralExpression) Check(ctx *CheckContext, scope *Scope) {
 
 	for _, e := range vl.Initialisers {
 		e.Check(ctx, scope)
-
-		if !e.Type().CanAssignTo(vl.ElementType) {
-			ctx.Errors.Errorf("Bad type in vector literal. Have %v, expecting %v", e.Type(), vl.ElementType)
-			return
-		}
 	}
 
-	if ctx.CurrentPass() == KPassMutate {
+	switch ctx.CurrentPass() {
+	case KPassSetTypes:
+		// ideally for the check types phase, but maybe better to do pre mutation
+		for _, e := range vl.Initialisers {
+			if !e.Type().CanAssignTo(vl.ElementType) {
+				ctx.Errors.Errorf("Bad type in vector literal. Have %v, expecting %v", e.Type(), vl.ElementType)
+				return
+			}
+		}
+
+
+	case KPassMutate:
 		vectorName := ctx.GetTemporaryName()
 
 		/*
