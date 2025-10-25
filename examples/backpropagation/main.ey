@@ -4,39 +4,39 @@
 import std::math
 import std::runtime
 
-cpu fn sigmoid(x f64) f64 {
+cpu fn sigmoid(x f32) f32 {
 	return 1.0 / (1.0 + math::exp(-x))
 }
 
-cpu fn sigmoid_derivative(x f64) f64 {
+cpu fn sigmoid_derivative(x f32) f32 {
     const s = sigmoid(x)
 	return s * (1.0 - s)
 }
 
 // TODO this needs replacement with a builtin
-cpu fn make_f64(len i64, value f64) [f64] {
-    let r = [f64]{}
+cpu fn make_f32(len i64, value f32) [f32] {
+    let r = [f32]{}
     for i: range(0, len) {
         r.append(value)
     }
     return r
 }
 
-cpu fn make_f64_2d(cols, rows i64, value f64) [[f64]] {
-    let r = [[f64]]{}
+cpu fn make_f32_2d(cols, rows i64, value f32) [[f32]] {
+    let r = [[f32]]{}
     for i: range(0, cols) {
-        r.append(make_f64(rows, value))
+        r.append(make_f32(rows, value))
     }
     return r
 }
 
 // TODO this is a bit questionable translation
-cpu fn outer_product(a, b [f64]) [[f64]] {
+cpu fn outer_product(a, b [f32]) [[f32]] {
 	const rows = a.length()
 	const cols = b.length()
-	let result = [[f64]] {}
+	let result = [[f32]] {}
     for i : range(0, rows) {
-        let row = [f64] {}
+        let row = [f32] {}
         for j : range(0, cols) {
             row.append(a[i] * b[j])
 		}
@@ -45,14 +45,14 @@ cpu fn outer_product(a, b [f64]) [[f64]] {
 	return result
 }
 
-cpu fn transpose_matrix(matrix [[f64]]) [[f64]] {
+cpu fn transpose_matrix(matrix [[f32]]) [[f32]] {
 	const rows = matrix.length()
 	if rows == 0 {
        runtime::panic("transpose_matrix: empty matrix")
 	}
 
 	const cols = matrix[0].length()
-	let transposed = make_f64_2d(cols, rows, 0)
+	let transposed = make_f32_2d(cols, rows, 0)
 	for i: range(0, rows) {
         for j: range(0, cols) {
 			transposed[j][i] = matrix[i][j]
@@ -62,23 +62,23 @@ cpu fn transpose_matrix(matrix [[f64]]) [[f64]] {
 	return transposed
 }
 
-cpu fn multiply_vectors(a, b [f64]) [f64] {
-	let result = make_f64(a.length(), 0)
+cpu fn multiply_vectors(a, b [f32]) [f32] {
+	let result = make_f32(a.length(), 0)
 	for i : range(0, a.length()) {
 		result[i] = a[i] * b[i]
 	}
 	return result
 }
 
-cpu fn add_vectors(a, b [f64]) [f64] {
-	let result = make_f64(a.length(), 0)
+cpu fn add_vectors(a, b [f32]) [f32] {
+	let result = make_f32(a.length(), 0)
 	for i: range(0, a.length()) {
 		result[i] = a[i] + b[i]
 	}
 	return result
 }
 
-cpu fn dot_product(a, b [f64]) f64 {
+cpu fn dot_product(a, b [f32]) f32 {
 	let sum = 0.0
 	for i: range(0, a.length()) {
 		sum = sum + a[i] * b[i]
@@ -86,8 +86,8 @@ cpu fn dot_product(a, b [f64]) f64 {
 	return sum
 }
 
-cpu fn multiply_matrix_vector(matrix [[f64]], vector [f64]) [f64] {
-	let result = [f64] {}
+cpu fn multiply_matrix_vector(matrix [[f32]], vector [f32]) [f32] {
+	let result = [f32] {}
 	for i: range(0, matrix.length()) {
         result.append(dot_product(matrix[i], vector))
 	}
@@ -100,19 +100,19 @@ struct Layer {
    // if true, sigmoid, if false, linear
    sigmoid bool
 
-   weights [[f64]]
-   biases [f64]
+   weights [[f32]]
+   biases [f32]
 
    // essentially a record of the last input
-   input_vector [f64]
-   weighted_sums [f64]
-   output_vector [f64]
+   input_vector [f32]
+   weighted_sums [f32]
+   output_vector [f32]
 
-   weight_gradients [[f64]]
-   bias_gradients [f64]
-   input_gradient [f64]
+   weight_gradients [[f32]]
+   bias_gradients [f32]
+   input_gradient [f32]
 
-   cpu fn activation(val f64) f64 {
+   cpu fn activation(val f32) f32 {
        if self.sigmoid {
            return sigmoid(val)
        } else {
@@ -120,7 +120,7 @@ struct Layer {
        }
    }
 
-   cpu fn derivative(val f64) f64 {
+   cpu fn derivative(val f32) f32 {
        if self.sigmoid {
            return sigmoid_derivative(val)
        } else {
@@ -129,14 +129,14 @@ struct Layer {
     }
 
     // forward prop is inference
-    cpu fn forward(input [f64]) [f64] {
+    cpu fn forward(input [f32]) [f32] {
         self.input_vector = input
 
         self.weighted_sums = multiply_matrix_vector(self.weights, input)
         self.weighted_sums = add_vectors(self.weighted_sums, self.biases)
 
         // 2. Activation
-        self.output_vector = make_f64(self.weighted_sums.length(), 0)
+        self.output_vector = make_f32(self.weighted_sums.length(), 0)
         for i : range(0, self.weighted_sums.length()) {
             self.output_vector[i] = self.activation(self.weighted_sums[i])
         }
@@ -144,8 +144,8 @@ struct Layer {
     }
 
     // backward is learning
-    cpu fn backward(output_gradient [f64]) [f64] {
-        let activation_gradient = make_f64(self.weighted_sums.length(), 0)
+    cpu fn backward(output_gradient [f32]) [f32] {
+        let activation_gradient = make_f32(self.weighted_sums.length(), 0)
         for i : range(0, self.weighted_sums.length()) {
             activation_gradient[i] = self.derivative(self.weighted_sums[i])
         }
@@ -158,7 +158,7 @@ struct Layer {
     }
 
 
-    cpu fn update(learning_rate f64) {
+    cpu fn update(learning_rate f32) {
         for i: range(0, self.weights.length()) {
             for j: range(0, self.weights[i].length()) {
                 self.weights[i][j] -= learning_rate * self.weight_gradients[i][j]
@@ -171,11 +171,11 @@ struct Layer {
 }
 
 cpu fn new_layer(inputs, outputs i64, sigmoid bool) *Layer {
-    const weight_scale = math::sqrt(1.0 / (inputs as f64))
+    const weight_scale = math::sqrt(1.0 / (inputs as f32))
 
-    let weights = [[f64]] { }
+    let weights = [[f32]] { }
     for i: range(0, outputs) {
-        weights.append(make_f64(inputs, 0))
+        weights.append(make_f32(inputs, 0))
 
         for j: range(0, inputs) {
             weights[i][j] = math::rand_normal() * weight_scale
@@ -187,7 +187,7 @@ cpu fn new_layer(inputs, outputs i64, sigmoid bool) *Layer {
         output_size: outputs,
         sigmoid: sigmoid,
         weights: weights,
-        biases: make_f64(outputs, 0.0),
+        biases: make_f32(outputs, 0.0),
     }
 
     return layer
@@ -196,7 +196,7 @@ cpu fn new_layer(inputs, outputs i64, sigmoid bool) *Layer {
 struct NeuralNetwork {
 	layers [*Layer]
 
-    cpu fn predict(input [f64]) [f64] {
+    cpu fn predict(input [f32]) [f32] {
         let output = input
         for layer: self.layers {
             output = layer.forward(output)
@@ -204,10 +204,10 @@ struct NeuralNetwork {
         return output
     }
 
-    cpu fn train(input [f64], target_output [f64], learning_rate f64) {
+    cpu fn train(input [f32], target_output [f32], learning_rate f32) {
         let predicted_output = self.predict(input)
 
-        let output_gradient = make_f64(predicted_output.length(), 0)
+        let output_gradient = make_f32(predicted_output.length(), 0)
         for i: range(0, predicted_output.length()) {
             output_gradient[i] = 2.0 * (predicted_output[i] - target_output[i])
         }
@@ -238,7 +238,7 @@ cpu fn new_neural_network(input_size i64, hidden_sizes [i64], output_size i64) *
 	return net
 }
 
-cpu fn print_f64(vals [f64]) {
+cpu fn print_f32(vals [f32]) {
     for v: vals {
         print(v)
         print(", ")
@@ -246,18 +246,18 @@ cpu fn print_f64(vals [f64]) {
 }
 
 cpu fn main() {
-	let xor_inputs = [[f64]] {
-		[f64] { 0.0, 0.0 },
-		[f64] { 0.0, 1.0 },
-		[f64] { 1.0, 0.0 },
-		[f64] { 1.0, 1.0 },
+	let xor_inputs = [[f32]] {
+		[f32] { 0.0, 0.0 },
+		[f32] { 0.0, 1.0 },
+		[f32] { 1.0, 0.0 },
+		[f32] { 1.0, 1.0 },
 	}
 
-	let xor_outputs = [[f64]] {
-		[f64] { 0.0 },
-		[f64] { 1.0 },
-		[f64] { 1.0 },
-		[f64] { 0.0 },
+	let xor_outputs = [[f32]] {
+		[f32] { 0.0 },
+		[f32] { 1.0 },
+		[f32] { 1.0 },
+		[f32] { 0.0 },
 	}
 
 	let nn = new_neural_network(2, [i64]{ 2 }, 1)
@@ -268,11 +268,11 @@ cpu fn main() {
         
 		let predicted_output = nn.predict(input)
         print("Input: ")
-        print_f64(input)
+        print_f32(input)
         print("Expected: ")
-        print_f64(xor_outputs[i])
+        print_f32(xor_outputs[i])
         print("Prediction: ")
-        print_f64(predicted_output)
+        print_f32(predicted_output)
         print_ln()
 	}
 
@@ -299,7 +299,7 @@ cpu fn main() {
 		}
 
 		if (i+1) % 1000 == 0 {
-            print_ln("Epoch ", i + 1, ", Average Loss: ", total_loss / (xor_inputs.length() as f64))
+            print_ln("Epoch ", i + 1, ", Average Loss: ", total_loss / (xor_inputs.length() as f32))
         }
 	}
 
@@ -311,11 +311,11 @@ cpu fn main() {
         
 		let predicted_output = nn.predict(input)
         print("Input: ")
-        print_f64(input)
+        print_f32(input)
         print("Expected: ")
-        print_f64(xor_outputs[i])
+        print_f32(xor_outputs[i])
         print("Prediction: ")
-        print_f64(predicted_output)
+        print_f32(predicted_output)
         print_ln()
 	}
 
