@@ -4,6 +4,10 @@
 import std::math
 import std::runtime
 
+fn linear(x f32) f32 {
+	return x
+}
+
 fn sigmoid(x f32) f32 {
 	return 1.0f / (1.0f + math::expf(-x))
 }
@@ -30,7 +34,6 @@ cpu fn make_f32_2d(cols, rows i64, value f32) [[f32]] {
     return r
 }
 
-// TODO this is a bit questionable translation
 cpu fn outer_product(a, b [f32]) [[f32]] {
 	const rows = a.length()
 	const cols = b.length()
@@ -94,6 +97,14 @@ cpu fn multiply_matrix_vector(matrix [[f32]], vector [f32]) [f32] {
 	return result
 }
 
+cpu fn create_activation_worker(is_sigmoid bool) worker(f32)f32 {
+    if is_sigmoid {
+        return cpu sigmoid
+    } else {
+        return cpu linear
+    }
+}
+
 struct Layer {
    input_size, output_size i64
 
@@ -112,13 +123,7 @@ struct Layer {
    bias_gradients [f32]
    input_gradient [f32]
 
-   fn activation(val f32) f32 {
-       if self.sigmoid {
-           return sigmoid(val)
-       } else {
-           return val
-       }
-   }
+   activation_worker worker(f32)f32
 
    fn derivative(val f32) f32 {
        if self.sigmoid {
@@ -128,22 +133,21 @@ struct Layer {
        }
     }
 
-    // forward prop is inference
+    // infer
     cpu fn forward(input [f32]) [f32] {
         self.input_vector = input
 
+        // calculate inputs
         self.weighted_sums = multiply_matrix_vector(self.weights, input)
         self.weighted_sums = add_vectors(self.weighted_sums, self.biases)
 
-        // 2. Activation
-        self.output_vector = make_f32(self.weighted_sums.length(), 0)
-        for i : range(0, self.weighted_sums.length()) {
-            self.output_vector[i] = self.activation(self.weighted_sums[i])
-        }
-        return self.output_vector
+        // activation values
+        send(self.activation_worker, self.weighted_sums)
+        let v = drain(self.activation_worker) 
+        return v
     }
 
-    // backward is learning
+    // learn
     cpu fn backward(output_gradient [f32]) [f32] {
         let activation_gradient = make_f32(self.weighted_sums.length(), 0)
         for i : range(0, self.weighted_sums.length()) {
@@ -156,7 +160,6 @@ struct Layer {
         self.input_gradient = multiply_matrix_vector(transposed_weights, gradient_after_activation)
         return self.input_gradient
     }
-
 
     cpu fn update(learning_rate f32) {
         for i: range(0, self.weights.length()) {
@@ -188,7 +191,9 @@ cpu fn new_layer(inputs, outputs i64, sigmoid bool) *Layer {
         sigmoid: sigmoid,
         weights: weights,
         biases: make_f32(outputs, 0.0),
+        activation_worker: create_activation_worker(sigmoid),
     }
+
 
     return layer
 }
