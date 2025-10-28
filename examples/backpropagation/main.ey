@@ -4,13 +4,13 @@
 import std::math
 import std::runtime
 
-cpu fn sigmoid(x f32) f32 {
-	return 1.0 / (1.0 + math::exp(-x))
+fn sigmoid(x f32) f32 {
+	return 1.0f / (1.0f + math::expf(-x))
 }
 
-cpu fn sigmoid_derivative(x f32) f32 {
+fn sigmoid_derivative(x f32) f32 {
     const s = sigmoid(x)
-	return s * (1.0 - s)
+	return s * (1.0f - s)
 }
 
 // TODO this needs replacement with a builtin
@@ -79,7 +79,7 @@ cpu fn add_vectors(a, b [f32]) [f32] {
 }
 
 cpu fn dot_product(a, b [f32]) f32 {
-	let sum = 0.0
+	let sum = 0.0f
 	for i: range(0, a.length()) {
 		sum = sum + a[i] * b[i]
 	}
@@ -112,7 +112,7 @@ struct Layer {
    bias_gradients [f32]
    input_gradient [f32]
 
-   cpu fn activation(val f32) f32 {
+   fn activation(val f32) f32 {
        if self.sigmoid {
            return sigmoid(val)
        } else {
@@ -120,11 +120,11 @@ struct Layer {
        }
    }
 
-   cpu fn derivative(val f32) f32 {
+   fn derivative(val f32) f32 {
        if self.sigmoid {
            return sigmoid_derivative(val)
        } else {
-           return 1.0
+           return 1.0f
        }
     }
 
@@ -171,14 +171,14 @@ struct Layer {
 }
 
 cpu fn new_layer(inputs, outputs i64, sigmoid bool) *Layer {
-    const weight_scale = math::sqrt(1.0 / (inputs as f32))
+    const weight_scale = math::sqrtf(1.0 / (inputs as f32))
 
     let weights = [[f32]] { }
     for i: range(0, outputs) {
         weights.append(make_f32(inputs, 0))
 
         for j: range(0, inputs) {
-            weights[i][j] = math::rand_normal() * weight_scale
+            weights[i][j] = (math::rand_normal() as f32) * weight_scale
         }
     }
 
