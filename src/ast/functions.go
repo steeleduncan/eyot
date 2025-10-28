@@ -390,6 +390,13 @@ func CheckStatementBlockEndsWithReturn(sb *StatementBlock) bool {
 	}
 }
 
+func (fd *FunctionDefinition) AddToContext(ctx *CheckContext) {
+	err := ctx.Functions.Add(fd.Id, fd.Signature(), fd.Location)
+	if err != "" {
+		ctx.Errors.Errorf(err)
+	}
+}
+
 func (fd *FunctionDefinition) Check(ctx *CheckContext, externalScope *Scope) {
 	if fd.Id.Module.Blank() {
 		panic("blank definition " + fd.Id.Name)
@@ -419,10 +426,7 @@ func (fd *FunctionDefinition) Check(ctx *CheckContext, externalScope *Scope) {
 			externalScope.SetVariable(fd.Id.Name, fd.OurType(), false)
 		}
 
-		err := ctx.Functions.Add(fd.Id, fd.Signature(), fd.Location)
-		if err != "" {
-			ctx.Errors.Errorf(err)
-		}
+		fd.AddToContext(ctx)
 
 	case KPassSetTypes:
 		ctx.RequireType(fd.Return, externalScope)

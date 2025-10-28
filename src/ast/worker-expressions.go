@@ -317,6 +317,9 @@ func (cce *CreateWorkerExpression) Check(ctx *CheckContext, scope *Scope) {
 				},
 			}
 
+			// this adds to the function group (which would normally be done in an earlier check pass)
+			fd.AddToContext(ctx)
+
 			// generate a wrapper function for this that can be passed to the worker
 			ctx.InsertElementBefore(&FunctionDefinitionTle{
 				Definition: fd,
