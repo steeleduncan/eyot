@@ -1,0 +1,19 @@
+/*
+  The CPU + GPU -> Anywhere need to happen when exporting functions
+  Sadly that is a separate codepath, so it needs testing here too
+*/
+import testlib::lib
+
+fn fna(x f32) f32 {
+	return lib::fna(x)
+}
+
+fn fnb(x f32) f32 {
+	return lib::fnb(x)
+}
+
+cpu fn main() {
+    print_ln("fna = ", fna(12.0f))
+    print_ln("fnb = ", fnb(12.0f))
+}
+

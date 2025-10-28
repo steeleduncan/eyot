@@ -173,7 +173,7 @@ func (gt GpuBuiltinTerminal) calculateType() (Type, bool) {
 	}
 
 	switch (gt.Name) {
-	case "sqrt":
+	case "sqrt", "exp":
 		rty.Types = []Type { Type { Selector: KTypeFloat, Width: 32 } }
 		rty.Return = &Type { Selector: KTypeFloat, Width: 32 }
 		return rty, true

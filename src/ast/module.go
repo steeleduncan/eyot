@@ -16,14 +16,29 @@ type Module struct {
 }
 
 func (f *Module) LookupFunction(name string) (*FunctionDefinition, bool) {
+	var def FunctionDefinition
+	fnd := false
+
 	for _, tlec := range f.TopLevelElements {
 		fdtle, ok := tlec.TopLevelElement.(*FunctionDefinitionTle)
 		if ok && fdtle.Definition.Id.Name == name {
-			return fdtle.Definition, true
+			thisDef := *fdtle.Definition
+
+			if fnd {
+				if def.Location == KLocationCpu && thisDef.Location == KLocationGpu {
+					def.Location = KLocationAnywhere
+				} else if def.Location == KLocationGpu && thisDef.Location == KLocationCpu {
+					def.Location = KLocationAnywhere
+				}
+				break
+			} else {
+				def = thisDef
+				fnd = true
+			}
 		}
 	}
 
-	return nil, false
+	return &def, fnd
 }
 
 func (f *Module) LookupStruct(name string) (*StructDefinitionStatement, bool) {

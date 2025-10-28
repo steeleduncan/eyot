@@ -2,6 +2,20 @@ export fn square(val i64) i64 {
    return unexported_square(val)
 }
 
+export cpu fn fna(val f32) f32 {
+    return val * 2.0f
+}
+export gpu fn fna(val f32) f32 {
+    return val * 3.0f
+}
+export gpu fn fnb(val f32) f32 {
+    return val * 4.0f
+}
+export cpu fn fnb(val f32) f32 {
+    return val * 5.0f
+}
+
+
 fn unexported_square(val i64) i64 {
    return val * val
 }

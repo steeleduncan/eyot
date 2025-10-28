@@ -10,6 +10,10 @@ EyFloat64 ey_stdlib_expd(EyExecutionContext *ctx, EyFloat64 val) {
     return exp(val);
 }
 
+EyFloat32 ey_stdlib_expf(EyExecutionContext *ctx, EyFloat32 val) {
+    return exp(val);
+}
+
 EyFloat64 ey_stdlib_logd(EyExecutionContext *ctx, EyFloat64 val) {
     return log(val);
 }

@@ -26,6 +26,11 @@
             "arguments": [ "EyFloat64" ]
         },
         {
+            "name": "ey_stdlib_expf",
+            "return": "EyFloat32",
+            "arguments": [ "EyFloat32" ]
+        },
+        {
             "name": "ey_stdlib_cosd",
             "return": "EyFloat64",
             "arguments": [ "EyFloat64" ]

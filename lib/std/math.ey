@@ -25,6 +25,12 @@ export cpu fn sqrtf(val f32) f32 {
 export gpu fn sqrtf(val f32) f32 {
     return gpubuiltin::sqrt(val)
 }
+export cpu fn expf(val f32) f32 {
+    return ey_stdlib_expf(val)
+}
+export gpu fn expf(val f32) f32 {
+    return gpubuiltin::exp(val)
+}
 
 export cpu fn pi() f64 {
     return 3.14159265359
