@@ -2,7 +2,7 @@
 
 The fundamental threading primitive is a *worker*.
 All workers are created from a function, and they run on either GPU or CPU, applying that function to data passed to them.
-If the function returns that data can be read back from the worker.
+If the function returns data, that can be read back from the worker.
 
 A simple example of logging in a background CPU thread is
 
