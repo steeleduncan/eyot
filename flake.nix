@@ -233,8 +233,8 @@
           };
         } else {});
 
-        # these are shells containing eyot rather than shell for devloping eyot with
         devShells = {
+          # this is a shell containing eyot rather than shell for devloping eyot with
           default =
             pkgs.mkShellNoCC {
               name = "eyot-shell";
