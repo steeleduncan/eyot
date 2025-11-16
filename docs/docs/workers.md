@@ -94,7 +94,9 @@ cpu fn main() {
 }
 ```
 
-Please note that although any function can be passed to the `cpu` keyword for conversion to a CPU-side worker, only location independent functions (those not tagged with `cpu`) can be passed to the `gpu` keyword for conversion to a GPU-side worker.
+Please note that although any function can be passed to the `cpu` keyword for conversion to a CPU-side worker, only location independent functions, those not tagged with anything, or those tagged with `gpu` can be passed to the `gpu` keyword for conversion to a GPU-side worker.
+
+## Passing state through partial application of functions
 
 Not all work is done on vectors of data with no other parameters of course, often you pass uniform parameters to GPU kernels.
 Worker functions in Eyot need to take a single parameter, which becomes the input type of the worker.
