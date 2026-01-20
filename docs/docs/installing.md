@@ -21,7 +21,7 @@ from the root, it places an `eyot` command in your path that functions exactly l
 Eyot can be installed on Debian, Ubuntu and any derivatives via a `.deb` file. Download `eyot.deb` from [here](eyot-latest.deb).
 
 ```
-sudo apt install --reinstall --yes eyot.deb
+sudo apt install --reinstall --yes ./eyot-latest.deb
 ```
 
 This will also install any dependencies Eyot requires (`opencl`, `gcc` etc), and the `.deb` is only updated if all tests pass, so it is the most reliable option for now.
