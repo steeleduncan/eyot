@@ -4,9 +4,10 @@
       /* Reset and Base Styles */
       body {
           margin: 0;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', sans-serif;
           background: #1e1e1e;
           color: #d4d4d4;
+          overflow: hidden;
       }
 
       /* Main Container */
@@ -14,32 +15,69 @@
           display: flex;
           height: 100vh;
           gap: 2px;
-          background: #333; /* Acts as the divider line */
+          background: #333; 
       }
 
       /* Panes */
-      .editor-pane, .output-pane {
+      .pane {
           flex: 1;
           display: flex;
           flex-direction: column;
           background: #1e1e1e;
+          min-width: 0;
       }
 
       /* Pane Headers */
       header {
-          padding: 10px 20px;
+          padding: 5px 15px;
           background: #252526;
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           text-transform: uppercase;
           letter-spacing: 1px;
           border-bottom: 1px solid #333;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          height: 40px;
+          box-sizing: border-box;
       }
+
+      /* Dropdown Styling */
+      .preset-select {
+          background: #3c3c3c;
+          color: #ccc;
+          border: 1px solid #555;
+          border-radius: 3px;
+          font-size: 11px;
+          padding: 2px 5px;
+          outline: none;
+          cursor: pointer;
+          max-width: 150px;
+      }
+
+      .preset-select:hover { background: #454545; }
+
+      /* Action Button */
+      .run-btn {
+          background: #007acc;
+          color: white;
+          border: none;
+          padding: 4px 12px;
+          border-radius: 3px;
+          cursor: pointer;
+          font-size: 11px;
+          font-weight: bold;
+          transition: background 0.2s;
+      }
+
+      .run-btn:hover { background: #0062a3; }
+      .run-btn:disabled { background: #444; cursor: not-allowed; }
 
       /* Input & Output Areas */
       textarea, #output-display {
           flex: 1;
           padding: 20px;
-          font-family: 'Fira Code', 'Courier New', monospace;
+          font-family: 'Fira Code', 'Cascadia Code', monospace;
           font-size: 14px;
           border: none;
           outline: none;
@@ -49,25 +87,42 @@
       textarea {
           background: #1e1e1e;
           color: #9cdcfe;
-          line-height: 1.5;
+          line-height: 1.6;
       }
 
       #output-display {
           background: #000;
-          color: #4af626; /* Classic "terminal" green */
+          color: #4af626; 
           white-space: pre-wrap;
+          overflow-y: auto;
       }
+
+      .error-text { color: #ff5555 !important; }
+      .loading { opacity: 0.5; }
     </style>
   </head>
   <body>
     <div class="playground">
-      <section class="editor-pane">
-        <header>Eyot</header>
-        <textarea id="code-input" spellcheck="false" placeholder="// Write code here..."></textarea>
+      <section class="pane">
+        <header>
+            <div>
+                <span style="margin-right: 10px;">Eyot</span>
+                <select id="example-select" class="preset-select">
+                    <option value="" disabled selected>Load Example...</option>
+                    <option value="hello">Hello World</option>
+                    <option value="squaregpu">Square numbers on GPU</option>
+                </select>
+            </div>
+            <span style="font-size: 10px; opacity: 0.5;">Ctrl + Enter</span>
+        </header>
+        <textarea id="code-input" spellcheck="false" placeholder="// Select an example or write code..."></textarea>
       </section>
 
-      <section class="output-pane">
-        <header id="output-header">Output</header>
+      <section class="pane">
+        <header>
+            <span id="output-header">Output</span>
+            <button id="run-button" class="run-btn" onclick="runCode()">RUN</button>
+        </header>
         <div id="output-display">Program results will appear here...</div>
       </section>
     </div>
@@ -76,45 +131,69 @@
       const input = document.getElementById('code-input');
       const output = document.getElementById('output-display');
       const outputHeader = document.getElementById('output-header');
+      const runBtn = document.getElementById('run-button');
+      const exampleSelect = document.getElementById('example-select');
+
+
+
+
+      // Define your snippets here
+      const examples = {
+          hello: `cpu fn main() {\n    print_ln("Hello, World!")\n}`,
+          squaregpu: `fn square(value i64) i64 {\n   return value * value\n}\n\ncpu fn main() {\n    let w = gpu square\n    send(w, [i64]{ 1, 2, 3, 4 })\n    for v: drain(w) {\n        print_ln("- ", v)\n    }\n}`,
+      };
+
+      // Listen for dropdown changes
+      exampleSelect.addEventListener('change', (e) => {
+          const selected = e.target.value;
+          if (examples[selected]) {
+              input.value = examples[selected];
+              // Optional: Clear output when switching examples
+              output.innerText = "Program results will appear here...";
+              output.classList.remove('error-text');
+          }
+      });
 
       input.addEventListener('keydown', (e) => {
           if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+              e.preventDefault();
               runCode();
           }
       });
 
       async function runCode() {
-          const payload = {
-              version: 1,
-              source: input.value,
-          };
-          
+          output.classList.add('loading');
+          runBtn.disabled = true;
+          runBtn.innerText = "RUNNING...";
+          output.classList.remove('error-text');
+
           try {
-              const response = await fetch("/run", {
+              const response = await fetch("/api/run", {
                   method: 'POST',
-                  // Curl defaults to 'application/x-www-form-urlencoded' for --data, 
-                  // but most modern APIs expect JSON. I'll use JSON here:
-                  headers: {
-                      'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(payload)
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                      version: 1,
+                      source: input.value,
+                  })
               });
               
               const result = await response.json();
-              console.log(result);
 
               if (result.CompileSuccess) {
                   outputHeader.innerText = "Output";
                   output.innerText = result.Log;
               } else {
-                  outputHeader.innerText = "Compiler failure log";
+                  outputHeader.innerText = "Compiler log";
                   output.innerText = result.CompileLog;
+                  output.classList.add('error-text');
               }
-
           } catch (error) {
-              console.log("error = ", error)
-              output.innerText = "Failed to process";
-              output.style.color = "#ff5555"; // Red for errors
+              output.innerText = "Error: " + error.toString();
+              output.classList.add('error-text');
+          } finally {
+              output.classList.remove('loading');
+              runBtn.disabled = false;
+              runBtn.innerText = "RUN";
           }
       }
     </script>

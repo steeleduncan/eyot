@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"io"
 	"fmt"
+	"time"
 	"path/filepath"
 	"encoding/json"
 	"net/http"
@@ -28,6 +29,7 @@ type Result struct {
 
 type JobRunner struct {
 	Path string
+	RollingId int
 }
 
 type Job struct {
@@ -38,18 +40,28 @@ type Job struct {
 
 	// any value here when finished
 	Done chan bool
+
+	StartTime int64
+
+	Id int
 }
 
+func (j *Job) Lifetime() int64 {
+	return (time.Now().UnixNano() - j.StartTime) / 1000000
+}
 
 type JobResponse struct {
 	CompileSuccess bool
 	CompileLog string
-
 	Log string
 }
 
 func (r *JobRunner) Run(j *Job) error {
-	fmt.Println("Run ", j.Request.Source)
+	j.Id = r.RollingId
+	r.RollingId += 1
+
+	fmt.Printf("Start job %v (%v ms)\n", j.Id, j.Lifetime())
+	
 	os.RemoveAll(r.Path)
 	os.MkdirAll(r.Path, 0777)
 
@@ -82,7 +94,6 @@ func (r *JobRunner) Run(j *Job) error {
 			CompileSuccess: false,
 			CompileLog: string(compileLog),
 		})
-		fmt.Println("compile failed: ", compileLog)
 		j.Done <- true
 		return nil
 	}
@@ -150,7 +161,7 @@ func (s *Server) RunJobs() {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if req.URL.Path == "/run" {
+	if req.URL.Path == "/api/run" {
 		d := json.NewDecoder(req.Body)
 
 		var p Program
@@ -164,10 +175,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			Request: p,
 			w: w,
 			Done: make(chan bool),
+			StartTime: time.Now().UnixNano(),
 		}
 
 		s.JobChannel <- job
 		_ = <- job.Done
+
+		fmt.Printf("Finished job %v (%v ms)\n", job.Id, job.Lifetime())
 	} else {
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
