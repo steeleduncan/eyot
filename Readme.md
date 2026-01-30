@@ -92,15 +92,27 @@ Finally, to preempt one question, the name has no meaning other than being a ref
 
 Currently it runs on Linux and macOS. Windows is not far from functional.
 
+## Using the `.deb` (Ubuntu/Debian and their derivatives)
+
+Eyot can be installed using `eyot-latest.deb`, downloaded from [here](eyot-latest.deb).
+
+```
+sudo apt install --reinstall --yes ./eyot-latest.deb
+```
+
+This installs dependencies, and it is only updated when all tests pass, so it is the most likely option to be functional right now.
+
 ## With Nix
 
-If nix is installed and flakes are enabled you can run an eyot file at `/path/to/file.ey` with
+If Nix is installed and flakes are enabled you can run an eyot file at `/path/to/file.ey` with
 
 ```
 nix run github:steeleduncan/eyot -- run /path/to/file.ey
 ```
 
 Please note that the flake is not setup right now to install ICDs, so it won't work with GPU threads (I'd welcome a pull request from anyone who knows how to use OpenCL from within a flake).
+
+
 
 ## From source (e.g. for development)
 
