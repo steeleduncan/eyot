@@ -147,7 +147,7 @@ Everything about it, from syntax to memory model, is chosen towards that goal, a
 
 I wouldn't want anyone to spend time learning Eyot and be disappointed, so some non-goals:
 
-- **Be the next great CPUside language** I want as few syntax differences between GPU and CPU as possible, so language design is bound by the GPU capabilities, which restricts what I can add to Eyot's syntax. As a result, although Eyot is useable as a CPUside languge, it shines when running code across GPUs and CPUs, and if you are looking to write CPU-side code only, there are likely to be more featureful options for you.
+- **Be the next great CPUside language** I want as few syntax differences between GPU and CPU as possible, so language design is bound by the GPU capabilities, which restricts what I can add to Eyot's syntax. As a result, although Eyot is useable as a CPUside language, it shines when running code across GPUs and CPUs, and if you are looking to write CPU-side code only, there are likely to be more featureful options for you.
 
 - **Automatic parallelisation** Eyot does not automatically parallelise work across CPU/GPU cores, rather it makes it easy to write code that does parallelise work across your CPU/GPU cores. The intention is to give a programmer a convenient option for distributing work across processors, not reduce their control.
 
