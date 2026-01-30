@@ -42,7 +42,6 @@
           box-sizing: border-box;
       }
 
-      /* Dropdown Styling */
       .preset-select {
           background: #3c3c3c;
           color: #ccc;
@@ -57,7 +56,6 @@
 
       .preset-select:hover { background: #454545; }
 
-      /* Action Button */
       .run-btn {
           background: #007acc;
           color: white;
@@ -92,7 +90,7 @@
 
       #output-display {
           background: #000;
-          color: #4af626; 
+          color: #9cdcfe; 
           white-space: pre-wrap;
           overflow-y: auto;
       }
@@ -105,15 +103,12 @@
     <div class="playground">
       <section class="pane">
         <header>
-            <div>
-                <span style="margin-right: 10px;">Eyot</span>
-                <select id="example-select" class="preset-select">
-                    <option value="" disabled selected>Load Example...</option>
-                    <option value="hello">Hello World</option>
-                    <option value="squaregpu">Square numbers on GPU</option>
-                </select>
-            </div>
-            <span style="font-size: 10px; opacity: 0.5;">Ctrl + Enter</span>
+            <span>Eyot playground</span>
+            <select id="example-select" class="preset-select">
+                <option value="" disabled selected>Load Example...</option>
+                <option value="hello">Hello World</option>
+                <option value="squaregpu">Square numbers on GPU</option>
+            </select>
         </header>
         <textarea id="code-input" spellcheck="false" placeholder="// Select an example or write code..."></textarea>
       </section>
@@ -121,7 +116,7 @@
       <section class="pane">
         <header>
             <span id="output-header">Output</span>
-            <button id="run-button" class="run-btn" onclick="runCode()">RUN</button>
+            <button id="run-button" class="run-btn" onclick="runCode()">RUN (Ctrl + Enter)</button>
         </header>
         <div id="output-display">Program results will appear here...</div>
       </section>

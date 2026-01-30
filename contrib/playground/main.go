@@ -102,7 +102,6 @@ func (r *JobRunner) Run(j *Job) error {
 	runCmd := exec.Command(
 		"timeout", "10s",
 		"firejail",
-		//		"--cpu.quota=20",
 		"--deterministic-shutdown",
 		"--net=none",
 		"--private=" + r.Path,
