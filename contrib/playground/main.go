@@ -8,11 +8,13 @@ import (
 	"path/filepath"
 	"encoding/json"
 	"net/http"
+	_ "embed"
 )
 
-/*
-   curl --request POST --data '{ "version": 1, "source": "cpu fn main() { print_ln(\"Hello World\") } " }' localhost:12321/something
- */
+import _ "embed"
+
+//go:embed index.html
+var IndexHtml string
 
 type Program struct {
 	Version int
@@ -50,6 +52,9 @@ func (r *JobRunner) Run(j *Job) error {
 	fmt.Println("Run ", j.Request.Source)
 	os.RemoveAll(r.Path)
 	os.MkdirAll(r.Path, 0777)
+
+	j.w.Header().Set("Content-Type", "application/json")
+	j.w.WriteHeader(http.StatusOK)
 
 	e := json.NewEncoder(j.w)
 
@@ -94,6 +99,7 @@ func (r *JobRunner) Run(j *Job) error {
 		"--noprofile",
 		"--nosound",
 		"--noinput",
+		"oclgrind",
 		"./out.exe",
 	)
 	runStdOut, err := runCmd.StdoutPipe()
@@ -144,23 +150,29 @@ func (s *Server) RunJobs() {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	d := json.NewDecoder(req.Body)
+	if req.URL.Path == "/run" {
+		d := json.NewDecoder(req.Body)
 
-	var p Program
-	if err := d.Decode(&p); err != nil {
-		fmt.Println("Failed to decode job: ", err)
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
+		var p Program
+		if err := d.Decode(&p); err != nil {
+			fmt.Println("Failed to decode job: ", err)
+			http.Error(w, "Bad request", http.StatusBadRequest)
+			return
+		}
+
+		job := &Job {
+			Request: p,
+			w: w,
+			Done: make(chan bool),
+		}
+
+		s.JobChannel <- job
+		_ = <- job.Done
+	} else {
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, IndexHtml)
 	}
-
-	job := &Job {
-		Request: p,
-		w: w,
-		Done: make(chan bool),
-	}
-
-	s.JobChannel <- job
-	_ = <- job.Done
 }
 
 func errMain() error {
