@@ -6,8 +6,10 @@ import (
 	"io"
 	"fmt"
 	"time"
+	"bytes"
 	"strconv"
 	"path/filepath"
+	"text/template"
 	"encoding/json"
 	"net/http"
 	_ "embed"
@@ -16,7 +18,7 @@ import (
 import _ "embed"
 
 //go:embed index.html
-var IndexHtml string
+var IndexHtmlTemplate string
 
 type Program struct {
 	Version int
@@ -132,8 +134,56 @@ func (r *JobRunner) Run(j *Job) error {
 	return nil
 }
 
+type Example struct {
+	Id string
+	Description string
+	Contents string
+}
+type Examples struct {
+	Items []Example
+}
+
 type Server struct {
-        JobChannel chan *Job
+	JobChannel chan *Job
+	IndexHtml string
+}
+
+func NewServer() (*Server, error) {
+	examples := Examples {
+		Items: []Example {
+			Example {
+				Id: "hello",
+				Description: "Minimal hello world",
+				Contents: `cpu fn main() {\n    print_ln("Hello, World!")\n}`,
+			},
+			Example {
+				Id: "gpusquare",
+				Description: "Square a vector of numbers on the GPU",
+				Contents: `fn square(value i64) i64 {\n   return value * value\n}\n\ncpu fn main() {\n    let w = gpu square\n    send(w, [i64]{ 1, 2, 3, 4 })\n    for v: drain(w) {\n        print_ln("- ", v)\n    }\n}`,
+			},
+			Example {
+				Id: "partial",
+				Description: "Partial function application",
+				Contents: `fn multiply(lhs, rhs i64) i64 {\n   return lhs * rhs \n}\n cpu fn main() {\n    let dbl = partial multiply(_, 2)\n    print_ln(dbl(3))\n}`,
+			},
+		},
+	}
+
+	tmpl, err := template.New("name").Parse(IndexHtmlTemplate)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing template")
+	}
+	buf := bytes.NewBuffer([]byte {})
+	if err := tmpl.Execute(buf, examples); err != nil {
+		return nil, fmt.Errorf("Error executing template: %v")
+	}
+
+	s := &Server {
+		JobChannel: make(chan *Job),
+		IndexHtml: buf.String(),
+	}
+
+	return s, nil
 }
 
 func (s *Server) RunJobsInBackground(path string) {
@@ -175,7 +225,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	} else {
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, IndexHtml)
+		fmt.Fprint(w, s.IndexHtml)
 	}
 }
 
@@ -201,8 +251,9 @@ func errMain() error {
 	}
 
 
-	s := &Server {
-		JobChannel: make(chan *Job),
+	s, err := NewServer()
+	if err != nil {
+		return err
 	}
 	go s.RunJobsInBackground(workingFolder)
 	fmt.Println("Listen on port: ", port)
