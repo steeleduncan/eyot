@@ -6,6 +6,7 @@ import (
 	"io"
 	"fmt"
 	"time"
+	"strconv"
 	"path/filepath"
 	"encoding/json"
 	"net/http"
@@ -132,22 +133,12 @@ func (r *JobRunner) Run(j *Job) error {
 }
 
 type Server struct {
-	JobChannel chan *Job
+        JobChannel chan *Job
 }
 
-func NewServer() *Server {
-	s := &Server {
-		JobChannel: make(chan *Job),
-	}
-
-	go s.RunJobs()
-
-	return s
-}
-
-func (s *Server) RunJobs() {
+func (s *Server) RunJobsInBackground(path string) {
 	runner := &JobRunner {
-		Path: "/tmp/eyot-playground-job-runner",
+		Path: path,
 	}
 	
 	for {
@@ -188,9 +179,35 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func usage() error {
+	fmt.Println("playground: <port> <working folder>")
+	return nil
+}
+
 func errMain() error {
-	s := NewServer()
-	return http.ListenAndServe(":12321", s)
+	if len(os.Args) != 3 {
+		return usage()
+	}
+
+	portArg := os.Args[1]
+	workingFolder := os.Args[2]
+
+	port, err := strconv.Atoi(portArg)
+	if err != nil {
+		return fmt.Errorf("Unable to understand port argument: %v", portArg)
+	}
+	if port == 0 {
+		return usage()
+	}
+
+
+	s := &Server {
+		JobChannel: make(chan *Job),
+	}
+	go s.RunJobsInBackground(workingFolder)
+	fmt.Println("Listen on port: ", port)
+	fmt.Println("Job folder: ", workingFolder)
+	return http.ListenAndServe(fmt.Sprintf(":%v", port), s)
 }
 
 func main() {
