@@ -21,15 +21,103 @@ func usage() error {
 	return nil
 }
 
+func runTest(sourcePath, outputPath string, isOut, isErr bool) (bool, bool, error) {
+	useOclGrind := os.Getenv("EyotTestOclGrind") == "y"
+	binaryPath := os.Args[1]
+
+	testOutputBlob, err := os.ReadFile(outputPath)
+	if err != nil {
+		return false, false, fmt.Errorf("Failed to read output at '%v': %v", outputPath, err)
+	}
+	referenceOutput := sortLineEndings(string(testOutputBlob))
+
+	buf := bytes.NewBuffer([]byte{})
+	var cmd *exec.Cmd
+	if useOclGrind {
+		cmd = exec.Command("oclgrind", binaryPath, "run", sourcePath)
+	} else {
+		cmd = exec.Command(binaryPath, "run", sourcePath)
+	}
+	cmd.Stdout = buf
+	cmd.Stderr = buf
+	cmd.Env = os.Environ()
+
+	// the sanitiser seems incompatible with some dlopen parameter used by open cl
+	if strings.Contains(sourcePath, "/gpu/") && os.Getenv("EyotDebug") == "y" {
+		cmd.Env = append(cmd.Env, "EyotDebug=n")
+		fmt.Println("  Disable sanitiser")
+	}
+
+	testRunError := cmd.Run()
+
+	actualOutput := sortLineEndings(buf.String())
+	if strings.Contains(actualOutput, "ey-test-reserved-pass") {
+		fmt.Println("  Forced pass")
+		return true, false, nil
+	}
+
+	if isOut {
+		if testRunError != nil {
+			fmt.Printf("  Execution of '%v' failed with\n    %v\n", sourcePath, testRunError)
+			return false, false, nil
+		}
+		if actualOutput != referenceOutput {
+			fmt.Printf("  Bad output when running '%v'\n    Got '%v'\n", sourcePath, actualOutput)
+
+			// This appears to be a transient issue with oclgrind
+			// It shows up sometimes in GHA on the ubuntu 24.04 machine
+			// I don't believe it is an actual issue with Eyot, so a retry seems reasonable
+			if strings.Contains(actualOutput, "[Oclgrind] Failed to get path to library") {
+				return false, true, nil
+			}
+
+			return false, false, nil
+		}
+	} else if isErr {
+		actualOutput = strings.ToLower(actualOutput)
+		referenceOutput = sortLineEndings(strings.ToLower(referenceOutput))
+
+		if testRunError == nil {
+			fmt.Printf("  No error when running '%v'\n", sourcePath)
+			return false, false, nil
+		}
+
+		if !strings.Contains(actualOutput, referenceOutput) {
+			fmt.Printf("  Bad output when running '%v'\n    Got '%v'\n", sourcePath, actualOutput)
+			return false, false, nil
+		}
+	}
+
+	return true, false, nil
+}
+
+func runTestWithRetries(sourcePath, outputPath string, isOut, isErr bool, retries int) (bool, error) {
+	for i := 0; i < retries; i += 1 {
+		fmt.Printf("%v (%v / %v)\n", sourcePath, i + 1, retries)
+
+		pass, retry, err := runTest(sourcePath, outputPath, isOut, isErr)
+		if err != nil {
+			return false, err
+		}
+
+		if pass {
+			return true, nil
+		}
+
+		if !retry {
+			break
+		}
+	}
+
+	return false, nil
+}
+
 func errMain() error {
 	if len(os.Args) != 3 {
 		return usage()
 	}
 
-	binaryPath := os.Args[1]
 	rootFolder := os.Args[2]
-
-	useOclGrind := os.Getenv("EyotTestOclGrind") == "y"
 
 	failures := []string{}
 
@@ -46,62 +134,10 @@ func errMain() error {
 
 		if isOut || isErr {
 			sourcePath := outputPath[:len(outputPath)-7] + "ey"
-			fmt.Println(sourcePath)
-			testOutputBlob, err := os.ReadFile(outputPath)
+
+			pass, err := runTestWithRetries(sourcePath, outputPath, isOut, isErr, 3)
 			if err != nil {
-				return fmt.Errorf("Failed to read output at '%v': %v", outputPath, err)
-			}
-			referenceOutput := sortLineEndings(string(testOutputBlob))
-
-			buf := bytes.NewBuffer([]byte{})
-			var cmd *exec.Cmd
-			if useOclGrind {
-				cmd = exec.Command("oclgrind", binaryPath, "run", sourcePath)
-			} else {
-				cmd = exec.Command(binaryPath, "run", sourcePath)
-			}
-			cmd.Stdout = buf
-			cmd.Stderr = buf
-			cmd.Env = os.Environ()
-
-			// the sanitiser seems incompatible with some dlopen parameter used by open cl
-			if strings.Contains(sourcePath, "/gpu/") && os.Getenv("EyotDebug") == "y" {
-				cmd.Env = append(cmd.Env, "EyotDebug=n")
-				fmt.Println("  Disable sanitiser")
-			}
-
-			testRunError := cmd.Run()
-
-			actualOutput := sortLineEndings(buf.String())
-			if strings.Contains(actualOutput, "ey-test-reserved-pass") {
-				fmt.Println("  Forced pass")
-				return nil
-			}
-
-			pass := true
-
-			if isOut {
-				if testRunError != nil {
-					fmt.Printf("  Execution of '%v' failed with\n    %v\n", sourcePath, testRunError)
-					pass = false
-				}
-				if actualOutput != referenceOutput {
-					fmt.Printf("  Bad output when running '%v'\n    Got '%v'\n", sourcePath, actualOutput)
-					pass = false
-				}
-			} else if isErr {
-				actualOutput = strings.ToLower(actualOutput)
-				referenceOutput = sortLineEndings(strings.ToLower(referenceOutput))
-
-				if testRunError == nil {
-					fmt.Printf("  No error when running '%v'\n", sourcePath)
-					pass = false
-				}
-
-				if !strings.Contains(actualOutput, referenceOutput) {
-					fmt.Printf("  Bad output when running '%v'\n    Got '%v'\n", sourcePath, actualOutput)
-					pass = false
-				}
+				return err
 			}
 
 			if !pass {
