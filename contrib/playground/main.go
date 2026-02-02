@@ -25,14 +25,16 @@ type Program struct {
 	Source string
 }
 
-type Result struct {
-	ErrorLog string
-	Output string
+type JobResponse struct {
+	CompileSuccess bool
+	CompileLog string
+	Log string
 }
 
 type JobRunner struct {
 	Path string
 	RollingId int
+	CachedResponses map[string]JobResponse
 }
 
 type Job struct {
@@ -53,83 +55,87 @@ func (j *Job) Lifetime() int64 {
 	return (time.Now().UnixNano() - j.StartTime) / 1000000
 }
 
-type JobResponse struct {
-	CompileSuccess bool
-	CompileLog string
-	Log string
-}
-
 func (r *JobRunner) Run(j *Job) error {
 	j.Id = r.RollingId
 	r.RollingId += 1
-
-	fmt.Printf("Start job %v (%v ms)\n", j.Id, j.Lifetime())
-	
-	os.RemoveAll(r.Path)
-	os.MkdirAll(r.Path, 0777)
-
 	j.w.Header().Set("Content-Type", "application/json")
 	j.w.WriteHeader(http.StatusOK)
 
+	var jr JobResponse
 	e := json.NewEncoder(j.w)
+	
+	if cr, ok := r.CachedResponses[j.Request.Source]; ok {
+		fmt.Printf("Cache hit for job %v (%v ms)\n", j.Id, j.Lifetime())
+		jr = cr
+	} else {
+		fmt.Printf("Start job %v (%v ms)\n", j.Id, j.Lifetime())
 
-	// write start file
-	source := filepath.Join(r.Path, "main.ey")
-	os.WriteFile(source, []byte(j.Request.Source), 0777)
+		os.RemoveAll(r.Path)
+		os.MkdirAll(r.Path, 0777)
 
-	// compile
-	os.Chdir(r.Path)
-	compileCmd := exec.Command("eyot", "build", source)
-	compileStdOut, err := compileCmd.StdoutPipe()
-	if err != nil {
-		return fmt.Errorf("Unable to create stdout: %v", err)
-	}
-	if err := compileCmd.Start(); err != nil {
-		return fmt.Errorf("Failed to start: %v", err)
-	}
-	compileLog, _ := io.ReadAll(compileStdOut)
-	compileCmd.Wait()
-	if compileCmd.ProcessState == nil {
-		return fmt.Errorf("Process failed to set state")
-	}
-	if compileCmd.ProcessState.ExitCode() != 0 {
-		e.Encode(&JobResponse {
-			CompileSuccess: false,
+
+		// write start file
+		source := filepath.Join(r.Path, "main.ey")
+		os.WriteFile(source, []byte(j.Request.Source), 0777)
+
+		// compile
+		os.Chdir(r.Path)
+		compileCmd := exec.Command("eyot", "build", source)
+		compileStdOut, err := compileCmd.StdoutPipe()
+		if err != nil {
+			return fmt.Errorf("Unable to create stdout: %v", err)
+		}
+		if err := compileCmd.Start(); err != nil {
+			return fmt.Errorf("Failed to start: %v", err)
+		}
+		compileLog, _ := io.ReadAll(compileStdOut)
+		compileCmd.Wait()
+		if compileCmd.ProcessState == nil {
+			return fmt.Errorf("Process failed to set state")
+		}
+		if compileCmd.ProcessState.ExitCode() != 0 {
+			e.Encode(&JobResponse {
+				CompileSuccess: false,
+				CompileLog: string(compileLog),
+			})
+			j.Done <- true
+			return nil
+		}
+
+		// run
+		runCmd := exec.Command(
+			"timeout", "10s",
+			"firejail",
+			"--deterministic-shutdown",
+			"--net=none",
+			"--private=" + r.Path,
+			"--nodbus",
+			"--noprofile",
+			"--nosound",
+			"--noinput",
+			"oclgrind",
+			"./out.exe",
+		)
+		runStdOut, err := runCmd.StdoutPipe()
+		if err != nil {
+			return fmt.Errorf("Unable to create stdout for run: %v", err)
+		}
+		if err := runCmd.Start(); err != nil {
+			return fmt.Errorf("Failed to start for run: %v", err)
+		}
+		runLog, _ := io.ReadAll(runStdOut)
+		runCmd.Wait()
+
+		jr = JobResponse {
+			CompileSuccess: true,
 			CompileLog: string(compileLog),
-		})
-		j.Done <- true
-		return nil
+			Log: string(runLog),
+		}
+
+		r.CachedResponses[j.Request.Source] = jr
 	}
 
-	// run
-	runCmd := exec.Command(
-		"timeout", "10s",
-		"firejail",
-		"--deterministic-shutdown",
-		"--net=none",
-		"--private=" + r.Path,
-		"--nodbus",
-		"--noprofile",
-		"--nosound",
-		"--noinput",
-		"oclgrind",
-		"./out.exe",
-	)
-	runStdOut, err := runCmd.StdoutPipe()
-	if err != nil {
-		return fmt.Errorf("Unable to create stdout for run: %v", err)
-	}
-	if err := runCmd.Start(); err != nil {
-		return fmt.Errorf("Failed to start for run: %v", err)
-	}
-	runLog, _ := io.ReadAll(runStdOut)
-	runCmd.Wait()
-
-	e.Encode(&JobResponse {
-		CompileSuccess: true,
-		CompileLog: string(compileLog),
-		Log: string(runLog),
-	})
+	e.Encode(&jr)
 	j.Done <- true
 	return nil
 }
@@ -151,6 +157,7 @@ type Server struct {
 func NewServer() (*Server, error) {
 	examples := Examples {
 		Items: []Example {
+			// move these to YAMLs or something similar?
 			Example {
 				Id: "hello",
 				Description: "Minimal hello world",
@@ -189,6 +196,7 @@ func NewServer() (*Server, error) {
 func (s *Server) RunJobsInBackground(path string) {
 	runner := &JobRunner {
 		Path: path,
+		CachedResponses: map[string]JobResponse {},
 	}
 	
 	for {
