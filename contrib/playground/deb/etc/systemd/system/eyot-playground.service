@@ -24,7 +24,6 @@ IOWeight=20
 MemorySwapMax=0
 
 StateDirectory=eyot-playground
-StateDirectorySizeMax=500M
 ReadWritePaths=/var/lib/eyot-playground
 RuntimeDirectory=eyot-playground
 

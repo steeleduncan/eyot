@@ -53,14 +53,23 @@
         playground-deb =
           pkgs.stdenv.mkDerivation {
             name = "eyot-deb";
-            src = ./contrib/playground;
-            buildInputs = [pkgs.go pkgs.dpkg];
+            src = ./.;
+            buildInputs = [pkgs.go pkgs.dpkg pkgs.patchelf];
             buildPhase = ''
               export GOCACHE=$(pwd)/gocache
-              export DpkgRoot=$(pwd)/deb
+              export DpkgRoot=$(pwd)/contrib/playground/deb
 
-              mkdir -p $DpkgRoot/usr/bin
+              mkdir -p $DpkgRoot/usr/bin $DpkgRoot/usr/share $DpkgRoot/usr/share/man/man1
+              cp -r ${lib_folder} $DpkgRoot/usr/share/eyot
+              cp ${man_page} $DpkgRoot/usr/share/man/man1/eyot.1
+
+              pushd contrib/playground
               GOOS=linux GOARCH=amd64 go build -o $DpkgRoot/usr/bin/eyot-playground .
+              patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 $DpkgRoot/usr/bin/eyot-playground
+              popd
+              pushd src
+              GOOS=linux GOARCH=amd64 go build -ldflags "-X eyot/program.EyotRoot=/usr/share/eyot" -o $DpkgRoot/usr/bin/eyot eyot/cmd
+              popd
 
               dpkg-deb --build --root-owner-group $DpkgRoot eyot-playground.deb
             '';
