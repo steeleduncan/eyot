@@ -50,6 +50,27 @@
             '';
           };
 
+        playground-deb =
+          pkgs.stdenv.mkDerivation {
+            name = "eyot-deb";
+            src = ./contrib/playground;
+            buildInputs = [pkgs.go pkgs.dpkg];
+            buildPhase = ''
+              export GOCACHE=$(pwd)/gocache
+              export DpkgRoot=$(pwd)/deb
+
+              mkdir -p $DpkgRoot/usr/bin
+              GOOS=linux GOARCH=amd64 go build -o $DpkgRoot/usr/bin/eyot-playground .
+
+              dpkg-deb --build --root-owner-group $DpkgRoot eyot-playground.deb
+            '';
+
+            installPhase = ''
+              mkdir -p $out
+              mv eyot-playground.deb $out
+            '';
+          };
+
         deb =
           pkgs.stdenv.mkDerivation {
             name = "eyot-deb";
@@ -171,6 +192,7 @@
           default = eyot_package;
           docs = docs;
           deb = deb;
+          playground = playground-deb;
           man = man_page;
           todos = todos;
         };
@@ -182,6 +204,7 @@
           build-eyot = eyot_package;
           build-man = man_page;
           build-deb = deb;
+          build-playground = playground-deb;
           build-docs = docs;
 
           example-hello = check_example "hello-world";

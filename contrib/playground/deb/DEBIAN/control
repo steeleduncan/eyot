@@ -1,0 +1,8 @@
+Package: eyot-playground
+Version: 0.0.0
+Architecture: amd64
+Maintainer: steeleduncan@hotmail.com
+Description: Playground server for Eyot programming language (NB, this assumes Eyot deb is installed)
+Depends: ufw, firejail, golang, oclgrind
+
+

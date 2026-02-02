@@ -1,7 +1,6 @@
 <html>
   <head>
     <style>
-      /* Reset and Base Styles */
       body {
           margin: 0;
           font-family: 'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', sans-serif;
@@ -10,7 +9,6 @@
           overflow: hidden;
       }
 
-      /* Main Container */
       .playground {
           display: flex;
           height: 100vh;
@@ -18,7 +16,6 @@
           background: #333; 
       }
 
-      /* Panes */
       .pane {
           flex: 1;
           display: flex;
@@ -27,7 +24,6 @@
           min-width: 0;
       }
 
-      /* Pane Headers */
       header {
           padding: 5px 15px;
           background: #252526;
@@ -71,7 +67,6 @@
       .run-btn:hover { background: #0062a3; }
       .run-btn:disabled { background: #444; cursor: not-allowed; }
 
-      /* Input & Output Areas */
       textarea, #output-display {
           flex: 1;
           padding: 20px;
@@ -106,8 +101,9 @@
             <span>Eyot playground</span>
             <select id="example-select" class="preset-select">
                 <option value="" disabled selected>Load Example...</option>
-                <option value="hello">Hello World</option>
-                <option value="squaregpu">Square numbers on GPU</option>
+{{ range .Items }}
+                <option value="{{ .Id }}">{{ .Description }}</option>
+{{end}}
             </select>
         </header>
         <textarea id="code-input" spellcheck="false" placeholder="// Select an example or write code..."></textarea>
@@ -129,13 +125,11 @@
       const runBtn = document.getElementById('run-button');
       const exampleSelect = document.getElementById('example-select');
 
-
-
-
       // Define your snippets here
       const examples = {
-          hello: `cpu fn main() {\n    print_ln("Hello, World!")\n}`,
-          squaregpu: `fn square(value i64) i64 {\n   return value * value\n}\n\ncpu fn main() {\n    let w = gpu square\n    send(w, [i64]{ 1, 2, 3, 4 })\n    for v: drain(w) {\n        print_ln("- ", v)\n    }\n}`,
+{{range .Items}}
+          {{.Id}}: `{{.Contents}}`,
+{{end}}
       };
 
       // Listen for dropdown changes
