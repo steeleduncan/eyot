@@ -196,6 +196,41 @@
 
         };
 
+        oclgrind = pkgs.stdenv.mkDerivation {
+          # -> pname for release
+          name = "oclgrind";
+
+          src = pkgs.fetchFromGitHub {
+            owner = "jrprice";
+            repo = "oclgrind";
+            # The changes that allow this to build with new LLVMs are not part of a tagged release
+            rev = "3372b8d26ec6104c65f782ae2c44b62c87c8a960";
+            sha256 = "sha256-+VSVzF55CgNwEZyGfbk5tygunBxe7PMPSiWic9JF/Rk=";
+          };
+
+          nativeBuildInputs = [ pkgs.cmake ];
+          nativeCheckInputs = [ pkgs.python3 ];
+          buildInputs = [
+            pkgs.llvmPackages_19.llvm
+            pkgs.llvmPackages_19.clang-unwrapped
+            pkgs.readline
+          ];
+
+          cmakeFlags = [
+            "-DCLANG_ROOT=${pkgs.llvmPackages_19.clang-unwrapped}"
+            (pkgs.lib.cmakeBool "CMAKE_SKIP_RPATH" true)
+          ];
+
+          meta = {
+            description = "OpenCL device simulator and debugger";
+            homepage = "https://github.com/jrprice/oclgrind";
+#            license = lib.licenses.bsd3;
+#            platforms = platforms.linux;
+#            maintainers = with lib.maintainers; [ athas steeleduncan ];
+          };
+        };
+
+
       in rec {
         packages = {
           default = eyot_package;
@@ -204,6 +239,7 @@
           playground = playground-deb;
           man = man_page;
           todos = todos;
+          oclgrind = oclgrind;
         };
 
         checks = {
