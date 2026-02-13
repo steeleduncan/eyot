@@ -13,3 +13,5 @@ test*.ey
 
 # nix
 result
+
+private

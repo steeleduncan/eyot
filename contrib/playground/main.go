@@ -56,6 +56,8 @@ func (j *Job) Lifetime() int64 {
 }
 
 func (r *JobRunner) Run(j *Job) error {
+	fmt.Println("Job for ", j.Request.Source)
+
 	j.Id = r.RollingId
 	r.RollingId += 1
 	j.w.Header().Set("Content-Type", "application/json")
@@ -83,17 +85,21 @@ func (r *JobRunner) Run(j *Job) error {
 		compileCmd := exec.Command("eyot", "build", source)
 		compileStdOut, err := compileCmd.StdoutPipe()
 		if err != nil {
+			fmt.Println("No stdout for compile")
 			return fmt.Errorf("Unable to create stdout: %v", err)
 		}
 		if err := compileCmd.Start(); err != nil {
+			fmt.Println("No start for compile")
 			return fmt.Errorf("Failed to start: %v", err)
 		}
 		compileLog, _ := io.ReadAll(compileStdOut)
 		compileCmd.Wait()
 		if compileCmd.ProcessState == nil {
+			fmt.Println("No process state for compile")
 			return fmt.Errorf("Process failed to set state")
 		}
 		if compileCmd.ProcessState.ExitCode() != 0 {
+			fmt.Println("Failed to compile")
 			e.Encode(&JobResponse {
 				CompileSuccess: false,
 				CompileLog: string(compileLog),
@@ -101,6 +107,8 @@ func (r *JobRunner) Run(j *Job) error {
 			j.Done <- true
 			return nil
 		}
+
+		fmt.Println("Compiled. Log = ", string(compileLog))
 
 		// run
 		runCmd := exec.Command(
@@ -113,18 +121,45 @@ func (r *JobRunner) Run(j *Job) error {
 			"--noprofile",
 			"--nosound",
 			"--noinput",
+			"--quiet",
+			// we run in the /var/lib folder passed by systemd
+			"--writable-var",
 			"oclgrind",
 			"./out.exe",
 		)
 		runStdOut, err := runCmd.StdoutPipe()
 		if err != nil {
+			fmt.Println("No stdout for run")
 			return fmt.Errorf("Unable to create stdout for run: %v", err)
 		}
+		runStdErr, err := runCmd.StderrPipe()
+		if err != nil {
+			fmt.Println("No stderr for run")
+			return fmt.Errorf("Unable to create stderr for run: %v", err)
+		}
 		if err := runCmd.Start(); err != nil {
+			fmt.Println("No start for run")
 			return fmt.Errorf("Failed to start for run: %v", err)
 		}
-		runLog, _ := io.ReadAll(runStdOut)
+
+		returnOut := make(chan string)
+		returnErr := make(chan string)
+
+		go func() {
+			lg, _ := io.ReadAll(runStdOut)
+			returnOut <- string(lg)
+		}()
+		go func() {
+			lg, _ := io.ReadAll(runStdErr)
+			returnErr <- string(lg)
+		}()
+
 		runCmd.Wait()
+		runLog := <- returnOut
+		runErr := <- returnErr
+
+		fmt.Println("Run log ", string(runLog))
+		fmt.Println("Run err ", string(runErr))
 
 		jr = JobResponse {
 			CompileSuccess: true,
@@ -209,6 +244,8 @@ func (s *Server) RunJobsInBackground(path string) {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Serve ", req.URL)
+
 	if req.URL.Path == "/api/run" {
 		d := json.NewDecoder(req.Body)
 
@@ -257,7 +294,6 @@ func errMain() error {
 	if port == 0 {
 		return usage()
 	}
-
 
 	s, err := NewServer()
 	if err != nil {
