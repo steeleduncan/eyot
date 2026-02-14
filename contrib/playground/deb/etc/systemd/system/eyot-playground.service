@@ -14,7 +14,6 @@ ProtectKernelTunables=yes
 ProtectKernelModules=yes
 ProtectControlGroups=yes
 ProtectProc=invisible
-DynamicUser=yes
 PrivateDevices=yes
 PrivateTmp=yes
 
