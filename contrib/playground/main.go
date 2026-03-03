@@ -7,18 +7,20 @@ import (
 	"fmt"
 	"time"
 	"bytes"
+	"strings"
 	"strconv"
 	"path/filepath"
 	"text/template"
 	"encoding/json"
 	"net/http"
-	_ "embed"
+	"embed"
 )
-
-import _ "embed"
 
 //go:embed index.html
 var IndexHtmlTemplate string
+
+//go:embed examples
+var EmbeddedExamples embed.FS
 
 type Program struct {
 	Version int
@@ -184,33 +186,57 @@ type Examples struct {
 	Items []Example
 }
 
+func EscapeExample(s string) string {
+	s = strings.ReplaceAll(s, "\n", "\\n")
+	s = strings.ReplaceAll(s, "\"", "\\\"")
+	return s
+}
+
+func ReadExamples() (Examples, error) {
+	root := "examples"
+
+	egs, err := EmbeddedExamples.ReadDir(root)
+	if err != nil {
+		return Examples {}, err
+	}
+
+	items := []Example {}
+
+	for _, eg := range egs {
+		main := filepath.Join(root, eg.Name(), "main.ey")
+		mainBytes, err := EmbeddedExamples.ReadFile(main)
+		if err != nil {
+			return Examples {}, err
+		}
+
+		desc := filepath.Join(root, eg.Name(), "description.txt")
+		descBytes, err := EmbeddedExamples.ReadFile(desc)
+		if err != nil {
+			return Examples {}, err
+		}
+
+		eg := Example {
+			Id: eg.Name(),
+			Description: string(descBytes),
+			Contents: EscapeExample(string(mainBytes)),
+		}
+		items = append(items, eg)
+	}
+
+	return Examples { Items: items }, nil
+}
+
 type Server struct {
 	JobChannel chan *Job
 	IndexHtml string
 }
 
 func NewServer() (*Server, error) {
-	examples := Examples {
-		Items: []Example {
-			// move these to YAMLs or something similar?
-			Example {
-				Id: "hello",
-				Description: "Minimal hello world",
-				Contents: `cpu fn main() {\n    print_ln("Hello, World!")\n}`,
-			},
-			Example {
-				Id: "gpusquare",
-				Description: "Square a vector of numbers on the GPU",
-				Contents: `fn square(value i64) i64 {\n   return value * value\n}\n\ncpu fn main() {\n    let w = gpu square\n    send(w, [i64]{ 1, 2, 3, 4 })\n    for v: drain(w) {\n        print_ln("- ", v)\n    }\n}`,
-			},
-			Example {
-				Id: "partial",
-				Description: "Partial function application",
-				Contents: `fn multiply(lhs, rhs i64) i64 {\n   return lhs * rhs \n}\n cpu fn main() {\n    let dbl = partial multiply(_, 2)\n    print_ln(dbl(3))\n}`,
-			},
-		},
+	examples, err := ReadExamples()
+	if err != nil {
+		return nil, err
 	}
-
+	
 	tmpl, err := template.New("name").Parse(IndexHtmlTemplate)
 	if err != nil {
 		return nil, fmt.Errorf("Error parsing template")

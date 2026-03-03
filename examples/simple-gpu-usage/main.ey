@@ -1,0 +1,11 @@
+fn square(value i64) i64 {
+    return value * value
+}
+
+cpu fn main() {
+    let w = gpu square
+    send(w, [i64]{ 1, 2, 3, 4 })
+    for v: drain(w) {
+        print_ln("- ", v)
+    }
+}

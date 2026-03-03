@@ -63,6 +63,9 @@
               cp -r ${lib_folder} $DpkgRoot/usr/share/eyot
               cp ${man_page} $DpkgRoot/usr/share/man/man1/eyot.1
 
+              rm -r contrib/playground/examples
+              cp -r examples contrib/playground/
+
               pushd contrib/playground
               GOOS=linux GOARCH=amd64 go build -o $DpkgRoot/usr/bin/eyot-playground .
               patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 $DpkgRoot/usr/bin/eyot-playground

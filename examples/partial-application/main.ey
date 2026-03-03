@@ -1,0 +1,8 @@
+fn multiply(lhs, rhs i64) i64 {
+    return lhs * rhs
+}
+
+cpu fn main() {
+    let dbl = partial multiply(_, 2)
+    print_ln(dbl(3))
+}
