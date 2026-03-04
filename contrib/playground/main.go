@@ -216,6 +216,9 @@ func ReadExamples() (Examples, error) {
 		desc := filepath.Join(root, eg.Name(), "description.txt")
 		descBytes, err := EmbeddedExamples.ReadFile(desc)
 		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
 			return Examples {}, err
 		}
 
