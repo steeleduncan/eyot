@@ -203,6 +203,10 @@ func ReadExamples() (Examples, error) {
 	items := []Example {}
 
 	for _, eg := range egs {
+		if !eg.IsDir() {
+			continue
+		}
+
 		main := filepath.Join(root, eg.Name(), "main.ey")
 		mainBytes, err := EmbeddedExamples.ReadFile(main)
 		if err != nil {
