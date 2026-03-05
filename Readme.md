@@ -25,7 +25,7 @@ cpu fn main() {
 }
 ```
 
-You can play with this in the [Eyot Playground](https://eyot-playground.cowleyforniastudios.com). To break it down:
+You can play with this in the [Eyot Playground](https://eyot-playground.cowleyforniastudios.com#simple-gpu-usage). To break it down:
 
 - `square` defines a function that can run anywhere, takes a 64 bit integer, prints it to the log, squares it and returns it
 - `main` defines the entrypoint, a function called `main` that can only run on the CPU , denoted by the `cpu` keyword

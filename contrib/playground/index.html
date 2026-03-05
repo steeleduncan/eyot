@@ -132,14 +132,23 @@
 {{end}}
       };
 
-      // Listen for dropdown changes
-      exampleSelect.addEventListener('change', (e) => {
-          const selected = e.target.value;
+      function loadNamedExample(selected) {
           if (examples[selected]) {
               input.value = examples[selected];
-              // Optional: Clear output when switching examples
               output.innerText = "Program results will appear here...";
               output.classList.remove('error-text');
+          }
+      } 
+
+      // Listen for dropdown changes
+      exampleSelect.addEventListener('change', (e) => {
+          loadNamedExample(e.target.value);
+      });
+
+      window.addEventListener('DOMContentLoaded', () => {
+          const hash = window.location.hash;
+          if (hash && hash.startsWith("#")) {
+              loadNamedExample(hash.substring(1));
           }
       });
 
