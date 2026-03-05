@@ -105,15 +105,15 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      steps:
-      - uses: actions/download-artifact@v8
-        with:
-          name: deb
-          path: ./eyot.deb
-      - run: echo "cpu fn main() { print_ln(true) }" > test.ey
-      - run: sudo apt install --reinstall --yes ./result/eyot.deb
-      - run: eyot run test.ey
-      - run: man eyot
+    steps:
+    - uses: actions/download-artifact@v8
+      with:
+        name: deb
+        path: ./eyot.deb
+    - run: echo "cpu fn main() { print_ln(true) }" > test.ey
+    - run: sudo apt install --reinstall --yes ./result/eyot.deb
+    - run: eyot run test.ey
+    - run: man eyot
 
   #
   # Deploy site and playground
