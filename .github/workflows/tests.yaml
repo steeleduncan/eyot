@@ -118,9 +118,10 @@ jobs:
     - uses: actions/download-artifact@v8
       with:
         name: deb
-        path: ./eyot.deb
+        path: /tmp/eyot.deb
+    - run: ls -al /tmp
     - run: echo "cpu fn main() { print_ln(true) }" > test.ey
-    - run: sudo apt install --reinstall --yes ./eyot.deb
+    - run: sudo apt install --reinstall --yes /tmp/eyot.deb
     - run: eyot run test.ey
     - run: man eyot
 
