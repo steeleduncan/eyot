@@ -88,6 +88,15 @@ jobs:
           overwrite: true
           retention-days: 1
 
+      # playground .deb package
+      - run: nix build .#playground
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playground
+          path: ./result/eyot-playground.deb
+          overwrite: true
+          retention-days: 1
+
       # documentation
       - name: Generate docs
         run: nix build .#docs
@@ -111,14 +120,14 @@ jobs:
         name: deb
         path: ./eyot.deb
     - run: echo "cpu fn main() { print_ln(true) }" > test.ey
-    - run: sudo apt install --reinstall --yes ./result/eyot.deb
+    - run: sudo apt install --reinstall --yes ./eyot.deb
     - run: eyot run test.ey
     - run: man eyot
 
   #
   # Deploy site and playground
   #
-  deploy-site:
+  deploy-gh-pages:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -131,6 +140,29 @@ jobs:
       pages: write
       id-token: write
     steps:
-    - name: Deploy to GitHub Pages
-      id: deployment
+    - id: deployment
       uses: actions/deploy-pages@v4
+  deploy-playground:
+    runs-on: ubuntu-latest
+    needs:
+    - check-deb
+    - nix-example-test
+    - build-artefacts
+    steps:
+      # ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFbuHFjiWNhfOsUJfmSIIeYS3AVb+i1OZauxpm31GUoeMGfCIk1OIiIBBk8NcRXpgQ22iHmweuAAreDoU5XstDo= gha
+    - name: Prep ssh
+      run: |-
+        echo "${{ secrets.PlaygroundServerKey }}" > /home/runner/sshkey
+        chmod 0600 /home/runner/sshkey
+        mkdir -p ~/.ssh 
+        ssh-keyscan eyot-playground.cowleyforniastudios.com > /home/runner/.ssh/known_hosts
+    - uses: actions/download-artifact@v8
+      with:
+        name: playground
+        path: ./eyot-playground.deb
+    - run: ssh -i /home/runner/sshkey root@eyot-playground.cowleyforniastudios.com "sudo apt remove eyot-playground -y || true"
+    - run: scp -i /home/runner/sshkey ./eyot-playground.deb root@eyot-playground.cowleyforniastudios.com:~/
+    - run: ssh -i /home/runner/sshkey root@eyot-playground.cowleyforniastudios.com "sudo apt install ~/eyot-playground.deb -y"
+    - run: ssh -i /home/runner/sshkey root@eyot-playground.cowleyforniastudios.com "sudo systemctl restart eyot-playground"
+
+
