@@ -118,7 +118,7 @@ jobs:
     - uses: actions/download-artifact@v8
       with:
         name: deb
-        path: /tmp/eyot.deb
+        path: /tmp/
     - run: ls -al /tmp
     - run: echo "cpu fn main() { print_ln(true) }" > test.ey
     - run: sudo apt install --reinstall --yes /tmp/eyot.deb
@@ -160,9 +160,9 @@ jobs:
     - uses: actions/download-artifact@v8
       with:
         name: playground
-        path: ./eyot-playground.deb
+        path: /tmp/
     - run: ssh -i /home/runner/sshkey root@eyot-playground.cowleyforniastudios.com "sudo apt remove eyot-playground -y || true"
-    - run: scp -i /home/runner/sshkey ./eyot-playground.deb root@eyot-playground.cowleyforniastudios.com:~/
+    - run: scp -i /home/runner/sshkey /tmp/eyot-playground.deb root@eyot-playground.cowleyforniastudios.com:~/
     - run: ssh -i /home/runner/sshkey root@eyot-playground.cowleyforniastudios.com "sudo apt install ~/eyot-playground.deb -y"
     - run: ssh -i /home/runner/sshkey root@eyot-playground.cowleyforniastudios.com "sudo systemctl restart eyot-playground"
 
