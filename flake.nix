@@ -68,7 +68,9 @@
 
               pushd contrib/playground
               GOOS=linux GOARCH=amd64 go build -o $DpkgRoot/usr/bin/eyot-playground .
-              patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 $DpkgRoot/usr/bin/eyot-playground
+              if [[ "$(uname)" == *Linux* ]]; then
+                patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 $DpkgRoot/usr/bin/eyot-playground
+              fi
               popd
               pushd src
               GOOS=linux GOARCH=amd64 go build -ldflags "-X eyot/program.EyotRoot=/usr/share/eyot" -o $DpkgRoot/usr/bin/eyot eyot/cmd
