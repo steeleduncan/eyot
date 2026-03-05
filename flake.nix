@@ -257,8 +257,11 @@
           build-playground = playground-deb;
           build-docs = docs;
 
+          # ensure the examples we ship actually work
           example-hello = check_example "hello-world";
           example-backpropagation = check_example "backpropagation";
+          example-backpropagation = check_example "partial-application";
+          example-backpropagation = check_example "simple-gpu-usage";
 
           # Check the reformat script is working
           # NB this needs to mutate the source folder so it can't use the default immutable folder

@@ -1,4 +1,5 @@
 fn square(value i64) i64 {
+    print_ln("Square: ", value)
     return value * value
 }
 
