@@ -261,10 +261,10 @@
           example-hello = check_example "hello-world";
           example-backpropagation = check_example "backpropagation";
           example-partial-application = check_example "partial-application";
-          example-blog-1 = check_example "blog-example-1";
 
-          # TODO re-enable when oclgrind is working in here
-#          example-simple-gpu-usage = check_example "simple-gpu-usage";
+          # re enable when oclgrind is up and running
+          # example-blog-1 = check_example "blog-example-1";
+          # example-simple-gpu-usage = check_example "simple-gpu-usage";
 
           # Check the reformat script is working
           # NB this needs to mutate the source folder so it can't use the default immutable folder
