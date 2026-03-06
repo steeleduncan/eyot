@@ -261,6 +261,7 @@
           example-hello = check_example "hello-world";
           example-backpropagation = check_example "backpropagation";
           example-partial-application = check_example "partial-application";
+          example-blog-1 = check_example "blog-example-1";
 
           # TODO re-enable when oclgrind is working in here
 #          example-simple-gpu-usage = check_example "simple-gpu-usage";
