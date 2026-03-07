@@ -46,13 +46,11 @@ Finally, to preempt one question, the name has no meaning other than being a ref
 
 # How to try it?
 
-Currently it runs on Linux and macOS. There are a few options to try it
+## [Eyot playground](https://eyot-playground.cowleyforniastudios.com)
 
-## The [playground](https://eyot-playground.cowleyforniastudios.com)
+[The playground](https://eyot-playground.cowleyforniastudios.com) runs the bleeding edge version of Eyot. The computing resources dedicated to it are modest though, and the GPU is virtual, so you will likely get better results running it locally.
 
-There is a [playground](https://eyot-playground.cowleyforniastudios.com) running the latest commit that passed tests. The computing resources dedicated to it are modest though, and the GPU is virtual, so you will likely get better results running it locally.
-
-## Using the `.deb` (Ubuntu/Debian and their derivatives)
+## Installing the `.deb` (Ubuntu/Debian and their derivatives)
 
 Eyot can be installed using `eyot-latest.deb`, downloaded from [here](eyot-latest.deb).
 
@@ -60,7 +58,7 @@ Eyot can be installed using `eyot-latest.deb`, downloaded from [here](eyot-lates
 sudo apt install --reinstall --yes ./eyot-latest.deb
 ```
 
-This `.deb` installs dependencies, and is only updated when all tests pass, so it is the most likely option to be functional right now.
+This `.deb` installs most of the required dependencies, but you will need to install the appropriate OpenCL ICD driver for your system.
 
 ## With Nix (macOS, any Linux)
 
@@ -74,7 +72,7 @@ Please note that the flake is not setup right now to install ICDs, so it won't w
 
 ## From source (e.g. for development)
 
-To build and Eyot on Linux or macOS you should install 
+To build Eyot on Linux or macOS you should install 
 
 - OpenCL
 - golang (>= 1.18)
@@ -82,9 +80,9 @@ To build and Eyot on Linux or macOS you should install
 
 On Ubuntu or Debian this would be `sudo apt install gcc ocl-icd-opencl-dev golang -y`. 
 
-On Linux in general to use the GPU you would also need the specific ICD for you GPU. For Intel GPUs this would be `sudo apt install intel-opencl-icd -y`, for Nvidia it would be `sudo apt install nvidia-opencl-icd -y`. (Please feel free to send a PR that updates this guide for other Linuxes or GPU manufacturers)
+To use the GPU on Linux you would also need the specific ICD for you GPU. For Intel GPUs this would be `sudo apt install intel-opencl-icd -y`, for Nvidia it would be `sudo apt install nvidia-opencl-icd -y`. (Please feel free to send a PR that updates this guide for other Linuxes or GPU manufacturers)
 
-Once everything is installed, source the environment
+Once everything is installed, clone the repo and source the environment
 
 ```
 git clone https://github.com/steeleduncan/eyot
@@ -92,7 +90,7 @@ cd eyot
 source contrib/env.sh
 ```
 
-And run an eyot file at `/path/to/file.ey` with
+And you can run an eyot file at `/path/to/file.ey` with
 
 ```
 eyot run /path/to/file.ey
@@ -116,9 +114,9 @@ I have tried Eyot on Windows from time to time, so it is not far from functional
 
 - **How efficient is Eyot?** If you are running an embarrasingly parallel number crunching problem on your CPU, then switching to Eyot and moving the computation to your GPU may already win you some time. However Eyot's runtime is far from optimised right now. If you are using a highly optimised GPGPU library, and switch to Eyot, then it is unlikely Eyot will compete (yet). With work, and a decent standard library, I'd like to close that gap in the future though!
 
-- **Why does it ask for a C compiler?** For now Eyot transpiles to C, and calls the C compiler for you. Without a C compiler on your system, it won't work
+- **Why does it ask for a C compiler?** For now Eyot transpiles to C, and calls the C compiler to build native code on that platform
 
-- **Will it always be able output to C?** Yes. My hope is for a future version of Eyot to output SPIR-V and native code directly, but the ANSI C backend will stay. Game developers ship code on a lot of platforms, and many of these platforms which have NDAs that hamper porting and shipping an open source project on them. It is hard to imagine a platform where you can't compile and run ANSI C though
+- **Will it always be able output to C?** Yes. My hope is for a future version of Eyot to output SPIR-V and native code directly, but the ANSI C backend will stay. Game developers ship code on a lot of platforms, and many of these platforms have NDAs that hamper porting and shipping an open source project on them. It is hard to imagine a platform where you can't compile and run ANSI C though
 
 - **Why aren't there more tests of the Go code** Although there are some go tests, the majority of the tests are integration tests compiling & running Eyot code. I intend to port the compiler from Go to Eyot once it is more settled, and unlike with Go tests, the work put into the integration tests will continue to be valid after porting
 
@@ -128,7 +126,7 @@ I have tried Eyot on Windows from time to time, so it is not far from functional
 
 I wouldn't want anyone to spend time learning Eyot and be disappointed, so some non-goals:
 
-- **Be the next great CPU-side language** I want as few syntax differences between GPU and CPU as possible, so language design is bound by the GPU capabilities, which restricts what I can add to Eyot's syntax. As a result, although Eyot is useable as a CPU-side language, it shines when running code across GPUs and CPUs. If you are looking to write CPU-side code only, there are likely to be more featureful options for you.
+- **Be the next great CPU-side language** I want as few syntax differences between GPU and CPU as possible, so language design is bound by the GPU capabilities. This restricts what I can add to Eyot's syntax, and if you are looking to write CPU-side code only, there are likely to be more featureful languages out there for you.
 
 - **Automatic parallelisation** Eyot does not automatically parallelise work across CPU/GPU cores, instead it makes it easy to write code that does parallelise work across your CPU/GPU cores. The intention is to give a programmer a convenient option for distributing work across processors, not reduce the programmer's control.
 
