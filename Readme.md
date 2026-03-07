@@ -6,7 +6,9 @@
 
 Eyot is an experiment to write a language in which it is no harder to run code on the GPU than it is to run it on a background thread. 
 
-Eyot source code is transparently compiled for both CPU and GPU, with communication between the two handled by the language itself. The intended users are those in areas where the GPU or other accelerators are used heavily, e.g. game development, numerical analysis and AI. All aspects of the Eyot's design are directed towards this goal, and it could be thought of as an entire language built around a CUDA model of GPU concurrency.
+Eyot source code is transparently compiled for both CPU and GPU, with communication between the two handled by the runtime. Traditional GPU programming expects you to handle many tasks, such as memory allocation, compiling the kernel, scheduling work, etc. These have long been handled by a language runtime when writing code for the CPU, and Eyot extends that convenience to code destined for the GPU as well. It can be thought of as an entire language built around a CUDA model of GPU concurrency.
+
+The intended users are those in areas where the GPU or other accelerators are used heavily, e.g. game development, numerical analysis and AI.
 
 The full documentation can be found [here](https://steeleduncan.github.io/eyot/), but to take a simple example, the following code will square a vector of numbers on the GPU
 
