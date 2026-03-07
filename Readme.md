@@ -1,4 +1,4 @@
-[![BL tests](https://github.com/steeleduncan/eyot/actions/workflows/tests.yaml/badge.svg)](https://github.com/steeleduncan/eyot/actions/workflows/tests.yaml)
+[![BL tests](https://github.com/steeleduncan/eyot/actions/workflows/tests.yaml/badge.svg)](https://github.com/steeleduncan/eyot/actions/workflows/tests.yaml) [![Documentation](https://img.shields.io/badge/Documentation-blue)](https://steeleduncan.github.io/eyot) [![Playground](https://img.shields.io/badge/Documentation-blue)](https://eyot-playground.cowleyforniastudios.com)
 
 # Eyot - A language where the GPU is just another thread
 
