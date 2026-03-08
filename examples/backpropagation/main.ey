@@ -1,4 +1,7 @@
 // Eyot backpropagation implementation
+//
+// There are many TODOs as I'm working on cleaning this up, and using it as a way of extending Eyot to be useful
+
 // Credit to: https://dev.to/andrey_matveyev/developing-a-neural-network-in-golang-bl8
 
 import std::math

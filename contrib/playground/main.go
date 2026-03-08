@@ -16,11 +16,18 @@ import (
 	"embed"
 )
 
+// arbitrary, but 128k seems reasonable max for the playground
+const KMaxRequestLength int = 1024 * 128
+
 //go:embed index.html
 var IndexHtmlTemplate string
 
 //go:embed examples
 var EmbeddedExamples embed.FS
+
+func Log(msg string) {
+	fmt.Printf("[%v] %v\n", time.Now().Format("2006-01-02 15:04:05"), msg)
+}
 
 type Program struct {
 	Version int
@@ -58,8 +65,6 @@ func (j *Job) Lifetime() int64 {
 }
 
 func (r *JobRunner) Run(j *Job) error {
-	fmt.Println("Job for ", j.Request.Source)
-
 	j.Id = r.RollingId
 	r.RollingId += 1
 	j.w.Header().Set("Content-Type", "application/json")
@@ -67,16 +72,25 @@ func (r *JobRunner) Run(j *Job) error {
 
 	var jr JobResponse
 	e := json.NewEncoder(j.w)
+
+	if len(j.Request.Source) > KMaxRequestLength {
+		e.Encode(&JobResponse {
+			CompileSuccess: false,
+			CompileLog: fmt.Sprintf("Request too long (max = %v bytes)", KMaxRequestLength),
+			Log: "",
+		})
+		j.Done <- true
+		return nil
+	}
 	
 	if cr, ok := r.CachedResponses[j.Request.Source]; ok {
-		fmt.Printf("Cache hit for job %v (%v ms)\n", j.Id, j.Lifetime())
+		Log(fmt.Sprintf("Cache hit for job %v (%v ms)", j.Id, j.Lifetime()))
 		jr = cr
 	} else {
-		fmt.Printf("Start job %v (%v ms)\n", j.Id, j.Lifetime())
+		Log(fmt.Sprintf("Start job %v (%v ms)", j.Id, j.Lifetime()))
 
 		os.RemoveAll(r.Path)
 		os.MkdirAll(r.Path, 0777)
-
 
 		// write start file
 		source := filepath.Join(r.Path, "main.ey")
@@ -87,21 +101,21 @@ func (r *JobRunner) Run(j *Job) error {
 		compileCmd := exec.Command("eyot", "build", source)
 		compileStdOut, err := compileCmd.StdoutPipe()
 		if err != nil {
-			fmt.Println("No stdout for compile")
+			Log("No stdout for compile")
 			return fmt.Errorf("Unable to create stdout: %v", err)
 		}
 		if err := compileCmd.Start(); err != nil {
-			fmt.Println("No start for compile")
+			Log("No start for compile")
 			return fmt.Errorf("Failed to start: %v", err)
 		}
 		compileLog, _ := io.ReadAll(compileStdOut)
 		compileCmd.Wait()
 		if compileCmd.ProcessState == nil {
-			fmt.Println("No process state for compile")
+			Log("No process state for compile")
 			return fmt.Errorf("Process failed to set state")
 		}
 		if compileCmd.ProcessState.ExitCode() != 0 {
-			fmt.Println("Failed to compile")
+			Log("Failed to compile")
 			e.Encode(&JobResponse {
 				CompileSuccess: false,
 				CompileLog: string(compileLog),
@@ -109,8 +123,6 @@ func (r *JobRunner) Run(j *Job) error {
 			j.Done <- true
 			return nil
 		}
-
-		fmt.Println("Compiled. Log = ", string(compileLog))
 
 		// run
 		runCmd := exec.Command(
@@ -131,16 +143,16 @@ func (r *JobRunner) Run(j *Job) error {
 		)
 		runStdOut, err := runCmd.StdoutPipe()
 		if err != nil {
-			fmt.Println("No stdout for run")
+			Log("No stdout for run")
 			return fmt.Errorf("Unable to create stdout for run: %v", err)
 		}
 		runStdErr, err := runCmd.StderrPipe()
 		if err != nil {
-			fmt.Println("No stderr for run")
+			Log("No stderr for run")
 			return fmt.Errorf("Unable to create stderr for run: %v", err)
 		}
 		if err := runCmd.Start(); err != nil {
-			fmt.Println("No start for run")
+			Log("No start for run")
 			return fmt.Errorf("Failed to start for run: %v", err)
 		}
 
@@ -160,13 +172,10 @@ func (r *JobRunner) Run(j *Job) error {
 		runLog := <- returnOut
 		runErr := <- returnErr
 
-		fmt.Println("Run log ", string(runLog))
-		fmt.Println("Run err ", string(runErr))
-
 		jr = JobResponse {
 			CompileSuccess: true,
 			CompileLog: string(compileLog),
-			Log: string(runLog),
+			Log: string(runLog + runErr),
 		}
 
 		r.CachedResponses[j.Request.Source] = jr
@@ -271,20 +280,20 @@ func (s *Server) RunJobsInBackground(path string) {
 		job := <- s.JobChannel
 		err := runner.Run(job)
 		if err != nil {
-			fmt.Println("runner error: ", err)
+			Log(fmt.Sprintf("runner error: %v", err))
 		}
 	}
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("Serve ", req.URL)
+	Log(fmt.Sprintf("Serve %v", req.URL))
 
 	if req.URL.Path == "/api/run" {
 		d := json.NewDecoder(req.Body)
 
 		var p Program
 		if err := d.Decode(&p); err != nil {
-			fmt.Println("Failed to decode job: ", err)
+			Log(fmt.Sprintf("Failed to decode job: %v", err))
 			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
@@ -299,7 +308,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		s.JobChannel <- job
 		_ = <- job.Done
 
-		fmt.Printf("Finished job %v (%v ms)\n", job.Id, job.Lifetime())
+		Log(fmt.Sprintf("Finished job %v (%v ms)", job.Id, job.Lifetime()))
 	} else {
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
@@ -333,8 +342,8 @@ func errMain() error {
 		return err
 	}
 	go s.RunJobsInBackground(workingFolder)
-	fmt.Println("Listen on port: ", port)
-	fmt.Println("Job folder: ", workingFolder)
+	Log(fmt.Sprintf("Listen on port: %v", port))
+	Log(fmt.Sprintf("Job folder: %v", workingFolder))
 	return http.ListenAndServe(fmt.Sprintf(":%v", port), s)
 }
 
