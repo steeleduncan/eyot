@@ -24,6 +24,10 @@
           min-width: 0;
       }
 
+      a, a:visited, a:hover, a:active, a:focus {
+          color: #d4d4d4;
+      }
+
       header {
           padding: 5px 15px;
           background: #252526;
@@ -99,6 +103,7 @@
       <section class="pane">
         <header>
             <span>Eyot playground</span>
+            <span><a href="https://github.com/steeleduncan/eyot">Github</a> | <a href="https://steeleduncan.github.io/eyot">Documentation</a></span>
             <select id="example-select" class="preset-select">
                 <option value="" disabled selected>Load Example...</option>
 {{ range .Items }}
@@ -132,14 +137,23 @@
 {{end}}
       };
 
-      // Listen for dropdown changes
-      exampleSelect.addEventListener('change', (e) => {
-          const selected = e.target.value;
+      function loadNamedExample(selected) {
           if (examples[selected]) {
               input.value = examples[selected];
-              // Optional: Clear output when switching examples
               output.innerText = "Program results will appear here...";
               output.classList.remove('error-text');
+          }
+      } 
+
+      // Listen for dropdown changes
+      exampleSelect.addEventListener('change', (e) => {
+          loadNamedExample(e.target.value);
+      });
+
+      window.addEventListener('DOMContentLoaded', () => {
+          const hash = window.location.hash;
+          if (hash && hash.startsWith("#")) {
+              loadNamedExample(hash.substring(1));
           }
       });
 

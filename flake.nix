@@ -68,7 +68,9 @@
 
               pushd contrib/playground
               GOOS=linux GOARCH=amd64 go build -o $DpkgRoot/usr/bin/eyot-playground .
-              patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 $DpkgRoot/usr/bin/eyot-playground
+              if [[ "$(uname)" == *Linux* ]]; then
+                patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 $DpkgRoot/usr/bin/eyot-playground
+              fi
               popd
               pushd src
               GOOS=linux GOARCH=amd64 go build -ldflags "-X eyot/program.EyotRoot=/usr/share/eyot" -o $DpkgRoot/usr/bin/eyot eyot/cmd
@@ -255,8 +257,14 @@
           build-playground = playground-deb;
           build-docs = docs;
 
+          # ensure the examples we ship actually work
           example-hello = check_example "hello-world";
           example-backpropagation = check_example "backpropagation";
+          example-partial-application = check_example "partial-application";
+
+          # re enable when oclgrind is up and running
+          # example-blog-1 = check_example "blog-example-1";
+          # example-simple-gpu-usage = check_example "simple-gpu-usage";
 
           # Check the reformat script is working
           # NB this needs to mutate the source folder so it can't use the default immutable folder

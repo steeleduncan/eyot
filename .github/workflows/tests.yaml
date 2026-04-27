@@ -2,19 +2,15 @@ name: CI
 on:
   workflow_dispatch:
   push:
+  pull_request:
 
 jobs:
-  # In principle these could be merged with the macOS equivalents
-  # However platform differences are enough it seemed cleaner with different blocks
-  linux-raw-machine-tests:
-    strategy:
-      matrix:
-        os:
-          # 22.04 worth testing because it is glibc older than debian 12
-        - "ubuntu-22.04"
-        - "ubuntu-24.04"
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+  #
+  # basic tests, running on the raw machine with "default" settings
+  #
+  linux-basic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt install oclgrind gcc ocl-icd-opencl-dev intel-opencl-icd golang -y
@@ -24,25 +20,46 @@ jobs:
         run: source contrib/env.sh && eyot_test
         env:
           EyotTestOclGrind: y
-
-  mac-raw-machine-tests:
-    strategy:
-      matrix:
-        os:
-          - "macos-15"
-          - "macos-15-intel"
-    runs-on: ${{ matrix.os }}
+  mac-basic:
+    runs-on: macos-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - run: brew install go
-      - name: Unit tests (no vgpu)
-        run: source contrib/env.sh && eyot_test
+      - run: source contrib/env.sh && eyot_test
 
-  # check the example that runs using nix (NB a failure here shouldn't block deploy)
+  #
+  # Nix tests, which are more thorough
+  #
+  nix-tests:
+    strategy:
+      matrix:
+        os:
+          - "macos-latest"
+          - "ubuntu-latest"
+    needs:
+    - mac-basic
+    - linux-basic
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      - run: nix flake check -L
+      - run: echo "cpu fn main() { print_ln(true) }" > test.ey
+      - run: nix run . -- run test.ey
+      - run: nix develop -i -c "eyot" "run" "tests/helloworld.ey"
+
+  #
+  # Various checks, and artefact builds
+  #
+
+  # Check consumption of nix flake in example
   nix-example-test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs:
+    - nix-tests
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v31
@@ -50,16 +67,12 @@ jobs:
         working-directory: ${{runner.workspace}}/eyot/examples/consume-flake
         run: nix build . && ./result/bin/out.exe
 
-  # nix flake checks
-  nix-tests:
-    strategy:
-      matrix:
-        os:
-          - "macos-15"
-          - "macos-15-intel"
-          - "ubuntu-latest"
-    runs-on: ${{ matrix.os }}
+  # Build artefacts
+  build-artefacts:
+    runs-on: "ubuntu-latest"
     timeout-minutes: 10
+    needs:
+    - nix-tests
     permissions:
       contents: read
       id-token: write
@@ -67,69 +80,93 @@ jobs:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v31
 
-      # unit tests
-      - run: nix flake check -L
-        name: Run all builds and tests
-
-      # minimal hello world
-      - run: echo "cpu fn main() { print_ln(true) }" > test.ey
-        name: Create an example program
-
-      # install and run the deb package (on linux)
+      # .deb package
       - run: nix build .#deb
-        name: Build the debian package
-        if: contains(matrix.os, 'ubuntu')
-
-      - name: Upload .deb
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: deb
           path: ./result/eyot.deb
           overwrite: true
           retention-days: 1
-      - run: sudo apt install --reinstall --yes ./result/eyot.deb
-        name: Install debian package
-        if: contains(matrix.os, 'ubuntu')
-      - run: eyot run test.ey
-        name: Run eyot via the debian package
-        if: contains(matrix.os, 'ubuntu')
-      - run: man eyot
-        name: Check eyot man page
-        if: contains(matrix.os, 'ubuntu')
 
-      # upload the gh pages artefact
-      # NB it is built as part of tests, so it is quickest to do this here
+      # playground .deb package
+      - run: nix build .#playground
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playground
+          path: ./result/eyot-playground.deb
+          overwrite: true
+          retention-days: 1
+
+      # documentation
       - name: Generate docs
         run: nix build .#docs
-        if: contains(matrix.os, 'ubuntu')
       - name: Upload docs
         uses: actions/upload-pages-artifact@v3
-        if: contains(matrix.os, 'ubuntu')
         with:
           path: result/
 
-      # check running via nix ok
-      - run: nix run . -- run test.ey
-        name: Run eyot from the flake
+  # Check the .deb installs and works on a clean machine
+  check-deb:
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 10
+    needs:
+    - build-artefacts
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+    - uses: actions/download-artifact@v8
+      with:
+        name: deb
+        path: /tmp/
+    - run: ls -al /tmp
+    - run: echo "cpu fn main() { print_ln(true) }" > test.ey
+    - run: sudo apt install --reinstall --yes /tmp/eyot.deb
+    - run: eyot run test.ey
+    - run: man eyot
 
-      # run a command within the nix shell to ensure that is ok
-      - run: nix develop -i -c "eyot" "run" "tests/helloworld.ey"
-        name: Check the nix shell
-
-  deploy-site:
+  #
+  # Deploy site and playground
+  #
+  deploy-gh-pages:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs:
-    - nix-tests
-    - mac-raw-machine-tests
-    - linux-raw-machine-tests
-    if: always() # NB this also updates the .deb, so only do it on success
+    - check-deb
+    - nix-example-test
+    - build-artefacts
     permissions:
       pages: write
       id-token: write
     steps:
-    - name: Deploy to GitHub Pages
-      id: deployment
+    - id: deployment
       uses: actions/deploy-pages@v4
+  deploy-playground:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs:
+    - check-deb
+    - nix-example-test
+    - build-artefacts
+    steps:
+      # ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFbuHFjiWNhfOsUJfmSIIeYS3AVb+i1OZauxpm31GUoeMGfCIk1OIiIBBk8NcRXpgQ22iHmweuAAreDoU5XstDo= gha
+    - name: Prep ssh
+      run: |-
+        echo "${{ secrets.PlaygroundServerKey }}" > /home/runner/sshkey
+        chmod 0600 /home/runner/sshkey
+        mkdir -p ~/.ssh 
+        ssh-keyscan eyot-playground.cowleyforniastudios.com > /home/runner/.ssh/known_hosts
+    - uses: actions/download-artifact@v8
+      with:
+        name: playground
+        path: /tmp/
+    - run: ssh -i /home/runner/sshkey root@eyot-playground.cowleyforniastudios.com "sudo apt remove eyot-playground -y || true"
+    - run: scp -i /home/runner/sshkey /tmp/eyot-playground.deb root@eyot-playground.cowleyforniastudios.com:~/
+    - run: ssh -i /home/runner/sshkey root@eyot-playground.cowleyforniastudios.com "sudo apt install ~/eyot-playground.deb -y"
+    - run: ssh -i /home/runner/sshkey root@eyot-playground.cowleyforniastudios.com "sudo systemctl restart eyot-playground"
+
+

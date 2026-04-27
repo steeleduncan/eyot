@@ -1,0 +1,19 @@
+fn square(value i64) i64 {
+   print_ln("square(", value, ")")
+   return value * value
+}
+
+cpu fn main() {
+    // 1. call it directly
+    print_ln("square(2) on cpu = ", square(2))
+
+    // 2. call it as a worker running on cpu
+    let cpu_worker = cpu square
+    send(cpu_worker, [i64]{ 3 })
+    print_ln(receive(cpu_worker))
+
+    // 3. call it as a worker running on the gpu
+    let gpu_worker = gpu square
+    send(gpu_worker, [i64]{ 4, 5, 6 })
+    print_ln(receive(gpu_worker))
+}
