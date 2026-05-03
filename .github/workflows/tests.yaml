@@ -1,3 +1,7 @@
+# I have checked that this pin has no transitive depencies on other actions
+x-templates:
+  - &install_nix_action cachix/install-nix-action@ab739621df7a23f52766f9ccc97f38da6b7af14f
+
 name: CI
 on:
   workflow_dispatch:
@@ -44,7 +48,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v31
+      - uses: *install_nix_action
       - run: nix flake check -L
       - run: echo "cpu fn main() { print_ln(true) }" > test.ey
       - run: nix run . -- run test.ey
@@ -62,7 +66,7 @@ jobs:
     - nix-tests
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v31
+      - uses: *install_nix_action
       - name: Check nix flake example
         working-directory: ${{runner.workspace}}/eyot/examples/consume-flake
         run: nix build . && ./result/bin/out.exe
@@ -78,7 +82,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v31
+      - uses: *install_nix_action
 
       # .deb package
       - run: nix build .#deb
